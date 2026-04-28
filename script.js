@@ -1,18 +1,20 @@
 const navToggle = document.querySelector(".nav-toggle");
-const globalNav = document.querySelector(".global-nav");
+const globalNavs = document.querySelectorAll(".global-nav");
 
-if (navToggle && globalNav) {
+if (navToggle && globalNavs.length) {
   navToggle.addEventListener("click", () => {
     const isOpen = navToggle.getAttribute("aria-expanded") === "true";
     navToggle.setAttribute("aria-expanded", String(!isOpen));
-    globalNav.classList.toggle("is-open", !isOpen);
+    globalNavs.forEach((nav) => nav.classList.toggle("is-open", !isOpen));
   });
 
-  globalNav.addEventListener("click", (event) => {
-    if (event.target instanceof HTMLAnchorElement) {
-      navToggle.setAttribute("aria-expanded", "false");
-      globalNav.classList.remove("is-open");
-    }
+  globalNavs.forEach((nav) => {
+    nav.addEventListener("click", (event) => {
+      if (event.target instanceof HTMLAnchorElement) {
+        navToggle.setAttribute("aria-expanded", "false");
+        globalNavs.forEach((item) => item.classList.remove("is-open"));
+      }
+    });
   });
 }
 
