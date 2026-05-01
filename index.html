@@ -36,41 +36,36 @@
     </header>
 
     <main id="main">
-      <section class="hero">
-        <div class="hero-decor" aria-hidden="true">
-          <img class="decor decor-soldier-left" src="assets/soldier-left.png" alt="" />
-          <img class="decor decor-soldier-right" src="assets/soldier-right.png" alt="" />
-          <img class="decor decor-clouds" src="assets/clouds.png" alt="" />
-          <img class="decor decor-bush-left" src="assets/bush-1.png" alt="" />
-          <img class="decor decor-bush-right" src="assets/bush-3.png" alt="" />
+      <section class="hero-cinema" aria-label="ひさほ保育園のメインビジュアル">
+        <img class="hero-cinema-photo" src="assets/pamphlet-p1-01.jpg" alt="園庭で笑顔を見せる園児たち" />
+        <div class="hero-cinema-stickers" aria-hidden="true">
+          <img class="hero-sticker hero-sticker-1" src="assets/nav-chick.png" alt="" />
+          <img class="hero-sticker hero-sticker-2" src="assets/nav-rabbit.png" alt="" />
+          <img class="hero-sticker hero-sticker-3" src="assets/clouds.png" alt="" />
         </div>
-        <span class="shape shape-sun" aria-hidden="true"></span>
-        <div class="hero-inner">
-          <div class="hero-copy reveal">
-            <p class="eyebrow">NINTEI KODOMOEN HISAHO HOIKUEN</p>
-            <h1>みんなが楽しい保育園で<br />心の根っこを育む</h1>
-            <p class="lead">
-              大阪府貝塚市久保にある、since 1980 の認定こども園です。少人数だからこそ一人ひとりの顔が見える距離で、
-              「好き」「安心」「やってみたい」を大切に育てます。
-            </p>
-            <div class="hero-actions">
-              <a class="button primary" href="visit.html">園見学を申し込む</a>
-              <a class="button secondary" href="#features">園の特徴を見る</a>
-            </div>
-            <ul class="hero-facts" aria-label="園の基本情報">
-              <li><span>定員</span><strong>75名</strong></li>
-              <li><span>対象</span><strong>0歳から就学前まで</strong></li>
-              <li><span>保育時間</span><strong>7:00 - 19:00</strong></li>
-            </ul>
-          </div>
-          <div class="hero-visual reveal">
-            <div class="photo-stack">
-              <img class="photo-main" src="assets/pamphlet-p1-01.jpg" alt="園庭で笑顔を見せる園児" />
-              <img class="photo-small photo-one" src="assets/pamphlet-p1-16.jpg" alt="花に水をあげる園児" />
-              <img class="photo-small photo-two" src="assets/pamphlet-p2-23.png" alt="もちつき体験をする園児" />
-              <span class="crayon-note">おいしい！ とれた！ つくる！</span>
-            </div>
-          </div>
+        <p class="hero-cinema-vertical">心の根っこを、ここで。</p>
+        <div class="hero-cinema-cta reveal">
+          <p class="hero-cinema-eyebrow">SINCE 1980</p>
+          <h1 class="hero-cinema-title">みんなが楽しい保育園で<br />心の根っこを育む</h1>
+        </div>
+        <div class="hero-cinema-tag" aria-hidden="true">
+          <span class="hero-cinema-tag-emoji">🌱</span>
+          <span class="hero-cinema-tag-text">毎日がはじめて</span>
+        </div>
+        <div class="hero-cinema-dots" aria-hidden="true">
+          <span class="is-active"></span><span></span><span></span><span></span>
+        </div>
+      </section>
+
+      <section class="section hero-meta" aria-label="園の基本情報">
+        <ul class="hero-facts">
+          <li><span>定員</span><strong>75名</strong></li>
+          <li><span>対象</span><strong>0歳から就学前まで</strong></li>
+          <li><span>保育時間</span><strong>7:00 - 19:00</strong></li>
+        </ul>
+        <div class="hero-actions">
+          <a class="button primary" href="visit.html">園見学を申し込む</a>
+          <a class="button secondary" href="#features">園の特徴を見る</a>
         </div>
       </section>
 
@@ -89,19 +84,37 @@
         </div>
         <div class="feature-grid">
           <article class="feature-card reveal">
-            <span class="feature-icon" aria-hidden="true">にこ</span>
-            <h3>少人数だから、できること。</h3>
-            <p>保育士が子どもたちの名前と表情を把握しやすく、その子の興味や発達段階に合わせた声かけを大切にしています。</p>
+            <figure class="feature-card-photo">
+              <img src="assets/pamphlet-p1-16.jpg" alt="花に水をあげる園児" />
+              <span class="feature-icon" aria-hidden="true"><img src="assets/nav-rabbit.png" alt="" /></span>
+            </figure>
+            <div class="feature-card-body">
+              <h3>少人数だから、できること</h3>
+              <p>名前と表情を見ながら、その子の興味や発達に合わせた声かけを大切にしています。</p>
+              <a class="button-pill" href="#concept">詳しく見る</a>
+            </div>
           </article>
           <article class="feature-card reveal">
-            <span class="feature-icon" aria-hidden="true">ぎゅ</span>
-            <h3>たて割り × 年齢別の保育</h3>
-            <p>年上に憧れる気持ち、年下をいたわる優しさを自然に育みながら、活動内容に応じて年齢別の学びも行います。</p>
+            <figure class="feature-card-photo">
+              <img src="assets/pamphlet-p2-06.png" alt="園庭で遊ぶ園児たち" />
+              <span class="feature-icon" aria-hidden="true"><img src="assets/nav-giraffe.png" alt="" /></span>
+            </figure>
+            <div class="feature-card-body">
+              <h3>たて割り × 年齢別の保育</h3>
+              <p>異年齢の関わりで思いやりを育み、活動内容に応じた年齢別の学びも行います。</p>
+              <a class="button-pill" href="#childcare">詳しく見る</a>
+            </div>
           </article>
           <article class="feature-card reveal">
-            <span class="feature-icon" aria-hidden="true">ぱく</span>
-            <h3>育てて・収穫して・食べる</h3>
-            <p>園の畑で育てた季節野菜を収穫し、給食やクッキング保育で味わうことで、命への感謝を五感で学びます。</p>
+            <figure class="feature-card-photo">
+              <img src="assets/pamphlet-p2-05.png" alt="収穫した野菜を見せる園児" />
+              <span class="feature-icon" aria-hidden="true"><img src="assets/nav-chick.png" alt="" /></span>
+            </figure>
+            <div class="feature-card-body">
+              <h3>育てて・収穫して・食べる</h3>
+              <p>季節野菜を収穫し、給食やクッキング保育で命への感謝を五感で学びます。</p>
+              <a class="button-pill" href="#food">詳しく見る</a>
+            </div>
           </article>
         </div>
       </section>
@@ -242,22 +255,25 @@
     </aside>
 
     <footer class="site-footer">
-      <div class="footer-grid">
-        <div>
-          <p class="footer-brand">認定こども園 ひさほ保育園</p>
-          <p>〒597-0031 大阪府貝塚市久保三丁目2番12号</p>
-          <p>TEL 072-427-5688 / FAX 072-427-5687</p>
-        </div>
-        <div class="footer-links">
+      <img class="footer-deco footer-deco-left" src="assets/bush-1.png" alt="" aria-hidden="true" />
+      <img class="footer-deco footer-deco-right" src="assets/bush-3.png" alt="" aria-hidden="true" />
+      <div class="footer-inner">
+        <img class="footer-logo" src="assets/hisaho-logo-main.png" alt="認定こども園 ひさほ保育園" />
+        <p class="footer-tagline">NINTEI KODOMOEN HISAHO HOIKUEN</p>
+        <a class="footer-cta" href="visit.html">お問い合わせ・園見学のお申し込み</a>
+        <a class="footer-tel" href="tel:0724275688">072-427-5688</a>
+        <p class="footer-address">〒597-0031 大阪府貝塚市久保三丁目2番12号</p>
+        <a class="footer-map" href="https://maps.google.com/?q=%E5%A4%A7%E9%98%AA%E5%BA%9C%E8%B2%9D%E5%A1%9A%E5%B8%82%E4%B9%85%E4%BF%9D%E4%B8%89%E4%B8%81%E7%9B%AE2%E7%95%AA12%E5%8F%B7" target="_blank" rel="noopener">📍 Google Map</a>
+        <nav class="footer-links" aria-label="フッターメニュー">
           <a href="#concept">園について</a>
           <a href="guide.html">園生活のしおり</a>
           <a href="news.html">お知らせ</a>
           <a href="visit.html">園見学</a>
           <a href="recruit.html">採用</a>
           <a href="https://www.instagram.com/hisaho_hoikuen/" target="_blank" rel="noopener">Instagram</a>
-        </div>
+        </nav>
+        <small class="footer-copy">&copy; Hisaho Hoikuen. All Rights Reserved.</small>
       </div>
-      <small>&copy; Hisaho Hoikuen.</small>
     </footer>
 
     <script src="script.js"></script>
