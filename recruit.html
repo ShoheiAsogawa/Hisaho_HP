@@ -3,72 +3,214 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="認定こども園 ひさほ保育園の採用ページ。少人数のあたたかな園で、一人ひとりに寄り添う保育を一緒につくる仲間を募集しています。" />
+    <meta
+      name="description"
+      content="認定こども園 ひさほ保育園の採用ページ。少人数のあたたかな園で、一人ひとりに寄り添う保育を一緒につくる仲間を募集しています。"
+    />
     <title>保育士募集 | 認定こども園 ひさほ保育園</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=20260728-1" />
+    <link rel="stylesheet" href="site.css?v=20260728-7" />
   </head>
-  <body>
+  <body class="hisaho">
     <a class="skip-link" href="#main">本文へスキップ</a>
+
+    <div class="page-frame page-frame-top" aria-hidden="true">
+      <img src="assets/frame-wave.png" alt="" />
+    </div>
+
     <header class="site-header">
       <div class="header-inner">
-        <nav id="nav-left" class="global-nav nav-left" aria-label="主なナビゲーション 左"><a class="nav-item" href="index.html#concept"><img src="assets/nav-lion.png" alt="" /><strong>園について</strong><span>ABOUT</span></a><a class="nav-item" href="index.html#features"><img src="assets/nav-giraffe.png" alt="" /><strong>園の特徴</strong><span>FEATURE</span></a><a class="nav-item" href="visit.html"><img src="assets/nav-rabbit.png" alt="" /><strong>入園案内</strong><span>ADMISSION</span></a></nav>
-        <a class="brand center-brand" href="index.html"><img class="brand-logo" src="assets/hisaho-logo-main.png" alt="認定こども園 ひさほ保育園" /></a>
-        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-left global-nav"><span></span><span></span><span></span><span class="sr-only">メニューを開く</span></button>
-        <nav id="global-nav" class="global-nav nav-right" aria-label="主なナビゲーション 右">
-          <a class="nav-item" href="recruit.html" aria-current="page"><img src="assets/nav-squirrel.png" alt="" /><strong>採用情報</strong><span>RECRUIT</span></a><a class="nav-item" href="news.html"><img src="assets/nav-panda.png" alt="" /><strong>お知らせ</strong><span>NEWS</span></a><a class="nav-item nav-cta" href="visit.html"><img src="assets/nav-chick.png" alt="" /><strong>お問い合わせ</strong><span>CONTACT</span></a>
+        <nav id="nav-left" class="global-nav nav-left" aria-label="主なナビゲーション 前半">
+          <a class="nav-item" href="about.html">
+            <img src="assets/nav-lion.png" alt="" />
+            <strong>園について</strong><span>ABOUT</span>
+          </a>
+          <a class="nav-item" href="food.html">
+            <img src="assets/nav-giraffe.png" alt="" />
+            <strong>食育・給食</strong><span>FOOD</span>
+          </a>
+          <a class="nav-item" href="visit.html">
+            <img src="assets/nav-rabbit.png" alt="" />
+            <strong>入園案内</strong><span>ADMISSION</span>
+          </a>
+        </nav>
+
+        <a class="brand center-brand" href="index.html" aria-label="ひさほ保育園 トップページ">
+          <img class="brand-logo" src="assets/hisaho-footer-logo-transparent.png" alt="認定こども園 ひさほ保育園" />
+        </a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-left global-nav">
+          <span></span><span></span><span></span>
+          <span class="sr-only">メニューを開く</span>
+        </button>
+
+        <nav id="global-nav" class="global-nav nav-right" aria-label="主なナビゲーション 後半">
+          <a class="nav-item" href="recruit.html" aria-current="page">
+            <img src="assets/nav-squirrel.png" alt="" />
+            <strong>採用情報</strong><span>RECRUIT</span>
+          </a>
+          <a class="nav-item" href="news.html">
+            <img src="assets/nav-panda.png" alt="" />
+            <strong>お知らせ</strong><span>NEWS</span>
+          </a>
+          <a class="nav-item nav-cta" href="visit.html#contact">
+            <img src="assets/nav-chick.png" alt="" />
+            <strong>お問い合わせ</strong><span>CONTACT</span>
+          </a>
         </nav>
       </div>
     </header>
 
     <main id="main">
-      <section class="page-hero section-green">
-        <span class="shape shape-flower"></span>
+      <section class="page-hero">
+        <img class="hero-illust left" src="assets/illust/deco-balloons.png" alt="" aria-hidden="true" />
+        <img class="hero-illust right" src="assets/illust/deco-bouquet.png" alt="" aria-hidden="true" />
         <div class="page-hero-inner reveal">
           <p class="eyebrow">Recruit</p>
-          <h1>子どもの「できた！」を、いちばん近くで喜ぶ仕事。</h1>
-          <p>ひさほ保育園は、少人数制だからこそ一人ひとりの表情に気づける園です。子どもにも保護者にもあたたかく寄り添う仲間を募集しています。</p>
-          <div class="hero-actions"><a class="button primary" href="mailto:hisahohoikuen@gmail.com?subject=%E4%BF%9D%E8%82%B2%E5%A3%AB%E5%8B%9F%E9%9B%86%E3%81%AE%E4%BB%B6">メールで問い合わせる</a><a class="button secondary" href="tel:0724275688">電話する</a></div>
+          <h1>子どもの「できた！」を、<br class="mobile-break" />いちばん近くで喜ぶ仕事。</h1>
+          <p>
+            ひさほ保育園は、少人数制だからこそ一人ひとりの表情に気づける園です。
+            子どもにも保護者にもあたたかく寄り添う仲間を募集しています。
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="mailto:hisahohoikuen@gmail.com?subject=%E4%BF%9D%E8%82%B2%E5%A3%AB%E5%8B%9F%E9%9B%86%E3%81%AE%E4%BB%B6">
+              メールで問い合わせる
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+            </a>
+            <a class="button secondary" href="tel:0724275688">
+              電話する
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+            </a>
+          </div>
         </div>
       </section>
 
-      <section class="section">
+      <section class="section" id="childcare">
+        <img class="sec-deco deco-tr deco-m soft" src="assets/illust/play-swing.png" alt="" aria-hidden="true" />
         <div class="section-heading reveal">
-          <p class="eyebrow">Our Childcare</p>
-          <h2>ひさほ保育園で大切にする保育</h2>
+          <h2 class="section-title">ひさほ保育園で大切にする保育</h2>
+          <p>「こうしなさい」ではなく、「やってみたい」を一緒に見つける保育をしています。</p>
         </div>
         <div class="feature-grid">
-          <article class="feature-card reveal"><span class="feature-icon">顔</span><h3>顔が見える距離感</h3><p>定員75名の規模を活かし、子どもの興味、発達、気持ちの揺れに丁寧に気づく保育を大切にしています。</p></article>
-          <article class="feature-card reveal"><span class="feature-icon">手</span><h3>たて割りと年齢別のバランス</h3><p>異年齢の関わりで思いやりを育み、活動内容に応じた年齢別保育で発達に合った経験を支えます。</p></article>
-          <article class="feature-card reveal"><span class="feature-icon">芽</span><h3>地域と食を感じる体験</h3><p>食育や自然体験、地域交流を通して、子どもたちの五感と心の根っこを育てます。</p></article>
+          <article class="feature-item reveal">
+            <span class="feature-icon icon-pink">
+              <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="15" r="7" /><path d="M8 34c1.4-7 5.6-10.5 12-10.5S30.6 27 32 34" /></svg>
+            </span>
+            <h3>顔が見える距離感</h3>
+            <p>定員75名の規模を活かし、子どもの興味、発達、気持ちの揺れに丁寧に気づく保育を大切にしています。</p>
+          </article>
+          <article class="feature-item reveal">
+            <span class="feature-icon icon-yellow">
+              <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="13" cy="14" r="5" /><circle cx="27" cy="14" r="5" /><path d="M4 32c.8-6 4-9 9-9s8.2 3 9 9M18 32c.8-6 4-9 9-9s8.2 3 9 9" /></svg>
+            </span>
+            <h3>たて割りと年齢別のバランス</h3>
+            <p>異年齢の関わりで思いやりを育み、活動内容に応じた年齢別保育で発達に合った経験を支えます。</p>
+          </article>
+          <article class="feature-item reveal">
+            <span class="feature-icon icon-mint">
+              <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 35V17" /><path d="M20 20C9 20 7 12 8 7c6 0 12 2 12 13zM20 20c11 0 13-8 12-13-6 0-12 2-12 13z" /></svg>
+            </span>
+            <h3>地域と食を感じる体験</h3>
+            <p>食育や自然体験、地域交流を通して、子どもたちの五感と心の根っこを育てます。</p>
+          </article>
         </div>
       </section>
 
-      <section class="section split section-peach">
-        <div class="split-copy reveal">
-          <p class="eyebrow">Message</p>
-          <h2>保育者も、安心して根を張れる場所へ。</h2>
-          <p>保育の仕事は、子どもの成長を支えるだけでなく、保護者の毎日を支える仕事でもあります。職員同士で子どもの姿を共有しながら、チームで関わることを大切にしています。</p>
+      <section class="band band-mint" id="environment">
+        <img class="sec-deco deco-bl deco-m soft" src="assets/illust/nature-tree.png" alt="" aria-hidden="true" />
+        <div class="band-inner">
+          <div class="section-heading reveal">
+            <h2 class="section-title">働く環境</h2>
+            <p>保育者も安心して根を張れる場所であるように。</p>
+          </div>
+          <div class="age-grid">
+            <article class="age-card reveal">
+              <span class="age-label">チーム</span>
+              <h3>ひとりで抱えこまない</h3>
+              <p>職員同士で子どもの姿を共有しながら、チームで関わることを大切にしています。困ったときに相談できる距離感です。</p>
+            </article>
+            <article class="age-card reveal">
+              <span class="age-label">学び</span>
+              <h3>専門講師と一緒に</h3>
+              <p>体育・音楽・リトミックは専門講師と連携。得意を活かしながら、保育の引き出しを増やせる環境です。</p>
+            </article>
+            <article class="age-card reveal">
+              <span class="age-label">視野</span>
+              <h3>世界とつながる園</h3>
+              <p>フィンランド・タンペレ市の保育園との情報交換など、外の学びを積極的に取り入れています。</p>
+            </article>
+          </div>
         </div>
-        <div class="cta-card reveal">
-          <h3>募集に関するお問い合わせ</h3>
-          <p>勤務条件や見学前のご相談など、園までお気軽にお問い合わせください。</p>
-          <p class="contact-line">TEL 072-427-5688</p>
-          <a class="button primary" href="mailto:hisahohoikuen@gmail.com?subject=%E4%BF%9D%E8%82%B2%E5%A3%AB%E5%8B%9F%E9%9B%86%E3%81%AE%E4%BB%B6">メールで相談する</a>
+      </section>
+
+      <section class="section" id="message">
+        <img class="sec-deco deco-tl deco-s soft" src="assets/illust/deco-rainbow.png" alt="" aria-hidden="true" />
+        <div class="split">
+          <div class="split-copy reveal">
+            <h2>保育者も、安心して<br class="mobile-break" />根を張れる場所へ。</h2>
+            <p>
+              保育の仕事は、子どもの成長を支えるだけでなく、保護者の毎日を支える仕事でもあります。
+              だからこそ、支える人自身が安心して働けることを大切にしたいと考えています。
+            </p>
+            <p>
+              「見学だけしてみたい」「まずは話を聞いてみたい」でも大歓迎です。
+              園の空気を感じに来てください。
+            </p>
+          </div>
+          <div class="cta-card reveal">
+            <h3>募集に関するお問い合わせ</h3>
+            <p>勤務条件や見学前のご相談など、園までお気軽にお問い合わせください。</p>
+            <p class="contact-line">TEL 072-427-5688</p>
+            <a class="button primary" href="mailto:hisahohoikuen@gmail.com?subject=%E4%BF%9D%E8%82%B2%E5%A3%AB%E5%8B%9F%E9%9B%86%E3%81%AE%E4%BB%B6">
+              メールで相談する
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+            </a>
+          </div>
         </div>
       </section>
     </main>
 
-    <aside class="floating-cta" aria-label="固定お問い合わせ導線"><a href="tel:0724275688">電話</a><a href="visit.html">見学</a><a href="recruit.html">採用</a></aside>
+    <aside class="floating-cta" aria-label="固定お問い合わせ導線">
+      <a href="tel:0724275688">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3 4 5c-1 8 7 16 15 15l2-3-5-4-2 2c-3-1-5-3-6-6l2-2z" /></svg>
+        <span>電話</span>
+      </a>
+      <a class="floating-primary" href="mailto:hisahohoikuen@gmail.com?subject=%E4%BF%9D%E8%82%B2%E5%A3%AB%E5%8B%9F%E9%9B%86%E3%81%AE%E4%BB%B6">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" /><path d="m3.5 7 8.5 6 8.5-6" /></svg>
+        <span>応募</span>
+      </a>
+    </aside>
+
+    <div class="page-frame page-frame-bottom" aria-hidden="true">
+      <img src="assets/frame-wave.png" alt="" />
+    </div>
+
     <footer class="site-footer">
       <div class="footer-grid">
-        <div><p class="footer-brand">認定こども園 ひさほ保育園</p><p>〒597-0031 大阪府貝塚市久保三丁目2番12号</p><p>TEL 072-427-5688 / FAX 072-427-5687</p></div>
-        <div class="footer-links"><a href="index.html#concept">園について</a><a href="news.html">お知らせ</a><a href="visit.html">園見学</a><a href="recruit.html">採用</a><a href="https://www.instagram.com/hisaho_hoikuen/" target="_blank" rel="noopener">Instagram</a></div>
+        <div class="footer-identity">
+          <p class="footer-brand">認定こども園 ひさほ保育園</p>
+          <p>〒597-0031 大阪府貝塚市久保三丁目2番12号</p>
+          <p><a href="tel:0724275688">TEL 072-427-5688</a> / FAX 072-427-5687</p>
+        </div>
+        <div class="footer-links">
+          <a href="about.html">園について</a>
+          <a href="food.html">食育・給食</a>
+          <a href="visit.html">入園案内・見学</a>
+          <a href="recruit.html">採用情報</a>
+          <a href="news.html">お知らせ</a>
+          <a href="visit.html#contact">お問い合わせ</a>
+          <a href="https://www.instagram.com/hisaho_hoikuen/" target="_blank" rel="noopener">Instagram</a>
+        </div>
       </div>
       <small>&copy; Hisaho Hoikuen.</small>
     </footer>
-    <script src="script.js"></script>
+
+    <script src="script.js?v=20260728-2"></script>
   </body>
 </html>

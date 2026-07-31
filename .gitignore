@@ -1,0 +1,8 @@
+# Deco Studio backups
+.deco-backups/
+
+# 未整理の生成素材の元データ（整理済み版は assets/illust/）
+assets/deco/
+
+# レビュー用の書き出し画像（どのページからも未参照）
+design-concepts/

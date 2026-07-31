@@ -3,75 +3,253 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="認定こども園 ひさほ保育園の園見学申込ページです。園の雰囲気、保育室、給食、遊び方を実際にご覧いただけます。" />
-    <title>園見学申込 | 認定こども園 ひさほ保育園</title>
+    <meta
+      name="description"
+      content="認定こども園 ひさほ保育園の入園案内・園見学申込ページ。保育時間、入所要件、見学の流れ、お問い合わせフォームをご案内します。"
+    />
+    <title>入園案内・園見学 | 認定こども園 ひさほ保育園</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css?v=20260728-1" />
+    <link rel="stylesheet" href="site.css?v=20260728-7" />
   </head>
-  <body>
+  <body class="hisaho">
     <a class="skip-link" href="#main">本文へスキップ</a>
+
+    <div class="page-frame page-frame-top" aria-hidden="true">
+      <img src="assets/frame-wave.png" alt="" />
+    </div>
+
     <header class="site-header">
       <div class="header-inner">
-        <nav id="nav-left" class="global-nav nav-left" aria-label="主なナビゲーション 左"><a class="nav-item" href="index.html#concept"><img src="assets/nav-lion.png" alt="" /><strong>園について</strong><span>ABOUT</span></a><a class="nav-item" href="index.html#features"><img src="assets/nav-giraffe.png" alt="" /><strong>園の特徴</strong><span>FEATURE</span></a><a class="nav-item" href="visit.html" aria-current="page"><img src="assets/nav-rabbit.png" alt="" /><strong>入園案内</strong><span>ADMISSION</span></a></nav>
-        <a class="brand center-brand" href="index.html"><img class="brand-logo" src="assets/hisaho-logo-main.png" alt="認定こども園 ひさほ保育園" /></a>
-        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-left global-nav"><span></span><span></span><span></span><span class="sr-only">メニューを開く</span></button>
-        <nav id="global-nav" class="global-nav nav-right" aria-label="主なナビゲーション 右">
-          <a class="nav-item" href="recruit.html"><img src="assets/nav-squirrel.png" alt="" /><strong>採用情報</strong><span>RECRUIT</span></a><a class="nav-item" href="news.html"><img src="assets/nav-panda.png" alt="" /><strong>お知らせ</strong><span>NEWS</span></a><a class="nav-item nav-cta" href="visit.html" aria-current="page"><img src="assets/nav-chick.png" alt="" /><strong>お問い合わせ</strong><span>CONTACT</span></a>
+        <nav id="nav-left" class="global-nav nav-left" aria-label="主なナビゲーション 前半">
+          <a class="nav-item" href="about.html">
+            <img src="assets/nav-lion.png" alt="" />
+            <strong>園について</strong><span>ABOUT</span>
+          </a>
+          <a class="nav-item" href="food.html">
+            <img src="assets/nav-giraffe.png" alt="" />
+            <strong>食育・給食</strong><span>FOOD</span>
+          </a>
+          <a class="nav-item" href="visit.html" aria-current="page">
+            <img src="assets/nav-rabbit.png" alt="" />
+            <strong>入園案内</strong><span>ADMISSION</span>
+          </a>
+        </nav>
+
+        <a class="brand center-brand" href="index.html" aria-label="ひさほ保育園 トップページ">
+          <img class="brand-logo" src="assets/hisaho-footer-logo-transparent.png" alt="認定こども園 ひさほ保育園" />
+        </a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-left global-nav">
+          <span></span><span></span><span></span>
+          <span class="sr-only">メニューを開く</span>
+        </button>
+
+        <nav id="global-nav" class="global-nav nav-right" aria-label="主なナビゲーション 後半">
+          <a class="nav-item" href="recruit.html">
+            <img src="assets/nav-squirrel.png" alt="" />
+            <strong>採用情報</strong><span>RECRUIT</span>
+          </a>
+          <a class="nav-item" href="news.html">
+            <img src="assets/nav-panda.png" alt="" />
+            <strong>お知らせ</strong><span>NEWS</span>
+          </a>
+          <a class="nav-item nav-cta" href="visit.html#contact">
+            <img src="assets/nav-chick.png" alt="" />
+            <strong>お問い合わせ</strong><span>CONTACT</span>
+          </a>
         </nav>
       </div>
     </header>
 
     <main id="main">
-      <section class="sub-hero section-green">
-        <span class="shape shape-mint"></span>
-        <div class="sub-hero-inner reveal">
-          <p class="eyebrow">Visit</p>
-          <h1>園見学申込</h1>
-          <p>パンフレットや写真だけでは伝わりきらない、子どもたちの表情、先生との距離感、園の空気を見に来てください。</p>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="visit-flow reveal">
-          <article><span>1</span><h2>希望日時を相談</h2><p>ご家庭の都合に合わせて、見学しやすい日時をお知らせください。</p></article>
-          <article><span>2</span><h2>園生活を見学</h2><p>保育室、園庭、給食、遊び方などを実際にご案内します。</p></article>
-          <article><span>3</span><h2>気になることを相談</h2><p>入園、一時預かり、延長保育、育児相談など、お気軽にお尋ねください。</p></article>
-        </div>
-      </section>
-
-      <section class="section section-cream">
-        <div class="form-shell reveal">
-          <div>
-            <p class="eyebrow">Application</p>
-            <h2>見学申込フォーム</h2>
-            <p>送信機能はメールソフトにつながる簡易フォームです。お急ぎの場合はお電話でも受け付けています。</p>
-            <div class="contact-box">
-              <a href="tel:0724275688">TEL 072-427-5688</a>
-              <a href="mailto:hisahohoikuen@gmail.com">hisahohoikuen@gmail.com</a>
-            </div>
+      <section class="page-hero">
+        <img class="hero-illust left" src="assets/illust/deco-bus.png" alt="" aria-hidden="true" />
+        <img class="hero-illust right" src="assets/illust/deco-hat.png" alt="" aria-hidden="true" />
+        <div class="page-hero-inner reveal">
+          <p class="eyebrow">Admission</p>
+          <h1>入園案内・園見学</h1>
+          <p>
+            生後57日目のお子さまから就学前まで。保育時間や入所の要件、
+            見学のお申し込みについてご案内します。
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#contact">
+              見学を申し込む
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+            </a>
+            <a class="button secondary" href="tel:0724275688">
+              電話で相談する
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+            </a>
           </div>
-          <form class="soft-form" action="mailto:hisahohoikuen@gmail.com" method="post" enctype="text/plain">
-            <label>保護者さまのお名前<input type="text" name="保護者名" autocomplete="name" required /></label>
-            <label>お子さまの年齢<select name="お子さまの年齢" required><option value="">選択してください</option><option>0歳</option><option>1歳</option><option>2歳</option><option>3歳</option><option>4歳</option><option>5歳</option><option>出産予定・その他</option></select></label>
-            <label>メールアドレス<input type="email" name="メールアドレス" autocomplete="email" required /></label>
-            <label>電話番号<input type="tel" name="電話番号" autocomplete="tel" /></label>
-            <label>見学希望日・相談内容<textarea name="見学希望日・相談内容" rows="6" required></textarea></label>
-            <button class="button primary" type="submit">見学希望を送る</button>
-          </form>
+        </div>
+      </section>
+
+      <section class="section" id="hours">
+        <img class="sec-deco deco-tr deco-s soft" src="assets/illust/deco-sun.png" alt="" aria-hidden="true" />
+        <div class="section-heading reveal">
+          <h2 class="section-title">保育時間</h2>
+          <p>朝夕の延長保育や土曜保育で、働くご家庭の毎日を支えます。</p>
+        </div>
+        <dl class="overview-table reveal">
+          <div><dt>通常保育</dt><dd>8:30 〜 16:30</dd></div>
+          <div><dt>延長保育（有料）</dt><dd>7:00 〜 8:30 / 16:30 〜 19:00</dd></div>
+          <div><dt>土曜保育</dt><dd>8:30 〜 16:30</dd></div>
+          <div><dt>ご注意</dt><dd>1号認定のお子さまは、通常保育・土曜保育ともに 8:30 〜 16:00 までとなります。</dd></div>
+        </dl>
+      </section>
+
+      <section class="band band-mint" id="requirements">
+        <img class="sec-deco deco-bl deco-m soft" src="assets/illust/nature-grass-tuft.png" alt="" aria-hidden="true" />
+        <div class="band-inner">
+          <div class="section-heading reveal">
+            <h2 class="section-title">入所できる要件</h2>
+            <p>2号・3号認定は、保護者のいずれもが次のいずれかの状態にあることが必要です。</p>
+          </div>
+          <ol class="req-list reveal">
+            <li>家庭外での労働（週4日以上かつ1日6時間以上の勤務）</li>
+            <li>家庭内での労働</li>
+            <li>母親の出産等</li>
+            <li>病気・障害</li>
+            <li>病人の看護等</li>
+            <li>家庭の災害</li>
+            <li>その他、市長が認める前各号に類する状態</li>
+          </ol>
+          <p class="note note-block reveal">※ 詳しい入園手続きは貝塚市の窓口、または園までお問い合わせください。</p>
+        </div>
+      </section>
+
+      <section class="section" id="flow">
+        <img class="sec-deco deco-tl deco-s soft" src="assets/illust/nature-flower-path.png" alt="" aria-hidden="true" />
+        <div class="section-heading reveal">
+          <h2 class="section-title">見学は3ステップで。</h2>
+          <p>
+            パンフレットや写真だけでは伝わりきらない、子どもたちの表情、先生との距離感、
+            園の空気を見に来てください。
+          </p>
+        </div>
+        <div class="visit-flow">
+          <article class="reveal">
+            <span class="step">1</span>
+            <h3>希望日時を相談</h3>
+            <p>ご家庭の都合に合わせて、見学しやすい日時をお知らせください。</p>
+          </article>
+          <article class="reveal">
+            <span class="step">2</span>
+            <h3>園生活を見学</h3>
+            <p>保育室、運動場、給食、遊び方などを実際にご案内します。</p>
+          </article>
+          <article class="reveal">
+            <span class="step">3</span>
+            <h3>気になることを相談</h3>
+            <p>入園、延長保育、離乳食やアレルギー対応など、お気軽にお尋ねください。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="band band-pink" id="contact">
+        <img class="sec-deco deco-tr deco-m soft" src="assets/illust/deco-signboard.png" alt="" aria-hidden="true" />
+        <div class="band-inner">
+          <div class="form-shell reveal">
+            <div>
+              <p class="eyebrow" style="color: var(--hp-pink-deep); font-weight: 700">Contact</p>
+              <h2>見学申込・<br class="mobile-break" />お問い合わせ</h2>
+              <p>
+                フォームはメールソフトにつながる簡易フォームです。
+                お急ぎの場合はお電話でも受け付けています。
+              </p>
+              <div class="contact-box">
+                <a href="tel:0724275688">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 3 4 5c-1 8 7 16 15 15l2-3-5-4-2 2c-3-1-5-3-6-6l2-2z" /></svg>
+                  TEL 072-427-5688
+                </a>
+                <a href="mailto:hisahohoikuen@gmail.com">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" /><path d="m3.5 7 8.5 6 8.5-6" /></svg>
+                  hisahohoikuen@gmail.com
+                </a>
+              </div>
+            </div>
+            <form class="soft-form" action="mailto:hisahohoikuen@gmail.com" method="post" enctype="text/plain">
+              <label>
+                保護者さまのお名前
+                <input type="text" name="保護者名" autocomplete="name" required />
+              </label>
+              <label>
+                お子さまの年齢
+                <select name="お子さまの年齢" required>
+                  <option value="">選択してください</option>
+                  <option>0歳</option>
+                  <option>1歳</option>
+                  <option>2歳</option>
+                  <option>3歳</option>
+                  <option>4歳</option>
+                  <option>5歳</option>
+                  <option>出産予定・その他</option>
+                </select>
+              </label>
+              <label>
+                メールアドレス
+                <input type="email" name="メールアドレス" autocomplete="email" required />
+              </label>
+              <label>
+                電話番号
+                <input type="tel" name="電話番号" autocomplete="tel" />
+              </label>
+              <label>
+                見学希望日・相談内容
+                <textarea name="見学希望日・相談内容" rows="6" required></textarea>
+              </label>
+              <button class="button primary" type="submit">
+                見学希望を送る
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+              </button>
+            </form>
+          </div>
         </div>
       </section>
     </main>
 
-    <aside class="floating-cta" aria-label="固定お問い合わせ導線"><a href="tel:0724275688">電話</a><a href="visit.html">見学</a><a href="recruit.html">採用</a></aside>
+    <aside class="floating-cta" aria-label="固定お問い合わせ導線">
+      <a href="tel:0724275688">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3 4 5c-1 8 7 16 15 15l2-3-5-4-2 2c-3-1-5-3-6-6l2-2z" /></svg>
+        <span>電話</span>
+      </a>
+      <a class="floating-primary" href="#contact">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="4" /><path d="M5 21c1-5 3-7 7-7s6 2 7 7" /></svg>
+        <span>見学申込</span>
+      </a>
+    </aside>
+
+    <div class="page-frame page-frame-bottom" aria-hidden="true">
+      <img src="assets/frame-wave.png" alt="" />
+    </div>
+
     <footer class="site-footer">
       <div class="footer-grid">
-        <div><p class="footer-brand">認定こども園 ひさほ保育園</p><p>〒597-0031 大阪府貝塚市久保三丁目2番12号</p><p>TEL 072-427-5688 / FAX 072-427-5687</p></div>
-        <div class="footer-links"><a href="index.html#concept">園について</a><a href="news.html">お知らせ</a><a href="visit.html">園見学</a><a href="recruit.html">採用</a><a href="https://www.instagram.com/hisaho_hoikuen/" target="_blank" rel="noopener">Instagram</a></div>
+        <div class="footer-identity">
+          <p class="footer-brand">認定こども園 ひさほ保育園</p>
+          <p>〒597-0031 大阪府貝塚市久保三丁目2番12号</p>
+          <p><a href="tel:0724275688">TEL 072-427-5688</a> / FAX 072-427-5687</p>
+        </div>
+        <div class="footer-links">
+          <a href="about.html">園について</a>
+          <a href="food.html">食育・給食</a>
+          <a href="visit.html">入園案内・見学</a>
+          <a href="recruit.html">採用情報</a>
+          <a href="news.html">お知らせ</a>
+          <a href="visit.html#contact">お問い合わせ</a>
+          <a href="https://www.instagram.com/hisaho_hoikuen/" target="_blank" rel="noopener">Instagram</a>
+        </div>
       </div>
       <small>&copy; Hisaho Hoikuen.</small>
     </footer>
-    <script src="script.js"></script>
+
+    <script src="script.js?v=20260728-2"></script>
   </body>
 </html>
