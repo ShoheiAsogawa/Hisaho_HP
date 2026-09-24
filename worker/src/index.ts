@@ -37,6 +37,8 @@ export default {
       home.pathname = "/index.html";
       return env.ASSETS.fetch(new Request(home, request));
     }
+    const detail = url.pathname.match(/^\/news\/(\d+)\/?$/);
+    if (detail) return renderNewsDetail(request, env, Number(detail[1]));
     if (url.pathname === "/news" || url.pathname === "/news.html") {
       return renderNewsPage(request, env);
     }
@@ -74,13 +76,38 @@ async function renderNewsPage(request: Request, env: Env): Promise<Response> {
 
 function renderArticle(row: NewsRow): string {
   const tag = row.tag_class ? ` class="tag ${escapeAttr(row.tag_class)}"` : ` class="tag"`;
-  const link = safeHref(row.link_href);
-  const linkHtml = link
-    ? `<a class="text-link" href="${escapeAttr(link)}">${allowWbr(row.link_label || "詳しく見る")}</a>`
-    : "";
   const datetime = escapeAttr(row.published_at);
   const label = escapeHtml(row.published_at.replace("-", ".").slice(0, 7));
-  return `<article class="news-row reveal"><time datetime="${datetime}">${label}</time><div><span${tag}>${escapeHtml(row.category)}</span><h2>${allowWbr(row.title)}</h2>${renderBody(row.body)}${linkHtml}</div></article>`;
+  return `<a class="news-row reveal" href="/news/${row.id}"><time datetime="${datetime}">${label}</time><div><span${tag}>${escapeHtml(row.category)}</span><h2>${allowWbr(row.title)}</h2><p>${excerpt(row.body)}</p><span class="news-more">記事を読む</span></div></a>`;
+}
+
+async function renderNewsDetail(request: Request, env: Env, id: number): Promise<Response> {
+  const assetUrl = new URL(request.url);
+  assetUrl.pathname = "/news.html";
+  const asset = await env.ASSETS.fetch(new Request(assetUrl, request));
+  if (!asset.ok) return asset;
+  const row = await env.DB.prepare(
+    "SELECT id, published_at, category, tag_class, title, body, link_href, link_label, sort_order, published FROM news WHERE id = ? AND published = 1",
+  ).bind(id).first<NewsRow>();
+  if (!row) return new Response("記事が見つかりません", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
+  const plainTitle = row.title.replace(/<[^>]+>/g, "");
+  const link = safeHref(row.link_href);
+  const linkHtml = link ? `<p><a class="text-link" href="${escapeAttr(link)}">${allowWbr(row.link_label || "詳しく見る")}</a></p>` : "";
+  const tag = row.tag_class ? ` class="tag ${escapeAttr(row.tag_class)}"` : ` class="tag"`;
+  const label = escapeHtml(row.published_at.replace("-", ".").slice(0, 7));
+  const article = `<article class="news-article"><a class="news-back" href="/news.html">お知らせ一覧へ</a><p class="news-kicker"><time datetime="${escapeAttr(row.published_at)}">${label}</time><span${tag}>${escapeHtml(row.category)}</span></p>${renderBody(row.body)}${linkHtml}</article>`;
+  return new HTMLRewriter()
+    .on("title", { element(element) { element.setInnerContent(`${plainTitle} | お知らせ | 認定こども園 ひさほ保育園`); } })
+    .on(".page-hero-inner h1", { element(element) { element.setInnerContent(allowWbr(row.title), { html: true }); } })
+    .on(".page-hero-inner p", { element(element) { element.setInnerContent("お知らせの詳細です。"); } })
+    .on("#news", { element(element) { element.setInnerContent(article, { html: true }); } })
+    .transform(asset);
+}
+
+function excerpt(body: string): string {
+  const text = sanitizeRich(body).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  if (text.length <= 90) return text;
+  return `${text.slice(0, 90)}…`;
 }
 
 async function handleApi(request: Request, env: Env, url: URL): Promise<Response> {
@@ -285,12 +312,12 @@ function json(data: unknown, status = 200): Response {
 function renderBody(body: string): string {
   const safe = sanitizeRich(body);
   if (!safe) return "";
-  if (/<(p|div|ul|ol|img)\b/i.test(safe)) return `<div class="news-body">${safe}</div>`;
+  if (/<(p|div|ul|ol|img|h2|h3|blockquote)\b/i.test(safe)) return `<div class="news-body">${safe}</div>`;
   return `<div class="news-body"><p>${safe}</p></div>`;
 }
 
 function sanitizeRich(input: string): string {
-  const allowed = new Set(["p", "div", "br", "strong", "b", "em", "img", "wbr", "ul", "ol", "li"]);
+  const allowed = new Set(["p", "div", "br", "strong", "b", "em", "i", "img", "wbr", "ul", "ol", "li", "h2", "h3", "blockquote", "a"]);
   let html = "";
   let skipping = false;
   const pattern = /<\/?([a-zA-Z0-9]+)([^>]*)>|([^<]+)/g;
@@ -312,6 +339,13 @@ function sanitizeRich(input: string): string {
     }
     if (match[0].startsWith("</")) {
       html += `</${name}>`;
+      continue;
+    }
+    if (name === "a") {
+      const href = /href\s*=\s*"([^"]+)"/i.exec(match[2] ?? "")?.[1] ?? "";
+      const safe = safeHref(href);
+      if (!safe) continue;
+      html += `<a href="${escapeAttr(safe)}">`;
       continue;
     }
     if (name === "img") {
@@ -448,8 +482,12 @@ const ADMIN_HTML = `<!DOCTYPE html>
     .meta { color:#8a6478; font-size:.92rem; }
     .error { color:#b4234a; min-height:1.2em; }
     .hidden { display:none; }
-    .toolbar { display:flex; gap:8px; }
-    .editor { min-height:160px; border:1px solid var(--line); border-radius:14px; padding:12px; background:#fff; font-weight:500; }
+    .toolbar { display:flex; gap:8px; flex-wrap:wrap; }
+    .toolbar button.is-on { background:#ffe3f3; color:#c43d93; }
+    .editor { min-height:220px; border:1px solid var(--line); border-radius:14px; padding:12px; background:#fff; font-weight:500; line-height:1.7; }
+    .editor:empty:before { content:"ここに文章を書いてください。選択して太字や見出しにできます。"; color:#b08aa0; }
+    .editor h2, .editor h3 { margin:0.6em 0 0.3em; }
+    .editor img { max-width:100%; }
     .editor:focus { outline:2px solid #ffd0ea; }
     .editor img { max-width:100%; height:auto; border-radius:12px; }
     @media (max-width:720px) { .grid { grid-template-columns:1fr; } header { align-items:flex-start; flex-direction:column; } }
@@ -486,9 +524,17 @@ const ADMIN_HTML = `<!DOCTYPE html>
             </select>
           </label>
         </div>
-        <div class="toolbar">
-          <button id="bold" class="ghost" type="button">太字</button>
-          <button id="insert-image" class="ghost" type="button">画像を挿入</button>
+        <div class="toolbar" id="toolbar">
+          <button class="ghost" type="button" data-cmd="bold">太字</button>
+          <button class="ghost" type="button" data-cmd="italic">斜体</button>
+          <button class="ghost" type="button" data-block="h2">大見出し</button>
+          <button class="ghost" type="button" data-block="h3">小見出し</button>
+          <button class="ghost" type="button" data-block="p">本文</button>
+          <button class="ghost" type="button" data-cmd="insertUnorderedList">箇条書き</button>
+          <button class="ghost" type="button" data-cmd="insertOrderedList">番号</button>
+          <button class="ghost" type="button" data-block="blockquote">引用</button>
+          <button class="ghost" type="button" id="insert-link">リンク</button>
+          <button class="ghost" type="button" id="insert-image">画像</button>
           <input id="image-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden />
         </div>
         <label>本文<div id="body-editor" class="editor" contenteditable="true"></div></label>
@@ -504,7 +550,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
           <label>リンク文言<input name="link_label" placeholder="詳しく見る" /></label>
         </div>
         <label class="row"><input name="published" type="checkbox" checked style="width:auto" /> 公開する</label>
-        <p class="meta">本文は太字にしたり、写真を差し込めます。見出しの改行位置は &lt;wbr&gt; で指定できます。</p>
+        <p class="meta">文章を選んでボタンを押すと、太字・見出し・リスト・リンクにできます。Ctrl+B で太字、Ctrl+I で斜体です。</p>
         <div class="row">
           <button type="submit">保存する</button>
           <button id="cancel" class="ghost hidden" type="button">新規入力に戻す</button>
@@ -652,10 +698,32 @@ const ADMIN_HTML = `<!DOCTYPE html>
       }
     });
 
-    document.querySelector("#bold").addEventListener("click", () => {
-      editorBody.focus();
-      document.execCommand("bold");
+    document.querySelectorAll("[data-cmd]").forEach((button) => {
+      button.addEventListener("click", () => {
+        editorBody.focus();
+        document.execCommand(button.dataset.cmd);
+        markToolbar();
+      });
     });
+    document.querySelectorAll("[data-block]").forEach((button) => {
+      button.addEventListener("click", () => {
+        editorBody.focus();
+        document.execCommand("formatBlock", false, "<" + button.dataset.block + ">");
+        markToolbar();
+      });
+    });
+    document.querySelector("#insert-link").addEventListener("click", () => {
+      const href = prompt("リンク先のURL", "https://");
+      if (!href) return;
+      editorBody.focus();
+      document.execCommand("createLink", false, href);
+    });
+    document.addEventListener("selectionchange", markToolbar);
+    function markToolbar() {
+      document.querySelectorAll("[data-cmd]").forEach((button) => {
+        button.classList.toggle("is-on", document.queryCommandState(button.dataset.cmd));
+      });
+    }
     document.querySelector("#insert-image").addEventListener("click", () => document.querySelector("#image-file").click());
     document.querySelector("#image-file").addEventListener("change", async (event) => {
       const file = event.target.files?.[0];

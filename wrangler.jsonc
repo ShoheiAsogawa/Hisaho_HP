@@ -10,7 +10,7 @@
     "binding": "ASSETS",
     "html_handling": "none",
     "not_found_handling": "none",
-    "run_worker_first": ["/", "/admin", "/admin/*", "/api/*", "/news", "/news.html", "/media/*"]
+    "run_worker_first": ["/", "/admin", "/admin/*", "/api/*", "/news", "/news/*", "/news.html", "/media/*"]
   },
   "d1_databases": [
     {
