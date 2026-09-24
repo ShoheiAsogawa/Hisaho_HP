@@ -5127,11 +5127,6 @@ body.hisaho {
     z-index: 2 !important;
   }
 
-  /* 看板は文字ごと .gate-sign 全体を動かすので、画像単体は反応させない */
-  .hisaho .gate-sign img {
-    pointer-events: none;
-  }
-
   .hisaho img[src*="assets/mascots/"] {
     transform-origin: 50% 100%;
     transition: translate .35s cubic-bezier(.34, 1.56, .64, 1), rotate .35s cubic-bezier(.34, 1.56, .64, 1), scale .35s cubic-bezier(.34, 1.56, .64, 1);
@@ -5173,9 +5168,7 @@ body.hisaho {
   .hisaho img[src*="item-wateringcan"] { transform-origin: 75% 85%; }
   .hisaho img[src*="item-wateringcan"]:hover { rotate: -16deg; scale: 1.04; }
 
-  /* 門柱の兵隊さん: 外側へ胸を張る。看板は文字ごとゆれる */
+  /* 門柱の兵隊さん: 外側へ胸を張る */
   .hisaho img[src*="soldier-left"]:hover { translate: 0 -6px; rotate: -4deg; }
   .hisaho img[src*="soldier-right"]:hover { translate: 0 -6px; rotate: 4deg; }
-  .hisaho .gate-sign { transform-origin: 50% 100%; }
-  .hisaho .gate-sign:hover { animation: hp-tilt .8s ease-in-out both; }
 }
