@@ -32,10 +32,8 @@ export default {
     if (url.pathname.startsWith("/api/")) {
       return handleApi(request, env, url);
     }
-    if (url.pathname === "/") {
-      const home = new URL(request.url);
-      home.pathname = "/index.html";
-      return env.ASSETS.fetch(new Request(home, request));
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      return renderHomePage(request, env);
     }
     const detail = url.pathname.match(/^\/news\/(\d+)\/?$/);
     if (detail) return renderNewsDetail(request, env, Number(detail[1]));
@@ -74,11 +72,36 @@ async function renderNewsPage(request: Request, env: Env): Promise<Response> {
     .transform(asset);
 }
 
-function renderArticle(row: NewsRow): string {
+async function renderHomePage(request: Request, env: Env): Promise<Response> {
+  const assetUrl = new URL(request.url);
+  assetUrl.pathname = "/index.html";
+  const asset = await env.ASSETS.fetch(new Request(assetUrl, request));
+  if (!asset.ok) return asset;
+  let rows: NewsRow[] = [];
+  try {
+    const result = await env.DB.prepare(
+      "SELECT id, published_at, category, tag_class, title, body, link_href, link_label, sort_order, published FROM news WHERE published = 1 ORDER BY sort_order ASC, published_at DESC, id DESC LIMIT 5",
+    ).all<NewsRow>();
+    rows = result.results ?? [];
+  } catch {
+    return asset;
+  }
+  if (rows.length === 0) return asset;
+  const html = rows.map((row) => renderArticle(row, "h3")).join("");
+  return new HTMLRewriter()
+    .on("#home-news .news-list", {
+      element(element) {
+        element.setInnerContent(html, { html: true });
+      },
+    })
+    .transform(asset);
+}
+
+function renderArticle(row: NewsRow, heading: "h2" | "h3" = "h2"): string {
   const tag = row.tag_class ? ` class="tag ${escapeAttr(row.tag_class)}"` : ` class="tag"`;
   const datetime = escapeAttr(row.published_at);
   const label = escapeHtml(row.published_at.replace("-", ".").slice(0, 7));
-  return `<a class="news-row reveal" href="/news/${row.id}"><time datetime="${datetime}">${label}</time><div><span${tag}>${escapeHtml(row.category)}</span><h2>${allowWbr(row.title)}</h2><p>${excerpt(row.body)}</p><span class="news-more">記事を読む</span></div></a>`;
+  return `<a class="news-row reveal" href="/news/${row.id}"><time datetime="${datetime}">${label}</time><div><span${tag}>${escapeHtml(row.category)}</span><${heading}>${allowWbr(row.title)}</${heading}><p>${excerpt(row.body)}</p><span class="news-more">記事を読む</span></div></a>`;
 }
 
 async function renderNewsDetail(request: Request, env: Env, id: number): Promise<Response> {
