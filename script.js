@@ -294,3 +294,13 @@ if (heroCarousel) {
   announce();
   startAutoplay();
 })();
+
+// フッターの「TOPへ」ボタン：ページのいちばん上までふわっと戻る。
+(() => {
+  const button = document.querySelector(".to-top");
+  if (!button) return;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  button.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: reduceMotion.matches ? "auto" : "smooth" });
+  });
+})();

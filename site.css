@@ -1394,6 +1394,99 @@ body.hisaho {
   font-weight: 700;
 }
 
+/* フッター上部の「TOPへ」ボタン：白い丸にひよこがちょこんと乗る */
+.hisaho .to-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: clamp(-18px, -1vw, -8px) auto clamp(30px, 4vw, 44px);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--hp-pink-deep);
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hisaho .to-top-chick {
+  position: relative;
+  z-index: 1;
+  width: 66px;
+  height: auto;
+  margin-bottom: -13px;
+  transform-origin: 50% 100%;
+}
+
+.hisaho .to-top-bubble {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1px;
+  width: 78px;
+  height: 78px;
+  border: 3px solid var(--hp-yellow, #ffd84d);
+  border-radius: 50%;
+  background: var(--hp-white);
+  box-shadow: 0 6px 0 rgb(0 0 0 / 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hisaho .to-top-bubble svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hisaho .to-top-bubble span {
+  font-family: "Kosugi Maru", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.hisaho .to-top:hover .to-top-bubble,
+.hisaho .to-top:focus-visible .to-top-bubble {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 0 rgb(0 0 0 / 0.12);
+}
+
+.hisaho .to-top:hover .to-top-chick,
+.hisaho .to-top:focus-visible .to-top-chick {
+  animation: to-top-hop 0.7s ease-in-out infinite;
+}
+
+.hisaho .to-top:active .to-top-bubble {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.12);
+}
+
+.hisaho .to-top:focus-visible {
+  outline: none;
+}
+
+.hisaho .to-top:focus-visible .to-top-bubble {
+  outline: 3px solid var(--hp-white);
+  outline-offset: 3px;
+}
+
+@keyframes to-top-hop {
+  0%, 100% { transform: translateY(-4px); }
+  45% { transform: translateY(-14px) rotate(-4deg); }
+  60% { transform: translateY(-4px) scaleY(0.94); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hisaho .to-top:hover .to-top-chick,
+  .hisaho .to-top:focus-visible .to-top-chick {
+    animation: none;
+  }
+}
+
 .hisaho .site-footer small {
   display: block;
   width: var(--hp-container);
