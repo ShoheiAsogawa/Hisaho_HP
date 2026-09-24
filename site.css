@@ -1394,7 +1394,7 @@ body.hisaho {
   font-weight: 700;
 }
 
-/* フッター上部の「TOPへ」ボタン：白い丸にひよこがちょこんと乗る */
+/* フッター上部の「TOPへ」ボタン：割れた卵からひよこがのぞく */
 .hisaho .to-top {
   display: flex;
   flex-direction: column;
@@ -1411,30 +1411,43 @@ body.hisaho {
 
 .hisaho .to-top-chick {
   position: relative;
-  z-index: 1;
-  width: 70px;
+  z-index: 0;
+  width: 72px;
   height: auto;
-  margin-bottom: -12px;
+  margin-bottom: -18px;
   transform-origin: 50% 100%;
 }
 
+/* 割れた卵の下半分：上辺は少しだけギザギザ、下は卵らしく丸く */
 .hisaho .to-top-bubble {
+  position: relative;
   display: grid;
   place-items: center;
   align-content: center;
   gap: 1px;
-  width: 88px;
-  height: 72px;
-  padding-top: 4px;
-  border: 3px solid var(--hp-yellow, #ffd84d);
-  /* ひよこが手をかけられるよう、上辺はまっすぐ・下は丸く */
-  border-radius: 10px 10px 44px 44px;
-  background: var(--hp-white);
-  box-shadow: 0 6px 0 rgb(0 0 0 / 0.12);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 1;
+  width: 96px;
+  height: 78px;
+  padding-top: 12px;
+  transition: transform 0.2s ease;
 }
 
-.hisaho .to-top-bubble svg {
+.hisaho .to-top-shell {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: var(--hp-white);
+  stroke: var(--hp-yellow, #ffbd59);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 5px 0 rgb(0 0 0 / 0.12));
+  transition: filter 0.2s ease;
+}
+
+.hisaho .to-top-arrow {
+  position: relative;
   width: 22px;
   height: 22px;
   fill: none;
@@ -1445,6 +1458,7 @@ body.hisaho {
 }
 
 .hisaho .to-top-bubble span {
+  position: relative;
   font-family: "Kosugi Maru", sans-serif;
   font-size: 0.8rem;
   font-weight: 900;
@@ -1454,33 +1468,37 @@ body.hisaho {
 .hisaho .to-top:hover .to-top-bubble,
 .hisaho .to-top:focus-visible .to-top-bubble {
   transform: translateY(-4px);
-  box-shadow: 0 10px 0 rgb(0 0 0 / 0.12);
+}
+
+.hisaho .to-top:hover .to-top-shell,
+.hisaho .to-top:focus-visible .to-top-shell {
+  filter: drop-shadow(0 9px 0 rgb(0 0 0 / 0.12));
 }
 
 .hisaho .to-top:hover .to-top-chick,
 .hisaho .to-top:focus-visible .to-top-chick {
-  animation: to-top-hop 0.7s ease-in-out infinite;
+  animation: to-top-hop 0.9s ease-in-out infinite;
 }
 
 .hisaho .to-top:active .to-top-bubble {
   transform: translateY(2px);
-  box-shadow: 0 3px 0 rgb(0 0 0 / 0.12);
 }
 
 .hisaho .to-top:focus-visible {
   outline: none;
 }
 
-.hisaho .to-top:focus-visible .to-top-bubble {
-  outline: 3px solid var(--hp-white);
-  outline-offset: 3px;
+.hisaho .to-top:focus-visible .to-top-shell {
+  stroke: var(--hp-white);
+  stroke-width: 5;
 }
 
 @keyframes to-top-hop {
-  0%, 100% { transform: translateY(-4px); }
-  45% { transform: translateY(-14px) rotate(-4deg); }
-  60% { transform: translateY(-4px) scaleY(0.94); }
+  0%, 100% { transform: translateY(-4px) rotate(0deg); }
+  25% { transform: translateY(-4px) rotate(-7deg); }
+  75% { transform: translateY(-4px) rotate(7deg); }
 }
+
 
 @media (prefers-reduced-motion: reduce) {
   .hisaho .to-top:hover .to-top-chick,
