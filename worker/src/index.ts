@@ -98,11 +98,26 @@ async function renderNewsDetail(request: Request, env: Env, id: number): Promise
   const article = `<article class="news-article"><a class="news-back" href="/news.html">お知らせ一覧へ</a><p class="news-kicker"><time datetime="${escapeAttr(row.published_at)}">${label}</time><span${tag}>${escapeHtml(row.category)}</span></p>${renderBody(row.body)}${linkHtml}</article>`;
   return new HTMLRewriter()
     .on("head", { element(element) { element.prepend('<base href="/">', { html: true }); } })
+    .on("link, script, img, source, a", {
+      element(element) {
+        for (const attr of ["href", "src"]) {
+          const value = element.getAttribute(attr);
+          if (!value) continue;
+          element.setAttribute(attr, rootUrl(value));
+        }
+      },
+    })
     .on("title", { element(element) { element.setInnerContent(`${plainTitle} | お知らせ | 認定こども園 ひさほ保育園`); } })
     .on(".page-hero-inner h1", { element(element) { element.setInnerContent(allowWbr(row.title), { html: true }); } })
     .on(".page-hero-inner p", { element(element) { element.setInnerContent("お知らせの詳細です。"); } })
     .on("#news", { element(element) { element.setInnerContent(article, { html: true }); } })
     .transform(asset);
+}
+
+function rootUrl(value: string): string {
+  const url = value.trim();
+  if (!url || url.startsWith("/") || url.startsWith("#") || url.startsWith("?") || /^[a-z][a-z0-9+.-]*:/i.test(url)) return url;
+  return `/${url.replace(/^\.\//, "")}`;
 }
 
 function excerpt(body: string): string {
