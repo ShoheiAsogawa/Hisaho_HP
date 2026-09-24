@@ -214,7 +214,27 @@
               </button>
               <p id="contact-status" class="note" role="status"></p>
             </form>
+            <div id="contact-pop" class="contact-pop" hidden>
+              <div class="contact-pop-card" role="dialog" aria-modal="true" aria-labelledby="contact-pop-title">
+                <img src="assets/mascots/chara-chick-flag.webp" alt="" width="437" height="440" />
+                <p class="contact-pop-kicker">やったー</p>
+                <h3 id="contact-pop-title">送信しました</h3>
+                <p>園に届きました。返信まで、少しだけお待ちくださいね。</p>
+                <button class="button primary" type="button" data-close-pop>とじる</button>
+              </div>
+            </div>
             <script>
+              const contactPop = document.querySelector("#contact-pop");
+              function closeContactPop() {
+                contactPop.hidden = true;
+                document.body.classList.remove("contact-pop-open");
+              }
+              contactPop.addEventListener("click", (event) => {
+                if (event.target === contactPop || event.target.closest("[data-close-pop]")) closeContactPop();
+              });
+              document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape" && !contactPop.hidden) closeContactPop();
+              });
               document.querySelector("#contact-form").addEventListener("submit", async (event) => {
                 event.preventDefault();
                 const form = event.currentTarget;
@@ -232,7 +252,9 @@
                   const body = await response.json().catch(() => ({}));
                   if (!response.ok) throw new Error(body.error || "送信できませんでした");
                   form.reset();
-                  status.textContent = "送信しました。園からの連絡をお待ちください。";
+                  contactPop.hidden = false;
+                  document.body.classList.add("contact-pop-open");
+                  contactPop.querySelector("[data-close-pop]").focus();
                 } catch (error) {
                   status.textContent = error.message || "送信できませんでした。お電話でご連絡ください。";
                 } finally {

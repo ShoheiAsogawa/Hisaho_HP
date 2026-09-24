@@ -2710,6 +2710,63 @@ body.hisaho {
   overflow: hidden;
 }
 
+.hisaho .contact-pop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(74, 49, 68, 0.35);
+}
+
+.hisaho .contact-pop[hidden] {
+  display: none;
+}
+
+.hisaho .contact-pop-card {
+  width: min(100%, 380px);
+  padding: 28px 28px 24px;
+  border-radius: 32px;
+  background: #fffafc;
+  box-shadow: 0 18px 50px rgba(173, 40, 110, 0.18);
+  text-align: center;
+  animation: contact-pop-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hisaho .contact-pop-card img {
+  width: 112px;
+  height: auto;
+  margin: -8px auto 4px;
+}
+
+.hisaho .contact-pop-kicker {
+  margin: 0;
+  color: var(--hp-pink-deep);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.hisaho .contact-pop-card h3 {
+  margin: 4px 0 8px;
+  font-size: 1.7rem;
+}
+
+.hisaho .contact-pop-card p:last-of-type {
+  margin: 0 0 18px;
+  color: var(--hp-muted);
+  line-height: 1.8;
+}
+
+body.contact-pop-open {
+  overflow: hidden;
+}
+
+@keyframes contact-pop-in {
+  from { transform: translateY(16px) scale(0.94); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
 .hisaho input,
 .hisaho select,
 .hisaho textarea {
