@@ -97,6 +97,7 @@ async function renderNewsDetail(request: Request, env: Env, id: number): Promise
   const label = escapeHtml(row.published_at.replace("-", ".").slice(0, 7));
   const article = `<article class="news-article"><a class="news-back" href="/news.html">お知らせ一覧へ</a><p class="news-kicker"><time datetime="${escapeAttr(row.published_at)}">${label}</time><span${tag}>${escapeHtml(row.category)}</span></p>${renderBody(row.body)}${linkHtml}</article>`;
   return new HTMLRewriter()
+    .on("head", { element(element) { element.prepend('<base href="/">', { html: true }); } })
     .on("title", { element(element) { element.setInnerContent(`${plainTitle} | お知らせ | 認定こども園 ひさほ保育園`); } })
     .on(".page-hero-inner h1", { element(element) { element.setInnerContent(allowWbr(row.title), { html: true }); } })
     .on(".page-hero-inner p", { element(element) { element.setInnerContent("お知らせの詳細です。"); } })
