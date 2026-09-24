@@ -342,7 +342,7 @@
 #main.nursery-main > section :is(a, button):focus-visible { outline-color: var(--section-accent); }
 
 /* TOP → Instagram: ローズの下地を波形とフェードにも引き継ぐ。 */
-#main.nursery-main :is(.dream-hero, #instagram) {
+#main.nursery-main :is(.dream-hero, #home-news, #instagram) {
   --section-ink: #492d40;
   --section-muted: #705260;
   --section-accent: #ad286e;
@@ -358,6 +358,10 @@
 #main.nursery-main .dream-thumb.is-active { border-color: var(--section-accent); background: var(--section-soft); }
 #main.nursery-main .dream-wave { fill: var(--rose-surface); }
 #main.nursery-main #instagram { background: var(--rose-surface); }
+#main.nursery-main #home-news { background: var(--rose-surface); padding-top: clamp(36px, 4vw, 56px); }
+#main.nursery-main #home-news .section-heading { margin-inline: auto; margin-bottom: 32px; text-align: center; }
+#main.nursery-main #home-news .news-row time { color: var(--section-accent); }
+#main.nursery-main .home-news-more { margin: 32px 0 0; text-align: center; }
 #main.nursery-main #instagram .section-heading h2 { color: var(--section-accent); }
 #main.nursery-main #instagram .ig-marquee::before { background: linear-gradient(to right, var(--rose-surface) 8%, #fff0f5b3 45%, #fff0f500); }
 #main.nursery-main #instagram .ig-marquee::after { background: linear-gradient(to left, var(--rose-surface) 8%, #fff0f5b3 45%, #fff0f500); }
