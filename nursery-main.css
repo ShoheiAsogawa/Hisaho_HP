@@ -295,11 +295,16 @@
 #main.nursery-main .season-card.autumn > img { object-fit: contain; background: #fff2e6; }
 #main.nursery-main .season-card.winter > img { object-fit: contain; background: #f1f7fc; }
 
-#main.nursery-main #instagram { padding-block: 80px; background: #ffe4ee; border-radius: 0 0 48% 52% / 0 0 2% 3%; }
+#main.nursery-main #instagram { position: relative; z-index: 1; padding-block: 80px; background: #ffe4ee; border-radius: 0; }
+#main.nursery-main .section-wave { position: absolute; left: 0; width: 100%; height: 65px; fill: var(--rose-surface); pointer-events: none; }
+#main.nursery-main .section-wave-top { top: -64px; }
+#main.nursery-main .section-wave-bottom { bottom: -64px; transform: scaleY(-1); }
+#main.nursery-main .events-section { position: relative; z-index: 0; }
+#main.nursery-main .admission-section { position: relative; z-index: 0; padding-top: calc(var(--nursery-space) + 36px); }
 #main.nursery-main #instagram .section-heading h2 { color: var(--nursery-accent); }
 #main.nursery-main #instagram .section-heading { margin-bottom: 36px; }
 
-#main.nursery-main .admission-section { background: #fff; padding-block: var(--nursery-space); }
+#main.nursery-main .admission-section { background: #fff; padding-block: calc(var(--nursery-space) + 36px) var(--nursery-space); }
 #main.nursery-main .admission-inner { align-items: center; gap: 45px; }
 #main.nursery-main .admission-copy h2 { font-size: clamp(1.6rem, 2.7vw, 2.5rem); }
 #main.nursery-main .support-list > div { gap: 12px; }
@@ -357,7 +362,13 @@
 #main.nursery-main .dream-controls button:hover { background: #fbe0eb; }
 #main.nursery-main .dream-thumb.is-active { border-color: var(--section-accent); background: var(--section-soft); }
 #main.nursery-main .dream-wave { fill: var(--rose-surface); }
-#main.nursery-main #instagram { background: var(--rose-surface); }
+#main.nursery-main #instagram { background: var(--rose-surface); border-radius: 0; }
+@media (max-width: 900px) {
+  #main.nursery-main .section-wave { height: 38px; }
+  #main.nursery-main .section-wave-top { top: -37px; }
+  #main.nursery-main .section-wave-bottom { bottom: -37px; }
+  #main.nursery-main .admission-section { padding-top: calc(var(--nursery-space) + 12px); }
+}
 /* TOP お知らせ：最新3件をサムネイル付きの小さなカードで。 */
 #main.nursery-main #home-news { position: relative; z-index: 1; background: var(--rose-surface); padding-block: clamp(28px, 3.4vw, 44px) clamp(72px, 7vw, 96px); }
 #main.nursery-main .home-news-wave { position: absolute; left: 0; bottom: -64px; width: 100%; height: 65px; fill: var(--rose-surface); pointer-events: none; transform: scaleY(-1); }
