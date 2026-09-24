@@ -2702,6 +2702,14 @@ body.hisaho {
   font-weight: 900;
 }
 
+.hisaho .hp-honeypot {
+  position: absolute !important;
+  left: -10000px !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 .hisaho input,
 .hisaho select,
 .hisaho textarea {

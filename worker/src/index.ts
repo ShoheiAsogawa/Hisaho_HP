@@ -252,9 +252,11 @@ function excerpt(body: string): string {
 async function handleApi(request: Request, env: Env, url: URL): Promise<Response> {
   if (request.method === "POST" && url.pathname === "/api/login") return login(request, env);
   if (request.method === "POST" && url.pathname === "/api/logout") return logout(request);
+  if (request.method === "POST" && url.pathname === "/api/contact") return submitContact(request, env);
   const session = await readSession(request, env);
   if (!session) return json({ error: "ログインが必要です" }, 401);
   if (request.method === "GET" && url.pathname === "/api/me") return json({ ok: true });
+  if (request.method === "GET" && url.pathname === "/api/inquiries") return listInquiries(env);
   if (request.method === "GET" && url.pathname === "/api/news") return listNews(env, true);
   if (request.method === "POST" && url.pathname === "/api/media") return uploadMedia(request, env);
   if (request.method === "POST" && url.pathname === "/api/news") return createNews(request, env);
@@ -263,6 +265,70 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   if (match && request.method === "PUT") return updateNews(request, env, Number(match[1]));
   if (match && request.method === "DELETE") return deleteNews(env, Number(match[1]));
   return json({ error: "見つかりません" }, 404);
+}
+
+const CONTACT_TO = "hisahohoikuen@gmail.com";
+
+async function submitContact(request: Request, env: Env): Promise<Response> {
+  const body = await request.json().catch(() => null) as Record<string, unknown> | null;
+  if (!body || String(body.company ?? "").trim()) return json({ ok: true });
+  const parentName = clip(body.parent_name, 80);
+  const childAge = clip(body.child_age, 40);
+  const email = clip(body.email, 120);
+  const phone = clip(body.phone, 40);
+  const message = String(body.message ?? "").replace(/\r\n/g, "\n").trim().slice(0, 4000);
+  if (!parentName || !childAge || !message || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return json({ error: "入力内容を確認してください" }, 400);
+  }
+  const recent = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM inquiries WHERE email = ? AND created_at >= datetime('now', '-1 hour')",
+  ).bind(email).first<{ n: number }>();
+  if ((recent?.n ?? 0) >= 5) return json({ error: "しばらく時間をおいて再度お試しください" }, 429);
+  await env.DB.prepare(
+    "INSERT INTO inquiries (parent_name, child_age, email, phone, message) VALUES (?, ?, ?, ?, ?)",
+  ).bind(parentName, childAge, email, phone, message).run();
+  const mailed = await forwardContact({ parentName, childAge, email, phone, message });
+  return json({ ok: true, mailed });
+}
+
+async function forwardContact(input: { parentName: string; childAge: string; email: string; phone: string; message: string }): Promise<boolean> {
+  const text = [
+    `保護者名: ${input.parentName}`,
+    `お子さまの年齢: ${input.childAge}`,
+    `メール: ${input.email}`,
+    `電話: ${input.phone || "未記入"}`,
+    "",
+    input.message,
+  ].join("\n");
+  try {
+    const response = await fetch(`https://formsubmit.co/ajax/${CONTACT_TO}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({
+        name: input.parentName,
+        email: input.email,
+        _replyto: input.email,
+        _subject: `【ひさほ保育園】見学・お問い合わせ ${input.parentName}`,
+        _template: "table",
+        _captcha: "false",
+        message: text,
+      }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+function clip(value: unknown, max: number): string {
+  return String(value ?? "").replace(/[\r\n]+/g, " ").replace(/[ \t]+/g, " ").trim().slice(0, max);
+}
+
+async function listInquiries(env: Env): Promise<Response> {
+  const result = await env.DB.prepare(
+    "SELECT id, parent_name, child_age, email, phone, message, created_at FROM inquiries ORDER BY id DESC LIMIT 100",
+  ).all();
+  return json({ inquiries: result.results ?? [] });
 }
 
 async function listNews(env: Env, includeDrafts: boolean): Promise<Response> {
@@ -714,6 +780,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
     </div>
     <div class="row">
       <a href="/news.html" target="_blank" rel="noopener">サイトを表示</a>
+      <button id="show-inquiries" class="ghost hidden" type="button">問い合わせ</button>
       <button id="logout" class="ghost hidden" type="button">ログアウト</button>
     </div>
   </header>
@@ -726,6 +793,15 @@ const ADMIN_HTML = `<!DOCTYPE html>
         <button type="submit">ログイン</button>
         <p id="login-error" class="error"></p>
       </form>
+    </section>
+    <section id="inbox" class="workspace hidden">
+      <div class="card" style="padding:20px">
+        <div class="sidebar-head">
+          <h2>届いた問い合わせ</h2>
+          <button id="back-editor" class="ghost" type="button">記事編集へ戻る</button>
+        </div>
+        <div id="inquiry-list"></div>
+      </div>
     </section>
     <section id="editor" class="workspace hidden">
       <aside class="sidebar">
@@ -861,6 +937,26 @@ const ADMIN_HTML = `<!DOCTYPE html>
       loginCard.classList.toggle("hidden", on);
       editor.classList.toggle("hidden", !on);
       logout.classList.toggle("hidden", !on);
+      document.querySelector("#show-inquiries").classList.toggle("hidden", !on);
+      document.querySelector("#inbox").classList.add("hidden");
+    }
+
+    document.querySelector("#show-inquiries").addEventListener("click", async () => {
+      const data = await api("/api/inquiries");
+      const list = document.querySelector("#inquiry-list");
+      const rows = data.inquiries || [];
+      list.innerHTML = rows.length ? rows.map((item) =>
+        "<article class=\"card\" style=\"margin-top:12px;padding:16px\"><p class=\"meta\">" + escapeText(item.created_at) + "</p><h3>" + escapeText(item.parent_name) + " / " + escapeText(item.child_age) + "</h3><p>" + escapeText(item.email) + (item.phone ? " / " + escapeText(item.phone) : "") + "</p><p style=\"white-space:pre-wrap\">" + escapeText(item.message) + "</p></article>"
+      ).join("") : "<p class=\"empty\">まだ問い合わせはありません。</p>";
+      editor.classList.add("hidden");
+      document.querySelector("#inbox").classList.remove("hidden");
+    });
+    document.querySelector("#back-editor").addEventListener("click", () => {
+      document.querySelector("#inbox").classList.add("hidden");
+      editor.classList.remove("hidden");
+    });
+    function escapeText(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[char]));
     }
 
     function confirmDiscard() {

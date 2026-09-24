@@ -164,7 +164,7 @@
               <p class="eyebrow" style="color: var(--hp-pink-deep); font-weight: 700">Contact</p>
               <h2>見学申込・<br class="mobile-break" />お問い合わせ</h2>
               <p>
-                フォームはメールソフトにつながる簡易フォームです。
+                送信内容は園のメール（hisahohoikuen@gmail.com）に届きます。
                 お急ぎの場合はお電話でも受け付けています。
               </p>
               <div class="contact-box">
@@ -178,14 +178,18 @@
                 </a>
               </div>
             </div>
-            <form class="soft-form" action="mailto:hisahohoikuen@gmail.com" method="post" enctype="text/plain">
+            <form class="soft-form" id="contact-form">
+              <label class="hp-honeypot">
+                会社名
+                <input type="text" name="company" tabindex="-1" autocomplete="off" />
+              </label>
               <label>
                 保護者さまのお名前
-                <input type="text" name="保護者名" autocomplete="name" required />
+                <input type="text" name="parent_name" autocomplete="name" required />
               </label>
               <label>
                 お子さまの年齢
-                <select name="お子さまの年齢" required>
+                <select name="child_age" required>
                   <option value="">選択してください</option>
                   <option>0歳</option>
                   <option>1歳</option>
@@ -198,21 +202,48 @@
               </label>
               <label>
                 メールアドレス
-                <input type="email" name="メールアドレス" autocomplete="email" required />
+                <input type="email" name="email" autocomplete="email" required />
               </label>
               <label>
                 電話番号
-                <input type="tel" name="電話番号" autocomplete="tel" />
+                <input type="tel" name="phone" autocomplete="tel" />
               </label>
               <label>
                 見学希望日・相談内容
-                <textarea name="見学希望日・相談内容" rows="6" required></textarea>
+                <textarea name="message" rows="6" required></textarea>
               </label>
               <button class="button primary" type="submit">
                 見学希望を送る
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
               </button>
+              <p id="contact-status" class="note" role="status"></p>
             </form>
+            <script>
+              document.querySelector("#contact-form").addEventListener("submit", async (event) => {
+                event.preventDefault();
+                const form = event.currentTarget;
+                const status = document.querySelector("#contact-status");
+                const button = form.querySelector("button[type=submit]");
+                status.textContent = "";
+                button.disabled = true;
+                const data = Object.fromEntries(new FormData(form).entries());
+                try {
+                  const response = await fetch("/api/contact", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                  });
+                  const body = await response.json().catch(() => ({}));
+                  if (!response.ok) throw new Error(body.error || "送信できませんでした");
+                  form.reset();
+                  status.textContent = "送信しました。園からの連絡をお待ちください。";
+                } catch (error) {
+                  status.textContent = error.message || "送信できませんでした。お電話でご連絡ください。";
+                } finally {
+                  button.disabled = false;
+                }
+              });
+            </script>
           </div>
         </div>
       </section>
