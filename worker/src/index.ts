@@ -32,15 +32,25 @@ export default {
     if (url.pathname.startsWith("/api/")) {
       return handleApi(request, env, url);
     }
-    if (url.pathname === "/news.html") {
+    if (url.pathname === "/") {
+      const home = new URL(request.url);
+      home.pathname = "/index.html";
+      return env.ASSETS.fetch(new Request(home, request));
+    }
+    if (url.pathname === "/news" || url.pathname === "/news.html") {
       return renderNewsPage(request, env);
+    }
+    if (url.pathname.startsWith("/media/")) {
+      return serveMedia(env, url.pathname.slice("/media/".length));
     }
     return env.ASSETS.fetch(request);
   },
 };
 
 async function renderNewsPage(request: Request, env: Env): Promise<Response> {
-  const asset = await env.ASSETS.fetch(request);
+  const assetUrl = new URL(request.url);
+  assetUrl.pathname = "/news.html";
+  const asset = await env.ASSETS.fetch(new Request(assetUrl, request));
   if (!asset.ok) return asset;
   let rows: NewsRow[] = [];
   try {
@@ -70,7 +80,7 @@ function renderArticle(row: NewsRow): string {
     : "";
   const datetime = escapeAttr(row.published_at);
   const label = escapeHtml(row.published_at.replace("-", ".").slice(0, 7));
-  return `<article class="news-row reveal"><time datetime="${datetime}">${label}</time><div><span${tag}>${escapeHtml(row.category)}</span><h2>${allowWbr(row.title)}</h2><p>${allowWbr(row.body)}</p>${linkHtml}</div></article>`;
+  return `<article class="news-row reveal"><time datetime="${datetime}">${label}</time><div><span${tag}>${escapeHtml(row.category)}</span><h2>${allowWbr(row.title)}</h2>${renderBody(row.body)}${linkHtml}</div></article>`;
 }
 
 async function handleApi(request: Request, env: Env, url: URL): Promise<Response> {
@@ -80,6 +90,7 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   if (!session) return json({ error: "ログインが必要です" }, 401);
   if (request.method === "GET" && url.pathname === "/api/me") return json({ ok: true });
   if (request.method === "GET" && url.pathname === "/api/news") return listNews(env, true);
+  if (request.method === "POST" && url.pathname === "/api/media") return uploadMedia(request, env);
   if (request.method === "POST" && url.pathname === "/api/news") return createNews(request, env);
   if (request.method === "POST" && url.pathname === "/api/news/reorder") return reorderNews(request, env);
   const match = url.pathname.match(/^\/api\/news\/(\d+)$/);
@@ -185,7 +196,9 @@ async function readNewsInput(request: Request): Promise<{ ok: true; value: NewsI
   if (!CATEGORIES.includes(category)) return { ok: false, error: "区分を選んでください" };
   if (!TAGS.has(tagClass)) return { ok: false, error: "ラベルの色が正しくありません" };
   if (!title || title.length > 160) return { ok: false, error: "見出しは1〜160文字にしてください" };
-  if (!text || text.length > 2000) return { ok: false, error: "本文は1〜2000文字にしてください" };
+  if (!text || text.length > 20000) return { ok: false, error: "本文は1〜20000文字にしてください" };
+  const rich = sanitizeRich(text);
+  if (!rich) return { ok: false, error: "本文を入力してください" };
   if (linkLabel.length > 80) return { ok: false, error: "リンク文言が長すぎます" };
   const href = linkHref ? safeHref(linkHref) : null;
   if (linkHref && !href) return { ok: false, error: "リンクはサイト内のページか https:// から始まるURLにしてください" };
@@ -196,7 +209,7 @@ async function readNewsInput(request: Request): Promise<{ ok: true; value: NewsI
       category,
       tag_class: tagClass,
       title,
-      body: text,
+      body: rich,
       link_href: href,
       link_label: linkLabel || null,
       published: body.published === false || body.published === 0 ? 0 : 1,
@@ -265,6 +278,88 @@ function json(data: unknown, status = 200): Response {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
       "x-robots-tag": "noindex, nofollow",
+    },
+  });
+}
+
+function renderBody(body: string): string {
+  const safe = sanitizeRich(body);
+  if (!safe) return "";
+  if (/<(p|div|ul|ol|img)\b/i.test(safe)) return `<div class="news-body">${safe}</div>`;
+  return `<div class="news-body"><p>${safe}</p></div>`;
+}
+
+function sanitizeRich(input: string): string {
+  const allowed = new Set(["p", "div", "br", "strong", "b", "em", "img", "wbr", "ul", "ol", "li"]);
+  let html = "";
+  let skipping = false;
+  const pattern = /<\/?([a-zA-Z0-9]+)([^>]*)>|([^<]+)/g;
+  for (const match of input.matchAll(pattern)) {
+    if (match[3]) {
+      if (!skipping) html += escapeHtml(match[3]);
+      continue;
+    }
+    const name = match[1].toLowerCase();
+    if (name === "script" || name === "style") {
+      skipping = !match[0].startsWith("</");
+      continue;
+    }
+    if (skipping) continue;
+    if (!allowed.has(name)) continue;
+    if (name === "br" || name === "wbr") {
+      html += `<${name}>`;
+      continue;
+    }
+    if (match[0].startsWith("</")) {
+      html += `</${name}>`;
+      continue;
+    }
+    if (name === "img") {
+      const src = /src\s*=\s*"([^"]+)"/i.exec(match[2] ?? "")?.[1] ?? "";
+      const alt = /alt\s*=\s*"([^"]*)"/i.exec(match[2] ?? "")?.[1] ?? "";
+      if (!/^\/media\/[a-zA-Z0-9._-]+$/.test(src)) continue;
+      html += `<img src="${escapeAttr(src)}" alt="${escapeAttr(alt)}">`;
+      continue;
+    }
+    html += `<${name}>`;
+  }
+  return html.trim();
+}
+
+async function uploadMedia(request: Request, env: Env): Promise<Response> {
+  const form = await request.formData();
+  const file = form.get("file");
+  if (!(file instanceof File)) return json({ error: "画像を選んでください" }, 400);
+  if (file.size > 1_200_000) return json({ error: "画像は1.2MB以下にしてください" }, 400);
+  const types: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" };
+  const ext = types[file.type];
+  if (!ext) return json({ error: "JPEG、PNG、WebP、GIF にしてください" }, 400);
+  const id = `${crypto.randomUUID().replaceAll("-", "")}.${ext}`;
+  await env.DB.prepare("INSERT INTO media (id, content_type, bytes) VALUES (?, ?, ?)").bind(id, file.type, await file.arrayBuffer()).run();
+  return json({ url: `/media/${id}` });
+}
+
+function toBytes(bytes: unknown): Uint8Array {
+  if (bytes instanceof Uint8Array) return bytes;
+  if (bytes instanceof ArrayBuffer) return new Uint8Array(bytes);
+  if (typeof bytes === "string") {
+    const binary = atob(bytes);
+    const out = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) out[i] = binary.charCodeAt(i);
+    return out;
+  }
+  return new Uint8Array(bytes as ArrayLike<number>);
+}
+
+async function serveMedia(env: Env, id: string): Promise<Response> {
+  if (!/^[a-zA-Z0-9._-]+$/.test(id)) return new Response("見つかりません", { status: 404 });
+  const row = await env.DB.prepare("SELECT content_type, bytes FROM media WHERE id = ?").bind(id).first<{ content_type: string; bytes: ArrayBuffer }>();
+  if (!row) return new Response("見つかりません", { status: 404 });
+  const bytes = toBytes(row.bytes);
+  return new Response(bytes, {
+    headers: {
+      "content-type": row.content_type,
+      "cache-control": "public, max-age=31536000, immutable",
     },
   });
 }
@@ -353,6 +448,10 @@ const ADMIN_HTML = `<!DOCTYPE html>
     .meta { color:#8a6478; font-size:.92rem; }
     .error { color:#b4234a; min-height:1.2em; }
     .hidden { display:none; }
+    .toolbar { display:flex; gap:8px; }
+    .editor { min-height:160px; border:1px solid var(--line); border-radius:14px; padding:12px; background:#fff; font-weight:500; }
+    .editor:focus { outline:2px solid #ffd0ea; }
+    .editor img { max-width:100%; height:auto; border-radius:12px; }
     @media (max-width:720px) { .grid { grid-template-columns:1fr; } header { align-items:flex-start; flex-direction:column; } }
   </style>
 </head>
@@ -387,7 +486,12 @@ const ADMIN_HTML = `<!DOCTYPE html>
             </select>
           </label>
         </div>
-        <label>本文<textarea name="body" required></textarea></label>
+        <div class="toolbar">
+          <button id="bold" class="ghost" type="button">太字</button>
+          <button id="insert-image" class="ghost" type="button">画像を挿入</button>
+          <input id="image-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden />
+        </div>
+        <label>本文<div id="body-editor" class="editor" contenteditable="true"></div></label>
         <div class="grid">
           <label>ラベル色
             <select name="tag_class">
@@ -400,7 +504,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
           <label>リンク文言<input name="link_label" placeholder="詳しく見る" /></label>
         </div>
         <label class="row"><input name="published" type="checkbox" checked style="width:auto" /> 公開する</label>
-        <p class="meta">改行位置を指定したいときは、見出しや本文に &lt;wbr&gt; と書いてください。</p>
+        <p class="meta">本文は太字にしたり、写真を差し込めます。見出しの改行位置は &lt;wbr&gt; で指定できます。</p>
         <div class="row">
           <button type="submit">保存する</button>
           <button id="cancel" class="ghost hidden" type="button">新規入力に戻す</button>
@@ -414,6 +518,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
     const loginCard = document.querySelector("#login-card");
     const editor = document.querySelector("#editor");
     const list = document.querySelector("#list");
+    const editorBody = document.querySelector("#body-editor");
     const form = document.querySelector("#news-form");
     const logout = document.querySelector("#logout");
     const cancel = document.querySelector("#cancel");
@@ -437,6 +542,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
       editing = null;
       form.reset();
       form.published.checked = true;
+      editorBody.innerHTML = "";
       document.querySelector("#form-title").textContent = "新しいお知らせ";
       cancel.classList.add("hidden");
       document.querySelector("#form-error").textContent = "";
@@ -447,7 +553,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
       form.published_at.value = item.published_at;
       form.title.value = item.title;
       form.category.value = item.category;
-      form.body.value = item.body;
+      editorBody.innerHTML = item.body;
       form.tag_class.value = item.tag_class || "";
       form.link_href.value = item.link_href || "";
       form.link_label.value = item.link_label || "";
@@ -464,7 +570,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
         const status = item.published === 1 ? "公開中" : "下書き";
         article.innerHTML = \`<p class="meta">\${item.published_at} / \${item.category} / \${status}</p><h3></h3><p></p>\`;
         article.querySelector("h3").textContent = item.title.replaceAll("<wbr>", "");
-        article.querySelector("p:last-child").textContent = item.body.replaceAll("<wbr>", "");
+        article.querySelector("p:last-child").textContent = item.body.replace(/<[^>]+>/g, "").slice(0, 120);
         const actions = document.createElement("div");
         actions.className = "row";
         const up = button("上へ", () => move(index, -1));
@@ -530,7 +636,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
         published_at: form.published_at.value,
         title: form.title.value,
         category: form.category.value,
-        body: form.body.value,
+        body: editorBody.innerHTML,
         tag_class: form.tag_class.value,
         link_href: form.link_href.value,
         link_label: form.link_label.value,
@@ -545,6 +651,45 @@ const ADMIN_HTML = `<!DOCTYPE html>
         error.textContent = err.message;
       }
     });
+
+    document.querySelector("#bold").addEventListener("click", () => {
+      editorBody.focus();
+      document.execCommand("bold");
+    });
+    document.querySelector("#insert-image").addEventListener("click", () => document.querySelector("#image-file").click());
+    document.querySelector("#image-file").addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file) return;
+      const error = document.querySelector("#form-error");
+      error.textContent = "画像を入れています…";
+      try {
+        const prepared = await shrinkImage(file);
+        const formData = new FormData();
+        formData.append("file", prepared, prepared.name);
+        const response = await fetch("/api/media", { method: "POST", body: formData, credentials: "same-origin" });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "画像を入れられませんでした");
+        const alt = prompt("画像の説明（なくても大丈夫です）", "") || "";
+        editorBody.focus();
+        document.execCommand("insertHTML", false, \`<img src="\${data.url}" alt="\${alt.replaceAll('"', "")}">\`);
+        error.textContent = "";
+      } catch (err) {
+        error.textContent = err.message;
+      }
+    });
+
+    async function shrinkImage(file) {
+      const bitmap = await createImageBitmap(file);
+      const max = 1400;
+      const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.72));
+      return new File([blob], "photo.jpg", { type: "image/jpeg" });
+    }
 
     cancel.addEventListener("click", resetForm);
     logout.addEventListener("click", async () => {

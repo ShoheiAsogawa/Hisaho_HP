@@ -2594,10 +2594,25 @@ body.hisaho {
   line-height: 1.5;
 }
 
-.hisaho .news-row p {
+.hisaho .news-row p,
+.hisaho .news-body p {
   margin: 0 0 10px;
   color: var(--hp-muted);
   font-size: 0.94rem;
+}
+
+.hisaho .news-body strong,
+.hisaho .news-body b {
+  font-weight: 900;
+  color: var(--hp-ink, #4a3144);
+}
+
+.hisaho .news-body img {
+  display: block;
+  width: min(100%, 640px);
+  height: auto;
+  margin: 12px 0;
+  border-radius: 18px;
 }
 
 /* 2カラム（画像 + テキスト / テキスト + CTA） */

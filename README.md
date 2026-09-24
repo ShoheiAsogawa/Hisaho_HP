@@ -62,7 +62,7 @@
 
 - テストサイト: https://hisaho-hp-test.noiseless-rib.workers.dev
 - 管理画面: https://hisaho-hp-test.noiseless-rib.workers.dev/admin
-- お知らせは D1（`hisaho-hp-cms`）に保存され、公開中の記事だけ `news.html` に反映されます
+- お知らせは D1（`hisaho-hp-cms`）に保存され、公開中の記事だけ `news.html` に反映されます。本文は太字と画像を入れられます。
 
 初回のデータベース作成:
 

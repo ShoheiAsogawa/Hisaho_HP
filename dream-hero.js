@@ -20,8 +20,14 @@
     timer = setTimeout(() => select(active + 1), 6000);
   }
 
+  function ensure(slide) {
+    if (slide?.dataset.src && !slide.getAttribute("src")) slide.src = slide.dataset.src;
+  }
+
   function select(index, manual = false) {
     active = (index + slides.length) % slides.length;
+    ensure(slides[active]);
+    ensure(slides[(active + 1) % slides.length]);
     slides.forEach((slide, i) => {
       slide.classList.toggle('is-active', i === active);
       slide.setAttribute('aria-hidden', String(i !== active));

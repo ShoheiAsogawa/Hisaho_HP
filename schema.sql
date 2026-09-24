@@ -1,3 +1,10 @@
+CREATE TABLE IF NOT EXISTS media (
+  id TEXT PRIMARY KEY,
+  content_type TEXT NOT NULL,
+  bytes BLOB NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS news (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   published_at TEXT NOT NULL,
