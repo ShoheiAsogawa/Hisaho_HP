@@ -1412,9 +1412,9 @@ body.hisaho {
 .hisaho .to-top-chick {
   position: relative;
   z-index: 1;
-  width: 66px;
+  width: 70px;
   height: auto;
-  margin-bottom: -13px;
+  margin-bottom: -12px;
   transform-origin: 50% 100%;
 }
 
@@ -1423,10 +1423,12 @@ body.hisaho {
   place-items: center;
   align-content: center;
   gap: 1px;
-  width: 78px;
-  height: 78px;
+  width: 88px;
+  height: 72px;
+  padding-top: 4px;
   border: 3px solid var(--hp-yellow, #ffd84d);
-  border-radius: 50%;
+  /* ひよこが手をかけられるよう、上辺はまっすぐ・下は丸く */
+  border-radius: 10px 10px 44px 44px;
   background: var(--hp-white);
   box-shadow: 0 6px 0 rgb(0 0 0 / 0.12);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -2789,113 +2791,291 @@ body.hisaho {
   font-weight: 700;
 }
 
-.hisaho .news-article {
+/* 記事詳細 */
+.hisaho.news-detail-page .page-hero h1 {
+  margin-bottom: 16px;
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  line-height: 1.45;
+  text-wrap: balance;
+}
+
+.hisaho .news-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.hisaho .news-hero-meta time {
+  color: var(--hp-muted);
+  font-family: "Kosugi Maru", sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.hisaho.news-detail-page #news {
+  padding-top: clamp(28px, 4vw, 48px);
+}
+
+.hisaho.news-detail-page #news > :not(.sec-deco) {
   max-width: 760px;
-  margin: 0 auto;
-  padding: clamp(24px, 4vw, 44px);
+  margin-inline: auto;
+}
+
+.hisaho .news-crumb {
+  margin-bottom: 14px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.hisaho .news-crumb a {
+  color: var(--hp-pink-deep);
+  text-decoration: none;
+}
+
+.hisaho .news-crumb a::before {
+  content: "← ";
+}
+
+.hisaho .news-article {
+  overflow: hidden;
   border-radius: 28px;
   background: var(--hp-white);
   box-shadow: var(--hp-shadow-soft);
 }
 
-.hisaho .news-article-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 18px;
-  border-bottom: 1px dashed var(--hp-line);
-  color: var(--hp-muted);
-  font-size: 0.9rem;
+.hisaho .news-article .news-article-cover {
+  margin: 0;
+  border-radius: 0;
+}
+
+.hisaho .news-article .news-article-cover.is-illust {
+  aspect-ratio: 5 / 2;
+}
+
+.hisaho .news-article-content {
+  padding: clamp(24px, 4.4vw, 48px) clamp(20px, 5vw, 56px) clamp(28px, 4.4vw, 48px);
+}
+
+.hisaho .news-article .news-body {
+  color: var(--hp-ink);
+  font-size: clamp(1rem, 1.2vw, 1.06rem);
+  line-height: 2;
 }
 
 .hisaho .news-article .news-body p {
-  font-size: 1rem;
-  line-height: 1.95;
+  margin: 0 0 1.2em;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.hisaho .news-article .news-body > :last-child {
+  margin-bottom: 0;
+}
+
+.hisaho .news-article .news-body img {
+  width: 100%;
+  margin: 1.4em 0;
 }
 
 .hisaho .news-related {
   margin: 28px 0 0;
+  text-align: center;
 }
 
 .hisaho .news-contact {
-  margin-top: 36px;
-  padding: 22px 24px;
-  border-radius: 22px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px 20px;
+  align-items: center;
+  margin-top: 24px;
+  padding: 22px 26px;
+  border: 2px dashed var(--hp-line);
+  border-radius: 24px;
   background: var(--hp-pink-soft);
 }
 
+.hisaho .news-contact-mascot {
+  width: 64px;
+  height: auto;
+}
+
 .hisaho .news-contact-title {
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   color: var(--hp-pink-deep);
+  font-size: 1.02rem;
   font-weight: 900;
 }
 
 .hisaho .news-contact p {
   margin: 0;
   color: var(--hp-muted);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
 }
 
 .hisaho .news-contact-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 14px;
+}
+
+.hisaho .news-contact .button {
+  min-height: 46px;
+  padding-inline: 22px;
+  white-space: nowrap;
+}
+
+.hisaho .news-tel {
+  border: 2px solid var(--hp-pink-deep);
+  background: var(--hp-white);
+  color: var(--hp-pink-deep);
+}
+
+.hisaho .news-tel svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
 }
 
 .hisaho .news-pager {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
-  margin-top: 30px;
+  margin-top: 28px;
 }
 
 .hisaho .news-pager-link {
   display: grid;
-  gap: 4px;
-  padding: 14px 16px;
-  border: 1px solid var(--hp-line);
-  border-radius: 16px;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
+  background: var(--hp-white);
+  box-shadow: var(--hp-shadow-soft);
   color: inherit;
   text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.hisaho .news-pager-link.older {
+.hisaho .news-pager-link:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--hp-shadow);
+}
+
+.hisaho .news-pager-link.newer {
+  grid-template-columns: minmax(0, 1fr) 76px;
   text-align: right;
+}
+
+.hisaho .news-pager-link.newer .news-thumb {
+  order: 1;
+}
+
+.hisaho .news-pager-link .news-thumb {
+  border-radius: 12px;
+}
+
+.hisaho .news-pager-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
 }
 
 .hisaho .news-pager-link small {
   color: var(--hp-pink-deep);
+  font-size: 0.78rem;
   font-weight: 700;
 }
 
-.hisaho .news-pager-link span {
+.hisaho .news-pager-link.older small::before {
+  content: "← ";
+}
+
+.hisaho .news-pager-link.newer small::after {
+  content: " →";
+}
+
+.hisaho .news-pager-text > span {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.9rem;
   font-weight: 700;
   line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .hisaho .news-back-wrap {
-  margin: 28px 0 0;
+  margin: 32px 0 0;
   text-align: center;
 }
 
 .hisaho .news-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 26px;
+  border: 2px solid var(--hp-line);
+  border-radius: 999px;
+  background: var(--hp-white);
+  color: var(--hp-ink);
+  font-size: 0.92rem;
   font-weight: 700;
+  text-decoration: none;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.hisaho .news-back:hover {
+  border-color: var(--hp-pink-deep);
+  color: var(--hp-pink-deep);
 }
 
 .hisaho .news-missing {
+  padding: clamp(28px, 5vw, 48px);
   text-align: center;
 }
 
-@media (max-width: 640px) {
-  .hisaho .news-pager {
-    grid-template-columns: 1fr;
+@media (max-width: 700px) {
+  .hisaho .news-contact {
+    grid-template-columns: auto 1fr;
+    padding: 20px;
   }
 
-  .hisaho .news-pager-link.older {
+  .hisaho .news-contact-mascot {
+    width: 52px;
+  }
+
+  .hisaho .news-contact-actions {
+    grid-column: 1 / -1;
+  }
+
+  .hisaho .news-contact-actions .button {
+    flex: 1 1 140px;
+    justify-content: center;
+  }
+
+  .hisaho .news-pager {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .hisaho .news-pager-empty {
+    display: none;
+  }
+
+  .hisaho .news-pager-link.newer {
+    grid-template-columns: 76px minmax(0, 1fr);
     text-align: left;
+  }
+
+  .hisaho .news-pager-link.newer .news-thumb {
+    order: 0;
   }
 }
 

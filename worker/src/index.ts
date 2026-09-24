@@ -160,7 +160,9 @@ async function renderNewsDetail(request: Request, env: Env, id: number): Promise
   const plainTitle = row ? row.title.replace(/<[^>]+>/g, "") : "記事が見つかりません";
   const description = row ? excerpt(row.body) : "お探しのお知らせは、公開を終了したか、アドレスが変わった可能性があります。";
   const article = row ? renderDetailArticle(row, newer, older) : renderMissingArticle();
-  const heroLead = row ? "ひさほ保育園からのお知らせです。" : "お知らせ一覧から、ほかの記事をご覧ください。";
+  const heroLead = row
+    ? `${renderTag(row)}<time datetime="${escapeAttr(row.published_at)}">${escapeHtml(formatMonth(row.published_at))}</time>`
+    : "お知らせ一覧から、ほかの記事をご覧ください。";
   const rewritten = new HTMLRewriter()
     .on("head", { element(element) { element.prepend('<base href="/">', { html: true }); } })
     .on("link, script, img, source, a", {
@@ -176,7 +178,13 @@ async function renderNewsDetail(request: Request, env: Env, id: number): Promise
     .on('meta[name="description"]', { element(element) { element.setAttribute("content", description); } })
     .on(".page-hero-inner .eyebrow", { element(element) { element.setInnerContent("News"); } })
     .on(".page-hero-inner h1", { element(element) { element.setInnerContent(row ? allowWbr(row.title) : "記事が見つかりません", { html: true }); } })
-    .on(".page-hero-inner p:not(.eyebrow)", { element(element) { element.setInnerContent(heroLead, { html: true }); } })
+    .on("body", { element(element) { element.setAttribute("class", `${element.getAttribute("class") ?? ""} news-detail-page`.trim()); } })
+    .on(".page-hero-inner p:not(.eyebrow)", {
+      element(element) {
+        if (row) element.setAttribute("class", "news-hero-meta");
+        element.setInnerContent(heroLead, { html: true });
+      },
+    })
     .on("#news", { element(element) { element.setInnerContent(article, { html: true }); } })
     .transform(asset);
   if (row) return rewritten;
@@ -190,33 +198,42 @@ function formatMonth(value: string): string {
 }
 
 function renderDetailArticle(row: NewsRow, newer: NewsRow | null, older: NewsRow | null): string {
-  const tag = row.tag_class ? ` class="tag ${escapeAttr(row.tag_class)}"` : ` class="tag"`;
   const link = safeHref(row.link_href);
   const related = link
     ? `<div class="news-related"><a class="button primary" href="${escapeAttr(link)}">${allowWbr(row.link_label || "詳しく見る")}</a></div>`
     : "";
-  const pager = [
-    newer ? `<a class="news-pager-link newer" href="/news/${newer.id}"><small>新しい記事</small><span>${allowWbr(newer.title)}</span></a>` : "<span></span>",
-    older ? `<a class="news-pager-link older" href="/news/${older.id}"><small>前の記事</small><span>${allowWbr(older.title)}</span></a>` : "<span></span>",
-  ].join("");
   const cover = coverFor(row);
   const body = cover.fromBody ? withoutFirstImage(row.body) : row.body;
-  return `<article class="news-article">
+  const pager = older || newer
+    ? `<nav class="news-pager" aria-label="ほかのお知らせ">${renderPagerLink(older, "older")}${renderPagerLink(newer, "newer")}</nav>`
+    : "";
+  return `<p class="news-crumb"><a href="/news.html">お知らせ一覧</a></p>
+  <article class="news-article">
     <figure class="news-article-cover${cover.fromBody ? "" : " is-illust"}"><img src="${escapeAttr(cover.src)}" alt="${escapeAttr(cover.alt)}" decoding="async"></figure>
-    <div class="news-article-meta"><span${tag}>${escapeHtml(row.category)}</span><time datetime="${escapeAttr(row.published_at)}">${escapeHtml(formatMonth(row.published_at))}</time></div>
-    ${renderBody(body)}
-    ${related}
-    <aside class="news-contact">
+    <div class="news-article-content">
+      ${renderBody(body)}
+      ${related}
+    </div>
+  </article>
+  <aside class="news-contact">
+    <img class="news-contact-mascot" src="/assets/mascots/chara-panda-heart.webp" alt="" aria-hidden="true" width="367" height="440" loading="lazy" decoding="async">
+    <div class="news-contact-text">
       <p class="news-contact-title">ご質問・園見学のご相談</p>
       <p>この記事について気になることがあれば、お気軽にお問い合わせください。</p>
-      <div class="news-contact-actions">
-        <a class="button primary" href="/visit.html#contact">お問い合わせ</a>
-        <a class="button" href="tel:0724275688">072-427-5688</a>
-      </div>
-    </aside>
-    <nav class="news-pager" aria-label="ほかのお知らせ">${pager}</nav>
-    <p class="news-back-wrap"><a class="news-back" href="/news.html">お知らせ一覧へ戻る</a></p>
-  </article>`;
+    </div>
+    <div class="news-contact-actions">
+      <a class="button primary" href="/visit.html#contact">お問い合わせ</a>
+      <a class="button news-tel" href="tel:0724275688"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5h2.6l1.4 4-2 1.4a12 12 0 0 0 6.5 6.5l1.4-2 4 1.4v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z"/></svg>072-427-5688</a>
+    </div>
+  </aside>
+  ${pager}
+  <p class="news-back-wrap"><a class="news-back" href="/news.html">お知らせ一覧へ戻る</a></p>`;
+}
+
+function renderPagerLink(row: NewsRow | null, dir: "older" | "newer"): string {
+  if (!row) return `<span class="news-pager-empty ${dir}" aria-hidden="true"></span>`;
+  const label = dir === "older" ? "前の記事" : "新しい記事";
+  return `<a class="news-pager-link ${dir}" href="/news/${row.id}">${renderThumb(row)}<span class="news-pager-text"><small>${label}</small><span>${allowWbr(row.title)}</span></span></a>`;
 }
 
 function renderMissingArticle(): string {
