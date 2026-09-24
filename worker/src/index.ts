@@ -946,8 +946,8 @@ const ADMIN_HTML = `<!DOCTYPE html>
       const list = document.querySelector("#inquiry-list");
       const rows = data.inquiries || [];
       list.innerHTML = rows.length ? rows.map((item) =>
-        "<article class=\"card\" style=\"margin-top:12px;padding:16px\"><p class=\"meta\">" + escapeText(item.created_at) + "</p><h3>" + escapeText(item.parent_name) + " / " + escapeText(item.child_age) + "</h3><p>" + escapeText(item.email) + (item.phone ? " / " + escapeText(item.phone) : "") + "</p><p style=\"white-space:pre-wrap\">" + escapeText(item.message) + "</p></article>"
-      ).join("") : "<p class=\"empty\">まだ問い合わせはありません。</p>";
+        '<article class="card" style="margin-top:12px;padding:16px"><p class="meta">' + escapeText(item.created_at) + '</p><h3>' + escapeText(item.parent_name) + ' / ' + escapeText(item.child_age) + '</h3><p>' + escapeText(item.email) + (item.phone ? ' / ' + escapeText(item.phone) : '') + '</p><p style="white-space:pre-wrap">' + escapeText(item.message) + '</p></article>'
+      ).join('') : '<p class="empty">まだ問い合わせはありません。</p>';
       editor.classList.add("hidden");
       document.querySelector("#inbox").classList.remove("hidden");
     });
@@ -956,7 +956,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
       editor.classList.remove("hidden");
     });
     function escapeText(value) {
-      return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[char]));
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
     }
 
     function confirmDiscard() {
