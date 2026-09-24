@@ -60,8 +60,9 @@
 
 公開サイトとお知らせ管理は、同じ Cloudflare Worker で配信しています。
 
-- テストサイト: https://hisaho-hp-test.noiseless-rib.workers.dev
-- 管理画面: https://hisaho-hp-test.noiseless-rib.workers.dev/admin
+- テストサイト: https://hisaho-hp-test.cyber-zephyr.workers.dev
+- 管理画面: https://hisaho-hp-test.cyber-zephyr.workers.dev/admin
+- 本番: `npm run deploy:prod`（Worker `hisaho-hp`、D1 は本番アカウントの `hisaho-hp-cms` を作成済み）。シークレットは `--env production` を付けて登録します。
 - お知らせは D1（`hisaho-hp-cms`）に保存され、公開中の記事だけ `news.html` に反映されます。本文は太字と画像を入れられます。
 
 初回のデータベース作成:

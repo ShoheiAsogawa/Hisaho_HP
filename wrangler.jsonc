@@ -18,5 +18,18 @@
       "database_name": "hisaho-hp-cms",
       "database_id": "f95fbec0-e8f4-4720-976c-ae24977c43af"
     }
-  ]
+  ],
+  "env": {
+    "production": {
+      "name": "hisaho-hp",
+      "account_id": "d2874089eebcda705bf220d39f117aec",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "hisaho-hp-cms",
+          "database_id": "5863e00b-09c5-4cc9-b344-a07b19ffb821"
+        }
+      ]
+    }
+  }
 }
