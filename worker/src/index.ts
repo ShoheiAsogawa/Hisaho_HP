@@ -22,6 +22,16 @@ const COOKIE = "hisaho_cms";
 const SESSION_MS = 1000 * 60 * 60 * 12;
 const CATEGORIES = ["行事", "国際交流", "新しい取り組み", "園見学", "採用", "お知らせ"];
 const TAGS = new Set(["", "tag-pink", "tag-out"]);
+// 本文に写真がない記事は、カテゴリに合う園の写真をTOP画像にする。
+const FALLBACK_COVERS: Record<string, string> = {
+  行事: "/assets/photos/hero-05-medals.jpg",
+  国際交流: "/assets/photos/hero-01-cucumber-harvest.jpg",
+  新しい取り組み: "/assets/photos/spring-flower-watering.jpg",
+  園見学: "/assets/photos/hero-06-group-photo.jpg",
+  採用: "/assets/photos/hero-03-watermelon.jpg",
+  お知らせ: "/assets/photos/hero-02-pineapple.jpg",
+};
+const HOME_NEWS_LIMIT = 3;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -80,14 +90,14 @@ async function renderHomePage(request: Request, env: Env): Promise<Response> {
   let rows: NewsRow[] = [];
   try {
     const result = await env.DB.prepare(
-      "SELECT id, published_at, category, tag_class, title, body, link_href, link_label, sort_order, published FROM news WHERE published = 1 ORDER BY sort_order ASC, published_at DESC, id DESC LIMIT 5",
-    ).all<NewsRow>();
+      "SELECT id, published_at, category, tag_class, title, body, link_href, link_label, sort_order, published FROM news WHERE published = 1 ORDER BY sort_order ASC, published_at DESC, id DESC LIMIT ?",
+    ).bind(HOME_NEWS_LIMIT).all<NewsRow>();
     rows = result.results ?? [];
   } catch {
     return asset;
   }
   if (rows.length === 0) return asset;
-  const html = rows.map((row) => renderArticle(row, "h3")).join("");
+  const html = rows.map(renderHomeCard).join("");
   return new HTMLRewriter()
     .on("#home-news .news-list", {
       element(element) {
@@ -97,11 +107,49 @@ async function renderHomePage(request: Request, env: Env): Promise<Response> {
     .transform(asset);
 }
 
-function renderArticle(row: NewsRow, heading: "h2" | "h3" = "h2"): string {
+function renderArticle(row: NewsRow): string {
+  return `<a class="news-row reveal" href="/news/${row.id}">${renderThumb(row)}<div class="news-row-body"><div class="news-meta">${renderDate(row)}${renderTag(row)}</div><h2>${allowWbr(row.title)}</h2><p>${excerpt(row.body)}</p><span class="news-more">記事を読む</span></div></a>`;
+}
+
+function renderHomeCard(row: NewsRow): string {
+  return `<a class="home-news-card reveal" href="/news/${row.id}">${renderThumb(row)}<div class="home-news-body"><div class="news-meta">${renderDate(row)}${renderTag(row)}</div><h3>${allowWbr(row.title)}</h3></div></a>`;
+}
+
+function renderTag(row: NewsRow): string {
   const tag = row.tag_class ? ` class="tag ${escapeAttr(row.tag_class)}"` : ` class="tag"`;
-  const datetime = escapeAttr(row.published_at);
+  return `<span${tag}>${escapeHtml(row.category)}</span>`;
+}
+
+function renderDate(row: NewsRow): string {
   const label = escapeHtml(row.published_at.replace("-", ".").slice(0, 7));
-  return `<a class="news-row reveal" href="/news/${row.id}"><time datetime="${datetime}">${label}</time><div><span${tag}>${escapeHtml(row.category)}</span><${heading}>${allowWbr(row.title)}</${heading}><p>${excerpt(row.body)}</p><span class="news-more">記事を読む</span></div></a>`;
+  return `<time datetime="${escapeAttr(row.published_at)}">${label}</time>`;
+}
+
+function renderThumb(row: NewsRow): string {
+  const cover = coverFor(row);
+  return `<span class="news-thumb"><img src="${escapeAttr(cover.src)}" alt="" loading="lazy" decoding="async"></span>`;
+}
+
+type Cover = { src: string; alt: string; fromBody: boolean };
+
+function coverFor(row: NewsRow): Cover {
+  const found = sanitizeRich(row.body).match(/<img src="([^"]+)" alt="([^"]*)">/);
+  if (found) return { src: decodeAttr(found[1]), alt: decodeAttr(found[2]), fromBody: true };
+  const fallbacks = Object.values(FALLBACK_COVERS);
+  const src = FALLBACK_COVERS[row.category] ?? fallbacks[row.id % fallbacks.length];
+  return { src, alt: "", fromBody: false };
+}
+
+// TOP画像に使った写真は本文から外し、残った空の段落も片付ける。
+function withoutFirstImage(body: string): string {
+  return sanitizeRich(body)
+    .replace(/<img src="[^"]+" alt="[^"]*">/, "")
+    .replace(/<(p|div)(?: style="[^"]*")?>(?:\s|<br>)*<\/\1>/g, "")
+    .trim();
+}
+
+function decodeAttr(value: string): string {
+  return value.replaceAll("&quot;", '"').replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&");
 }
 
 async function renderNewsDetail(request: Request, env: Env, id: number): Promise<Response> {
@@ -159,9 +207,12 @@ function renderDetailArticle(row: NewsRow, newer: NewsRow | null, older: NewsRow
     newer ? `<a class="news-pager-link newer" href="/news/${newer.id}"><small>新しい記事</small><span>${allowWbr(newer.title)}</span></a>` : "<span></span>",
     older ? `<a class="news-pager-link older" href="/news/${older.id}"><small>前の記事</small><span>${allowWbr(older.title)}</span></a>` : "<span></span>",
   ].join("");
+  const cover = coverFor(row);
+  const body = cover.fromBody ? withoutFirstImage(row.body) : row.body;
   return `<article class="news-article">
+    <figure class="news-article-cover"><img src="${escapeAttr(cover.src)}" alt="${escapeAttr(cover.alt)}" decoding="async"></figure>
     <div class="news-article-meta"><span${tag}>${escapeHtml(row.category)}</span><time datetime="${escapeAttr(row.published_at)}">${escapeHtml(formatMonth(row.published_at))}</time></div>
-    ${renderBody(row.body)}
+    ${renderBody(body)}
     ${related}
     <aside class="news-contact">
       <p class="news-contact-title">ご質問・園見学のご相談</p>
@@ -190,7 +241,12 @@ function rootUrl(value: string): string {
 }
 
 function excerpt(body: string): string {
-  const text = sanitizeRich(body).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  // 太字などの文中タグは詰め、段落の区切りだけ空白にする（「、 パイナップル を」のような隙間を防ぐ）。
+  const text = sanitizeRich(body)
+    .replace(/<\/?(?:strong|b|em|i|u|s|strike|span|a|wbr)\b[^>]*>/g, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   if (text.length <= 90) return text;
   return `${text.slice(0, 90)}…`;
 }
@@ -754,6 +810,10 @@ const ADMIN_HTML = `<!DOCTYPE html>
               <button id="delete-post" class="warn hidden" type="button">この記事を削除</button>
             </div>
             <p id="form-error" class="error"></p>
+          </section>
+          <section class="card">
+            <h3>TOP画像</h3>
+            <p class="meta">本文の最初の写真が、トップページ・お知らせ一覧・記事ページのTOP画像になります。写真がない記事は、カテゴリに合わせた園の写真を自動で表示します。</p>
           </section>
           <section class="card">
             <h3>記事の下に出すボタン</h3>
