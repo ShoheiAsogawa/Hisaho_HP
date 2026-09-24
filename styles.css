@@ -54,7 +54,7 @@ img { max-width: 100%; display: block; }
 }
 .header-inner {
   position: relative;
-  width: min(1180px, calc(100% - 34px)); margin: 0 auto;
+  width: min(1180px, calc(100% - 48px)); margin: 0 auto;
   display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center; gap: clamp(14px, 2.2vw, 36px); padding: 10px 0 18px;
   overflow: visible;
@@ -369,7 +369,8 @@ textarea { min-height: 130px; resize: vertical; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
 }
 
-@media (max-width: 980px) {
+/* ヘッダーの折りたたみは site.css のモバイル用ヘッダーと同じ 900px 以下に合わせる */
+@media (max-width: 900px) {
   .nav-toggle { display: block; }
   .header-inner {
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
@@ -391,6 +392,9 @@ textarea { min-height: 130px; resize: vertical; }
   .nav-item:hover, .nav-item:focus-visible { background: var(--green-soft); }
   .nav-item img { width: 40px; height: 40px; }
   .nav-item strong, .nav-item span { grid-column: 2; }
+}
+
+@media (max-width: 980px) {
   .hero-inner, .split, .section-green.split, .section-peach.split, .form-shell, .visit-flow { grid-template-columns: 1fr; }
   .quick-links, .feature-grid, .food-grid, .season-grid { grid-template-columns: repeat(2, 1fr); }
   .overview-table div { grid-template-columns: 1fr; }

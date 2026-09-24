@@ -109,10 +109,12 @@ body.hisaho {
 }
 
 /* Shared home primitives */
+/* 背景の塗りは画面幅いっぱい、中身は左右の余白で共通の枠（--hp-container）に収める。
+   色帯（.band）と同じ塗り幅になり、四隅の飾りの基準もそろう */
 .hisaho .section {
-  width: var(--hp-container);
-  margin: 0 auto;
-  padding: var(--hp-section-y) 0;
+  width: 100%;
+  margin: 0;
+  padding: var(--hp-section-y) calc((100% - var(--hp-container)) / 2);
 }
 
 .hisaho .section-heading {
@@ -741,7 +743,7 @@ body.hisaho {
   transition: transform 0.25s ease;
 }
 
-.hisaho .class-card:hover img {
+.hisaho .class-card:hover img:not(.class-chara) {
   transform: translateY(-5px) rotate(-3deg);
 }
 
@@ -2105,6 +2107,7 @@ body.hisaho {
 .hisaho .hero-illust {
   position: absolute;
   z-index: 0;
+  height: auto;
   pointer-events: none;
   user-select: none;
   opacity: 0.92;
@@ -2126,6 +2129,7 @@ body.hisaho {
 .hisaho .sec-deco {
   position: absolute;
   z-index: 0;
+  height: auto;
   pointer-events: none;
   user-select: none;
   opacity: 0.85;
@@ -2142,7 +2146,10 @@ body.hisaho {
   z-index: 1;
 }
 
-.hisaho .sec-deco {
+/* 直前の「> * { position: relative }」に負けて本文の流れに入らないよう、ここで戻す */
+.hisaho .section > .sec-deco,
+.hisaho .band > .sec-deco {
+  position: absolute;
   z-index: 0;
 }
 
@@ -3245,48 +3252,76 @@ body.hisaho {
   }
 }
 
-/* モバイルヘッダーは、アイコンと文字の余白だけを詰めて構成はそのまま残す */
+/* モバイルヘッダー: 中央ロゴと、等幅の6項目を独立した2段に揃える。 */
 @media (max-width: 900px) {
   .hisaho .site-header {
-    --nav-gap: clamp(6px, 2.2vw, 12px);
+    --nav-gap: 0px;
+    position: relative;
   }
 
-  .hisaho .header-inner {
-    gap: 0 var(--nav-gap);
-    padding: 3px 0 2px;
+  .hisaho .site-header .header-inner {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(100% - 16px, 640px);
+    gap: 14px 0;
+    /* ロゴ＋メニューの2段を縦の中央に（上下の余白を同じに） */
+    padding: 14px 0;
+    /* Deco Studioの座標移動をスマホには持ち込まない。 */
+    transform: none !important;
   }
 
   .hisaho .brand {
+    grid-column: 1 / -1;
+    grid-row: 1;
     margin-bottom: 0;
     line-height: 0;
   }
 
   .hisaho .brand-logo {
-    width: clamp(80px, 22vw, 102px);
+    width: clamp(108px, 28vw, 124px);
+    height: auto;
   }
 
   .hisaho .global-nav {
-    gap: var(--nav-gap);
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-row: 2;
+    width: 100%;
+    gap: 0;
+    align-items: stretch;
   }
 
   .hisaho .nav-item {
-    gap: 0;
-    padding: 0 1px;
+    grid-template-rows: 30px auto;
+    align-content: center;
+    align-items: center;
+    min-height: 58px;
+    gap: 5px;
+    padding: 4px 0;
   }
 
   .hisaho .nav-item img {
-    width: clamp(27px, 7vw, 36px);
-    height: clamp(27px, 7vw, 36px);
+    width: 30px;
+    height: 30px;
   }
 
   .hisaho .nav-item strong {
-    font-size: clamp(0.42rem, 1.9vw, 0.64rem);
-    line-height: 1.08;
+    font-size: clamp(8.5px, 2.35vw, 12px);
+    letter-spacing: -0.04em;
+    line-height: 1.4;
   }
 
   .hisaho .nav-item + .nav-item::before,
   .hisaho .nav-right .nav-item:first-child::before {
-    height: clamp(20px, 5.8vw, 27px);
+    left: 0;
+    height: 24px;
+    border-left-width: 1px;
+    opacity: 0.45;
+  }
+
+  /* ページ幅に依存する装飾は省き、ナビの動物アイコンを主役にする。 */
+  .hisaho .site-header .hp-deco-item {
+    display: none;
   }
 }
 
@@ -4234,4 +4269,452 @@ body.hisaho {
   .hisaho .hero-slider .content.is-entering {
     animation: none;
   }
+}
+
+
+/* =========================================================================
+   モバイル: 食育セクションと行事セクションを横スクロールにする
+   Based on "Horizontal Image Slider with GSAP" by Filip Zrnzevic (MIT)
+   https://codepen.io/filipz/pen/NWQzWGm
+
+   ・GSAP が読み込めたとき  … 画面に固定して、縦スクロールで横に流す
+   ・GSAP が読み込めないとき … 指でなぞる普通の横スクロール（保険）
+
+   ピン留めするのは section ではなく .hscroll-inner。
+   #main が display:flex のため、その直下をピン留めすると
+   GSAP が入れる pin-spacer が flex アイテムになり、高さ計算が壊れて
+   セクション同士が重なってしまう。内側の箱を留めれば spacer は
+   section の中（通常のブロック）に入るので破綻しない。
+   ========================================================================= */
+@media (max-width: 900px) {
+  /* ---- 保険側（JSなしでも成立させる） ---- */
+  .hisaho .hscroll-track {
+    display: flex;
+    gap: 16px;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    padding: 6px 20px 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .hisaho .hscroll-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hisaho .hscroll-item {
+    flex: 0 0 auto;
+    width: min(78vw, 300px);
+    scroll-snap-align: center;
+  }
+
+  /* 横に流れるカードは IntersectionObserver で拾えないので、最初から見せる */
+  .hisaho .hscroll .hscroll-item.reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---- GSAP が有効なとき ---- */
+  /* セクション自体は通常の流れのまま。高さは pin-spacer が確保する */
+  .hisaho .hscroll.is-gsap {
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: visible;
+  }
+
+  /* 実際に画面へ固定される箱 */
+  .hisaho .hscroll.is-gsap .hscroll-inner {
+    width: 100%;
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hisaho .hscroll.is-gsap .section-heading {
+    margin-bottom: clamp(14px, 3vw, 24px);
+  }
+
+  .hisaho .hscroll.is-gsap .center-cta {
+    margin-top: clamp(14px, 3vw, 22px);
+  }
+
+  .hisaho .hscroll.is-gsap .hscroll-track {
+    width: max-content;
+    margin-left: calc(50% - 50vw);
+    /* 先頭と最後のカードも画面中央に来るように、左右へ余白を足す */
+    padding-inline: calc((100vw - min(78vw, 300px)) / 2);
+    overflow: visible;
+    scroll-snap-type: none;
+    will-change: transform;
+  }
+
+  .hisaho .hscroll.is-gsap .hscroll-item {
+    opacity: 0.72;
+    transform: scale(0.9);
+    transform-origin: center center;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s ease;
+  }
+
+  /* 画面中央に来たカードだけ、大きくはっきり見せる */
+  .hisaho .hscroll.is-gsap .hscroll-item.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* 固定中は飾りイラストが視界に残り続けるので隠す */
+  .hisaho .hscroll.is-gsap .sec-deco {
+    display: none;
+  }
+
+  /* 縦に詰めるため、カード内の余白を少し切り詰める */
+  .hisaho .hscroll.is-gsap .food-card,
+  .hisaho .hscroll.is-gsap .season-card {
+    padding: 18px;
+  }
+
+  .hisaho .hscroll.is-gsap .season-card img,
+  .hisaho .hscroll.is-gsap .food-photo img {
+    aspect-ratio: 4 / 3;
+    height: auto;
+  }
+
+  /* GSAP が差し込む pin-spacer が、親の flex で潰れないようにする */
+  .hisaho .hscroll .pin-spacer {
+    flex: none;
+  }
+}
+
+/* 動きを減らす設定のときは固定しない（普通の横スクロールのまま） */
+@media (prefers-reduced-motion: reduce) {
+  .hisaho .hscroll.is-gsap .hscroll-inner {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* =========================================================================
+   キャラクター素材（assets/mascots/chara-*.webp / item-*.webp）
+   色と線がはっきりした絵なので、水彩の飾りのように薄くはしない。
+   ========================================================================= */
+.hisaho :is(.sec-deco, .hero-illust)[src*="assets/mascots/"] {
+  opacity: 1;
+  filter: drop-shadow(0 5px 7px rgba(80, 60, 70, 0.12));
+}
+
+/* キャラは画面の端で切れないよう、四隅の内側に置く */
+.hisaho .sec-deco[src*="assets/mascots/"]:is(.deco-tl, .deco-bl) { left: clamp(4px, 1.4vw, 24px); }
+.hisaho .sec-deco[src*="assets/mascots/"]:is(.deco-tr, .deco-br) { right: clamp(4px, 1.4vw, 24px); }
+.hisaho .sec-deco[src*="assets/mascots/"]:is(.deco-tl, .deco-tr) { top: clamp(8px, 1.2vw, 18px); }
+
+.hisaho .hero-illust.left[src*="assets/mascots/"] {
+  bottom: 6px;
+  width: clamp(96px, 12.5vw, 172px);
+}
+
+.hisaho .hero-illust.right[src*="assets/mascots/"] {
+  top: 18px;
+  width: clamp(84px, 10.5vw, 146px);
+}
+
+/* クラス: 全身のキャラがカードのふちから顔を出す */
+.hisaho .class-grid:has(.class-chara) {
+  padding-top: 46px;
+  row-gap: 62px;
+}
+
+.hisaho .class-card:has(.class-chara) {
+  justify-content: flex-start;
+  min-height: 0;
+  padding: 0 10px 22px;
+}
+
+.hisaho .class-card .class-chara {
+  width: clamp(88px, 8.4vw, 112px);
+  height: clamp(88px, 8.4vw, 112px);
+  margin: -46px 0 6px;
+  filter: drop-shadow(0 5px 6px rgba(53, 46, 67, 0.14));
+}
+
+/* ピンクの帯の上では、同じピンクのカードが背景に溶けるので色を変える */
+.hisaho .band-pink .class-card:nth-child(2) { background: #ffffff; }
+.hisaho .band-pink .class-card:nth-child(4) { background: #fcdcec; }
+
+/* 年齢別の保育・働く環境: カード上部の挿絵 */
+.hisaho .age-art {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: clamp(104px, 10vw, 132px);
+  margin: 0 auto 16px;
+  object-fit: contain;
+}
+
+/* 特別指導科目: キャラが先生役 */
+.hisaho .lesson-icon[src*="assets/mascots/"] {
+  width: auto;
+  height: clamp(84px, 8.5vw, 108px);
+  max-width: 100%;
+  align-self: flex-start;
+  object-fit: contain;
+}
+
+/* 見学の3ステップ: 番号は角に、主役はキャラ */
+.hisaho .visit-flow article:has(.step-chara) {
+  padding-top: clamp(22px, 2.4vw, 30px);
+}
+
+.hisaho .visit-flow article:has(.step-chara) .step {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 46px;
+  height: 46px;
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.hisaho .visit-flow .step-chara {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: clamp(110px, 10.5vw, 136px);
+  margin: 0 auto 14px;
+  object-fit: contain;
+}
+
+/* 本文の下に添えるキャラ（離乳食・採用メッセージ） */
+.hisaho .split-chara {
+  display: block;
+  width: clamp(140px, 13vw, 176px);
+  height: auto;
+  margin-top: 26px;
+}
+
+@media (max-width: 900px) {
+  /* 本文が横いっぱいになる幅では隅のキャラが文字やボタンに重なるので、タイトルの上に置く */
+  .hisaho .page-hero:has(.hero-illust[src*="assets/mascots/"]) {
+    padding-top: 28px;
+  }
+
+  .hisaho .hero-illust.left[src*="assets/mascots/"] {
+    position: relative;
+    inset: auto;
+    display: block;
+    width: auto;
+    height: clamp(92px, 14vw, 116px);
+    max-width: 60%;
+    margin: 0 auto 10px;
+    object-fit: contain;
+  }
+
+  .hisaho .hero-illust.right[src*="assets/mascots/"] {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .hisaho .class-grid:has(.class-chara) {
+    padding-top: 38px;
+    gap: 54px 12px;
+  }
+
+  .hisaho .class-card .class-chara {
+    width: 84px;
+    height: 84px;
+    margin-top: -38px;
+  }
+
+  .hisaho .age-art {
+    height: 112px;
+  }
+
+  .hisaho .split-chara {
+    width: 150px;
+    margin-inline: auto;
+  }
+}
+
+/* PC幅のヘッダー: メニューとロゴを縦の中央に（上下の余白を同じに） */
+@media (min-width: 901px) {
+  .hisaho .header-inner {
+    padding-block: 14px;
+  }
+}
+
+/* Deco Studio でヘッダー左右に置いたキャラ（TOPのみ。900px 以下は非表示）。
+   固定の px 位置ではなく、ヘッダーの下端に立たせる（パンダはヒーローのふちから顔を出す形）。
+   高さはメニュー（1000px幅で約75px〜1600px幅で約90px）に合わせて伸縮させる */
+@media (min-width: 901px) {
+  .site-header .hp-deco-item:has(img[src*="chara-chick-run"]) {
+    top: auto !important;
+    bottom: 0;
+    left: 6px !important;
+    width: clamp(60px, 5.6vw, 76px) !important;
+  }
+
+  .site-header .hp-deco-item:has(img[src*="chara-panda-peek"]) {
+    top: auto !important;
+    bottom: 0;
+    left: auto !important;
+    right: 6px;
+    width: clamp(66px, 6.2vw, 86px) !important;
+  }
+}
+
+/* =========================================================================
+   改行のルール
+   ・見出し／ボタン／短いラベル: HTML の <wbr>（文節の区切り）でだけ折り返し、行の長さをそろえる。
+     区切りが無い長い語は、はみ出す場合だけ文字の途中で折り返す（overflow-wrap: anywhere）。
+   ・本文: 禁則を厳しく（行頭に「ー」や小さい「ゃ」などを置かない）、最後の行が1〜2文字にならないように。
+   ・<br class="pc-br"> は PC 幅（901px 以上）だけの改行。スマホでは自然に折り返す。
+   ========================================================================= */
+.hisaho :is(h1, h2, h3, h4, .button, .dream-visit, .dream-about, .text-link, .lesson-list strong, .quick-links strong, .age-label, .tag, .eyebrow, .facility-card li, .quick-links span) {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
+  text-wrap: balance;
+}
+
+.hisaho :is(p, li, dd, dt, label, .support-list span) {
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+/* 途中で折り返したくない短い語句 */
+.hisaho .nowrap {
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .hisaho br.pc-br {
+    display: none;
+  }
+}
+
+/* スマホでは下層ページの大見出しを少し小さくし、1行目が「を、」だけ次の行に落ちないようにする */
+@media (max-width: 640px) {
+  .hisaho .page-hero h1 {
+    font-size: clamp(1.4rem, 7.2vw, 2rem);
+  }
+}
+
+/* =========================================================================
+   キャラクター・小物のホバーアニメーション（マウス操作の端末だけ／動きを減らす設定では無し）
+   既存の待機アニメーションが transform を使っているので、ここでは個別プロパティ
+   （translate / rotate / scale）で動かし、重ねても打ち消し合わないようにする。
+   カードの中のキャラは、カードのどこにマウスを乗せても動く。
+   ========================================================================= */
+@keyframes hp-hop {
+  0% { translate: 0 0; rotate: 0deg; scale: 1; }
+  16% { translate: 0 2px; rotate: 0deg; scale: 1.05 .93; }
+  40% { translate: 0 -12px; rotate: -5deg; scale: .97 1.04; }
+  62% { translate: 0 0; rotate: 4deg; scale: 1.03 .97; }
+  80% { translate: 0 -3px; rotate: -2deg; scale: 1; }
+  100% { translate: 0 0; rotate: 0deg; scale: 1; }
+}
+
+@keyframes hp-squish {
+  0%, 100% { scale: 1; }
+  25% { scale: 1.06 .94; }
+  50% { scale: .96 1.05; }
+  75% { scale: 1.02 .99; }
+}
+
+@keyframes hp-sway {
+  0%, 100% { rotate: 0deg; }
+  25% { rotate: -6deg; }
+  60% { rotate: 5deg; }
+  85% { rotate: -2deg; }
+}
+
+@keyframes hp-tilt {
+  0%, 100% { rotate: 0deg; }
+  30% { rotate: -2.5deg; }
+  65% { rotate: 2deg; }
+}
+
+@keyframes hp-drift {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 10px -4px; }
+}
+
+@keyframes hp-bounce {
+  0%, 100% { translate: 0 0; scale: 1; }
+  30% { translate: 0 -16px; scale: .96 1.04; }
+  55% { translate: 0 0; scale: 1.08 .92; }
+  75% { translate: 0 -5px; scale: 1; }
+}
+
+@keyframes hp-spin {
+  to { rotate: 360deg; }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  /* 飾りは普段クリックを下に通すため pointer-events: none。キャラと小物だけホバーを受け取る */
+  .hisaho :is(.sec-deco, .hero-illust)[src*="assets/mascots/"],
+  .site-header .hp-deco-item:has(img[src*="assets/mascots/"]) {
+    pointer-events: auto;
+  }
+
+  /* ヘッダーの左右のキャラは、メニューの枠（見えない余白）より手前にしてホバーを届かせる。
+     メニューの項目とは重ならない位置なので、クリックの邪魔にはならない */
+  .site-header .hp-deco-item:has(img[src*="assets/mascots/"]) {
+    z-index: 2 !important;
+  }
+
+  /* 看板は文字ごと .gate-sign 全体を動かすので、画像単体は反応させない */
+  .hisaho .gate-sign img {
+    pointer-events: none;
+  }
+
+  .hisaho img[src*="assets/mascots/"] {
+    transform-origin: 50% 100%;
+    transition: translate .35s cubic-bezier(.34, 1.56, .64, 1), rotate .35s cubic-bezier(.34, 1.56, .64, 1), scale .35s cubic-bezier(.34, 1.56, .64, 1);
+  }
+
+  /* キャラ: ぴょんと跳ねる */
+  .hisaho img[src*="assets/mascots/chara-"]:hover,
+  .hisaho :is(.class-card, .feature-item, .lesson-list li, .age-card, .lesson-card, .visit-flow article, .season-card):hover img[src*="assets/mascots/chara-"] {
+    animation: hp-hop .8s cubic-bezier(.3, .7, .4, 1) both;
+  }
+
+  /* 何匹かいる集合・場面の絵: ぷるんと弾む */
+  .hisaho img[src*="assets/mascots/"]:is([src*="chara-friends-all"], [src*="chara-lion-giraffe-play"], [src*="chara-rabbit-squirrel-lunch"], [src*="chara-panda-chick-nap"]):hover,
+  .hisaho :is(.feature-item, .age-card):hover img[src*="assets/mascots/"]:is([src*="chara-friends-all"], [src*="chara-lion-giraffe-play"], [src*="chara-rabbit-squirrel-lunch"], [src*="chara-panda-chick-nap"]) {
+    animation: hp-squish .7s ease-in-out both;
+  }
+
+  /* のぞいているキャラ: 顔を少し上げる */
+  .hisaho img[src*="-peek"]:hover {
+    animation: none;
+    translate: 0 -8px;
+  }
+
+  /* 小物（基本）: 少し傾いて大きくなる */
+  .hisaho img[src*="assets/mascots/item-"]:hover,
+  .hisaho .lesson-card:hover img[src*="assets/mascots/item-"] {
+    rotate: -6deg;
+    scale: 1.08;
+  }
+
+  .hisaho img[src*="item-sun"] { transform-origin: 50% 50%; }
+  .hisaho img[src*="item-sun"]:hover { rotate: 0deg; scale: 1.05; animation: hp-spin 5s linear infinite; }
+  .hisaho img[src*="item-cloud"]:hover { rotate: 0deg; scale: 1; animation: hp-drift 1.8s ease-in-out infinite; }
+  .hisaho img[src*="item-ball"]:hover,
+  .hisaho .lesson-card:hover img[src*="item-ball"] { rotate: 0deg; scale: 1; animation: hp-bounce .8s cubic-bezier(.3, .7, .4, 1) both; }
+  .hisaho img[src*="item-garland"] { transform-origin: 50% 0; }
+  .hisaho img[src*="item-garland"]:hover { rotate: 0deg; scale: 1; animation: hp-sway 1s ease-in-out both; }
+  .hisaho img:is([src*="item-tree"], [src*="item-flowerpot"]):hover { rotate: 0deg; scale: 1; animation: hp-sway .9s ease-in-out both; }
+  .hisaho img[src*="item-wateringcan"] { transform-origin: 75% 85%; }
+  .hisaho img[src*="item-wateringcan"]:hover { rotate: -16deg; scale: 1.04; }
+
+  /* 門柱の兵隊さん: 外側へ胸を張る。看板は文字ごとゆれる */
+  .hisaho img[src*="soldier-left"]:hover { translate: 0 -6px; rotate: -4deg; }
+  .hisaho img[src*="soldier-right"]:hover { translate: 0 -6px; rotate: 4deg; }
+  .hisaho .gate-sign { transform-origin: 50% 100%; }
+  .hisaho .gate-sign:hover { animation: hp-tilt .8s ease-in-out both; }
 }

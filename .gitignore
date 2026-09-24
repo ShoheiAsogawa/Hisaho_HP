@@ -1,8 +1,12 @@
 # Deco Studio backups
 .deco-backups/
 
-# 未整理の生成素材の元データ（整理済み版は assets/illust/）
+# 未整理の生成素材の元データ（整理済み版は assets/illust/ と assets/mascots/）
+# Deco Studio の「素材を保存」もここに書き出すので、公開に使うものは assets/mascots/ へ移すこと
 assets/deco/
 
 # レビュー用の書き出し画像（どのページからも未参照）
 design-concepts/
+
+# 新しい素材の受け取り口（加工前の元データ。加工後は assets/mascots/ や assets/illust/ へ）
+assets/_inbox/

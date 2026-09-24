@@ -211,6 +211,11 @@ if (heroCarousel) {
     if (!announcement) return;
     const label = items()[1]?.getAttribute("aria-label") || "";
     announcement.textContent = label ? "表示中の写真: " + label : "";
+    items().forEach((item, index) => {
+      const selectable = index >= 2 && index < 5;
+      item.setAttribute("role", selectable ? "button" : "img");
+      item.tabIndex = selectable ? 0 : -1;
+    });
   };
 
   const go = (dir) => {
@@ -229,7 +234,7 @@ if (heroCarousel) {
 
   const startAutoplay = () => {
     stopAutoplay();
-    if (reduceMotion.matches) return;
+    if (reduceMotion.matches || document.hidden) return;
     timer = setInterval(() => go("next"), AUTOPLAY_MS);
   };
 
@@ -245,6 +250,23 @@ if (heroCarousel) {
   nextBtn?.addEventListener("click", () => {
     go("next");
     restart();
+  });
+
+  const selectPhoto = (target) => {
+    const item = target.closest(".item");
+    const index = items().indexOf(item);
+    if (index < 2) return;
+    // クリックした写真を、全面表示される2番目の位置に移動する。
+    for (let step = 1; step < index; step++) slider.append(slider.firstElementChild);
+    replayContent();
+    announce();
+    restart();
+  };
+  slider.addEventListener("click", (event) => selectPhoto(event.target));
+  slider.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    selectPhoto(event.target);
   });
 
   hero.addEventListener("keydown", (e) => {

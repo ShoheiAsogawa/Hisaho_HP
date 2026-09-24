@@ -1,0 +1,704 @@
+/* 本文だけのレイアウト。ヘッダー・フッターや共通トークンには触れない。 */
+#main.nursery-main {
+  --nursery-blush: #fff0f8;
+  --nursery-ink: #4b3742;
+  --nursery-space: clamp(68px, 7vw, 108px);
+  /* ヘッダーの雲からつなぐ、鮮やかな色と文字用の濃色。 */
+  --nursery-yellow: #f2cb4b;
+  --nursery-mint: #6bcdbc;
+  --nursery-blue: #3c53b6;
+  --nursery-pink: #ef9ec3;
+  --nursery-coral: #fa8b78;
+  --nursery-lavender: #bcaaec;
+  --nursery-accent: #bf287a;
+}
+
+#main.nursery-main > section:not(.hero) { position: relative; }
+#main.nursery-main .section { padding-block: var(--nursery-space); }
+#main.nursery-main .section-heading { max-width: 850px; margin-bottom: 46px; }
+#main.nursery-main .section-heading h2 { font-size: clamp(1.65rem, 3.2vw, 2.8rem); line-height: 1.5; color: var(--nursery-blue); }
+#main.nursery-main .section-heading p { line-height: 2; }
+#main.nursery-main .section-title::before,
+#main.nursery-main .section-title::after { content: ""; }
+#main.nursery-main .section-mascot {
+  position: relative;
+  display: block;
+  width: 110px;
+  height: 90px;
+  object-fit: contain;
+  margin: 0 auto 16px;
+  pointer-events: none;
+}
+#main.nursery-main .mascot-lion { width: 132px; height: 105px; }
+#main.nursery-main .mascot-rabbit { height: 110px; }
+#main.nursery-main .sec-deco { position: absolute; pointer-events: none; }
+/* 背景は画面幅いっぱいなので、飾りは画面の端から少し内側に置く */
+#main.nursery-main #classes > .deco-tl { top: 48px; left: clamp(8px, 2vw, 32px); }
+#main.nursery-main #classes > .deco-br { bottom: clamp(16px, 2vw, 32px); right: clamp(8px, 2vw, 32px); }
+#main.nursery-main #food > .deco-tl { top: 80px; left: clamp(8px, 2vw, 32px); }
+#main.nursery-main #food > .deco-br { bottom: clamp(16px, 2vw, 32px); right: clamp(8px, 2vw, 32px); }
+
+/* TOP: 写真と言葉が呼吸する、やわらかな園生活の窓。 */
+#main.nursery-main .dream-hero {
+  --dream-pink: var(--nursery-accent);
+  --dream-ink: #492b42;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin: 0;
+  padding: clamp(48px, 5vw, 76px) 0 100px;
+  background: #fff;
+  color: var(--dream-ink);
+}
+#main.nursery-main .dream-layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
+  align-items: center;
+  gap: clamp(24px, 3vw, 48px);
+  width: var(--hp-container);
+  margin-inline: auto;
+}
+#main.nursery-main .dream-copy { min-width: 0; padding-bottom: 12px; }
+#main.nursery-main .dream-copy h1 {
+  margin: 0;
+  color: var(--dream-ink);
+  font-family: "Zen Maru Gothic", sans-serif;
+  font-size: clamp(36px, 3.65vw, 56px);
+  font-weight: 900;
+  line-height: 1.5;
+  letter-spacing: .015em;
+}
+#main.nursery-main .dream-final { display: inline-block; margin-top: 2px; font-size: .85em; white-space: nowrap; }
+#main.nursery-main .dream-emphasis { position: relative; color: var(--dream-pink); }
+#main.nursery-main .dream-emphasis::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 8px;
+  background: var(--nursery-yellow);
+  border-radius: 55% 45% 60% 40%;
+  transform: rotate(-1deg);
+}
+#main.nursery-main .dream-description { max-width: 480px; margin: 30px 0 0; font-size: 17px; line-height: 2; color: #65505e; }
+#main.nursery-main .dream-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 20px 26px; margin-top: 30px; }
+#main.nursery-main .dream-actions a { display: inline-flex; align-items: center; justify-content: center; gap: 18px; font-size: 16px; font-weight: 700; text-decoration: none; min-height: 56px; }
+#main.nursery-main .dream-visit { padding: 15px 28px; background: #cc327e; color: #fff; border-radius: 50px; transition: transform .2s, background .2s; }
+#main.nursery-main .dream-visit:hover { transform: translateY(-3px); background: #b7246a; }
+#main.nursery-main .dream-about { color: var(--nursery-blue); }
+#main.nursery-main .dream-about:hover { color: #cc327e; }
+#main.nursery-main .dream-actions svg,
+#main.nursery-main .dream-controls svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+#main.nursery-main .dream-gallery { position: relative; min-width: 0; }
+#main.nursery-main .dream-gallery::before {
+  content: "";
+  position: absolute;
+  inset: -12px -4px 96px 20px;
+  background: var(--nursery-pink);
+  border-radius: 35% 65% 35% 65% / 40% 48% 52% 60%;
+  transform: rotate(-6deg);
+}
+#main.nursery-main .dream-photo {
+  position: relative;
+  aspect-ratio: 1.36;
+  overflow: hidden;
+  border-radius: 57% 43% 28% 34% / 39% 49% 30% 40%;
+  background: #fdf4f7;
+  isolation: isolate;
+}
+#main.nursery-main .dream-slide { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity .85s ease; }
+#main.nursery-main .dream-slide.is-active { opacity: 1; }
+#main.nursery-main .dream-slide:nth-child(2) { object-position: 50% 43%; }
+#main.nursery-main .dream-slide:nth-child(3) { object-position: 50% 40%; }
+#main.nursery-main .dream-flower { position: absolute; top: 0; right: -8px; width: 62px; height: 62px; transform: rotate(18deg); animation: dream-float 6s ease-in-out infinite; pointer-events: none; }
+#main.nursery-main .dream-flower i { position: absolute; width: 30px; height: 36px; border-radius: 70% 70% 50% 50%; background: var(--nursery-yellow); transform-origin: 50% 100%; left: 16px; top: -4px; }
+#main.nursery-main .dream-flower i:nth-child(2) { transform: rotate(90deg); }
+#main.nursery-main .dream-flower i:nth-child(3) { transform: rotate(180deg); }
+#main.nursery-main .dream-flower i:nth-child(4) { transform: rotate(270deg); }
+#main.nursery-main .dream-gallery-bottom { position: relative; display: flex; align-items: center; justify-content: center; gap: 20px; margin: 28px 0 0; padding-left: 12px; }
+#main.nursery-main .dream-gallery-bottom::before { content: ""; position: absolute; left: -10px; top: 8px; width: 17px; height: 30px; background: var(--nursery-mint); border-radius: 90% 0 90% 0; transform: rotate(-24deg); }
+#main.nursery-main .dream-thumbnails { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); flex: 1; gap: 8px; min-width: 0; max-width: 450px; }
+#main.nursery-main .dream-thumb { display: block; min-width: 0; padding: 3px; aspect-ratio: 1.12; border: 2px solid transparent; border-radius: 13px; background: transparent; cursor: pointer; transition: border-color .2s, transform .2s; }
+#main.nursery-main .dream-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+#main.nursery-main .dream-thumb.is-active { border-color: #cc327e; }
+#main.nursery-main .dream-thumb:hover { transform: translateY(-3px); }
+#main.nursery-main .dream-controls { display: flex; align-items: center; gap: 7px; }
+#main.nursery-main .dream-controls button { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--nursery-blue); border-radius: 50%; background: #fff; color: var(--nursery-blue); cursor: pointer; padding: 0; }
+#main.nursery-main .dream-controls button:hover { background: #e9edff; }
+#main.nursery-main .dream-controls .dream-play-icon { display: none; }
+#main.nursery-main [data-dream-pause].is-paused .dream-play-icon { display: block; }
+#main.nursery-main [data-dream-pause].is-paused .dream-pause-icon { display: none; }
+#main.nursery-main .dream-hero :is(a, button):focus-visible { outline: 3px solid #b52473; outline-offset: 4px; }
+#main.nursery-main .dream-wave { position: absolute; width: 100%; height: 65px; bottom: -1px; left: 0; fill: #ffe4ee; pointer-events: none; }
+@keyframes dream-float { 50% { transform: translateY(-7px) rotate(28deg); } }
+@media (max-width: 1100px) and (min-width: 901px) {
+  #main.nursery-main .dream-layout { width: calc(100% - 48px); gap: 24px; }
+  #main.nursery-main .dream-copy h1 { font-size: 35px; }
+  #main.nursery-main .dream-actions { gap: 12px; }
+  #main.nursery-main .dream-actions a { font-size: 12px; gap: 10px; }
+  #main.nursery-main .dream-visit { padding-inline: 20px; }
+  #main.nursery-main .dream-gallery-bottom { flex-wrap: wrap; }
+  #main.nursery-main .dream-thumbnails { flex-basis: 100%; }
+}
+@media (max-width: 900px) {
+  #main.nursery-main .dream-hero { padding: 30px 0 76px; }
+  #main.nursery-main .dream-layout { grid-template-columns: minmax(0, 1fr); width: min(620px, var(--hp-container)); gap: 34px; }
+  #main.nursery-main .dream-gallery { grid-row: 1; }
+  #main.nursery-main .dream-copy { grid-row: 2; padding: 0 6px; }
+  #main.nursery-main .dream-copy h1 { font-size: clamp(30px, 7.8vw, 46px); line-height: 1.5; }
+  #main.nursery-main .dream-description { font-size: 14px; margin-top: 24px; max-width: none; }
+  #main.nursery-main .dream-gallery-bottom { flex-wrap: wrap; gap: 12px; padding-left: 0; margin-top: 20px; }
+  #main.nursery-main .dream-gallery-bottom::before { display: none; }
+  #main.nursery-main .dream-thumbnails { flex-basis: 100%; max-width: none; gap: 5px; }
+  #main.nursery-main .dream-thumb { aspect-ratio: 1.25; }
+  #main.nursery-main .dream-controls { width: 100%; justify-content: center; gap: 12px; }
+  #main.nursery-main .dream-controls button { width: 44px; height: 44px; }
+  #main.nursery-main .dream-gallery::before { inset: -7px 0 110px 12px; }
+  #main.nursery-main .dream-flower { width: 44px; height: 44px; right: 4px; top: 4px; scale: .65; transform-origin: top right; }
+  #main.nursery-main .dream-actions { margin-top: 24px; gap: 12px 20px; }
+  #main.nursery-main .dream-actions a { font-size: 13px; }
+  #main.nursery-main .dream-visit { padding-inline: 24px; }
+  #main.nursery-main .dream-wave { height: 38px; }
+}
+@media (max-width: 540px) {
+  #main.nursery-main .dream-copy { padding: 0; }
+  #main.nursery-main .dream-copy h1 { font-size: clamp(28px, 7.8vw, 36px); }
+  #main.nursery-main .dream-actions { justify-content: center; }
+  #main.nursery-main .dream-visit { width: 100%; }
+  #main.nursery-main .dream-desktop-break { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #main.nursery-main .dream-slide { transition: none; }
+  #main.nursery-main .dream-flower { animation: none; }
+}
+
+/* 特長：淡いまるの上にキャラ、その下端に見出しの札（文字幅ぴったり）を重ねる。
+   まる・札・本文の幅をそろえ、列いっぱいに伸ばさない。色は項目ごとの変数で管理 */
+#main.nursery-main .feature-grid { gap: 30px; }
+#main.nursery-main .feature-item {
+  --feature-w: 320px;
+  --pill: var(--nursery-yellow);
+  --pill-ink: #594016;
+  --pill-shadow: rgba(170, 120, 20, .38);
+  --blob: #fff5d6;
+  padding: 0;
+  min-width: 0;
+}
+#main.nursery-main .feature-item:nth-child(2) { --pill: var(--nursery-mint); --pill-ink: #1d4b42; --pill-shadow: rgba(40, 130, 110, .34); --blob: #eaf7f1; }
+#main.nursery-main .feature-item:nth-child(3) { --pill: var(--nursery-lavender); --pill-ink: #45306a; --pill-shadow: rgba(110, 80, 170, .32); --blob: #f1ebfb; }
+#main.nursery-main .feature-item::after { display: none; }
+#main.nursery-main .feature-art {
+  display: grid;
+  place-items: center;
+  width: min(100%, var(--feature-w));
+  height: 210px;
+  margin: 0 auto;
+  border-radius: 54% 46% 50% 50% / 50% 54% 46% 50%;
+  background: var(--blob);
+}
+#main.nursery-main .feature-art img { display: block; width: 220px; height: 186px; object-fit: contain; }
+#main.nursery-main .feature-item h3 {
+  position: relative;
+  z-index: 1;
+  width: fit-content;
+  max-width: 100%;
+  margin: -22px auto 18px;
+  padding: 8px 24px 9px;
+  border: 3px solid #fffdf6;
+  border-radius: 999px;
+  background: var(--pill);
+  color: var(--pill-ink);
+  box-shadow: 0 8px 16px -8px var(--pill-shadow);
+  font-size: clamp(.92rem, 1.2vw, 1.06rem);
+  letter-spacing: .05em;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+#main.nursery-main .feature-item p { max-width: var(--feature-w); margin-inline: auto; padding-inline: 4px; text-align: left; line-height: 2; }
+
+/* 大きくゆるやかな曲線。小さな連続スカラップは使わない。 */
+#main.nursery-main .concept-band {
+  padding: 105px 0;
+  margin-block: 28px;
+  color: var(--nursery-ink);
+  background: var(--nursery-yellow);
+  border-radius: 48% 52% 45% 55% / 8% 10% 9% 8%;
+  isolation: isolate;
+}
+#main.nursery-main .concept-statement { display: block; max-width: 850px; position: relative; z-index: 1; }
+#main.nursery-main .concept-statement h2 { color: #283e95; font-size: clamp(1.6rem, 3vw, 2.7rem); }
+#main.nursery-main .concept-statement p { color: #44352d; line-height: 2.1; }
+#main.nursery-main .concept-statement .text-link { color: #283e95; }
+#main.nursery-main .concept-cloud { position: absolute; top: clamp(14px, 2.4vw, 34px); right: 5%; width: clamp(72px, 9vw, 128px); height: auto; pointer-events: none; animation: chara-sway 7s ease-in-out infinite; }
+#main.nursery-main .concept-garden { position: absolute; bottom: clamp(12px, 2vw, 26px); left: 5%; width: clamp(58px, 7.6vw, 112px); height: auto; pointer-events: none; filter: drop-shadow(0 6px 8px rgba(101, 68, 27, .16)); }
+
+#main.nursery-main #classes .section-heading h2 { width: auto; height: auto; transform: none; }
+#main.nursery-main .class-grid { gap: 16px; }
+#main.nursery-main .class-card { border: 0; border-radius: 48% 52% 45% 55% / 44% 44% 56% 56%; box-shadow: none; padding: 25px 10px; }
+#main.nursery-main .class-card img { width: 72px; height: 72px; object-fit: contain; }
+#main.nursery-main .class-card:nth-child(1) { background: var(--nursery-yellow); }
+#main.nursery-main .class-card:nth-child(2) { background: var(--nursery-mint); }
+#main.nursery-main .class-card:nth-child(3) { background: var(--nursery-lavender); }
+#main.nursery-main .class-card:nth-child(4) { background: var(--nursery-pink); }
+#main.nursery-main .class-card:nth-child(5) { background: #8abcf6; }
+#main.nursery-main .class-card:nth-child(6) { background: var(--nursery-coral); }
+#main.nursery-main .class-card :is(strong, span) { color: #352e43; }
+
+#main.nursery-main .experiences-section {
+  margin-block: 28px;
+  padding-block: var(--nursery-space);
+  background: #e4f6ef;
+  border-radius: 6% 9% 8% 5% / 5% 7% 6% 8%;
+}
+#main.nursery-main .experiences-inner { gap: 28px 65px; }
+#main.nursery-main .experience-copy h2 { font-size: clamp(1.85rem, 3vw, 2.7rem); line-height: 1.6; }
+#main.nursery-main .experience-copy h2 span { color: var(--nursery-blue); }
+#main.nursery-main .experience-copy h2::after { display: none; }
+#main.nursery-main .experience-photo {
+  padding: 18px;
+  height: 365px;
+  background: #fff;
+  border-radius: 44% 56% 51% 49% / 49% 45% 55% 51%;
+  box-shadow: 10px 12px 0 var(--nursery-mint);
+}
+#main.nursery-main .experience-photo img { object-fit: contain; }
+#main.nursery-main .lesson-list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+#main.nursery-main .lesson-list li { background: transparent; border: 0; padding: 0; min-height: 110px; }
+#main.nursery-main .lesson-list img { width: 85px; height: 74px; object-fit: contain; }
+#main.nursery-main .lesson-list strong { font-size: .8rem; }
+
+#main.nursery-main .food-photo {
+  height: 270px;
+  padding: 12px;
+  border-radius: 43% 57% 50% 50% / 47% 44% 56% 53%;
+  background: var(--nursery-yellow);
+}
+#main.nursery-main .food-photo img { border-radius: inherit; object-fit: contain; }
+#main.nursery-main .food-card:nth-child(2) .food-photo { background: var(--nursery-mint); }
+#main.nursery-main .food-card:nth-child(3) .food-photo { padding: 0; }
+#main.nursery-main .food-card:nth-child(3) .food-photo img { object-fit: cover; object-position: center 65%; }
+#main.nursery-main .food-card h3 { color: #176957; font-size: 1.15rem; }
+#main.nursery-main .food-care-note { max-width: 800px; margin: 38px auto 0; text-align: center; color: var(--hp-muted); font-size: .88rem; }
+
+#main.nursery-main .events-section { background: #eef2ff; padding-block: var(--nursery-space); border-radius: 45% 55% 0 0 / 3% 4% 0 0; }
+#main.nursery-main .season-card h3 span { color: #352e43; }
+#main.nursery-main .season-card.spring h3 span { background: var(--nursery-pink); }
+#main.nursery-main .season-card.summer h3 span { background: var(--nursery-mint); }
+#main.nursery-main .season-card.autumn h3 span { background: var(--nursery-yellow); }
+#main.nursery-main .season-card.winter h3 span { background: var(--nursery-lavender); }
+#main.nursery-main .season-card > img { aspect-ratio: 4 / 3; object-fit: cover; border-radius: 38% 42% 36% 30% / 32% 34% 28% 30%; }
+#main.nursery-main .season-card.summer > img { object-position: 45% center; }
+#main.nursery-main .season-card.autumn > img { object-fit: contain; background: #fff2e6; }
+#main.nursery-main .season-card.winter > img { object-fit: contain; background: #f1f7fc; }
+
+#main.nursery-main #instagram { padding-block: 80px; background: #ffe4ee; border-radius: 0 0 48% 52% / 0 0 2% 3%; }
+#main.nursery-main #instagram .section-heading h2 { color: var(--nursery-accent); }
+#main.nursery-main #instagram .section-heading { margin-bottom: 36px; }
+
+#main.nursery-main .admission-section { background: #fff; padding-block: var(--nursery-space); }
+#main.nursery-main .admission-inner { align-items: center; gap: 45px; }
+#main.nursery-main .admission-copy h2 { font-size: clamp(1.6rem, 2.7vw, 2.5rem); }
+#main.nursery-main .support-list > div { gap: 12px; }
+#main.nursery-main .visit-invite { display: flex; gap: 14px; align-items: center; background: #f7d873; border: 0; border-radius: 44px 70px 48px 58px; padding: 32px 24px; box-shadow: none; }
+#main.nursery-main .visit-invite :is(h3, p) { color: #44352d; }
+#main.nursery-main .visit-invite .visit-guide { display: block; flex: 0 0 100px; width: 100px; height: 200px; margin: 0; object-fit: contain; transform: scaleX(-1); }
+#main.nursery-main .visit-invite h3 { font-size: 1.5rem; }
+#main.nursery-main .overview { padding-top: 28px; }
+
+/* 配色の役割: セクション色 = 見出し・補助操作、共通ピンク = 見学/フォロー。
+   アクセントだけでなく、下地・本文・境界線・ホバーまで同じ色相に揃える。
+   写真やヘッダー/フッターの色にはフィルターをかけない。 */
+#main.nursery-main {
+  --section-ink: #343c56;
+  --section-muted: #59647b;
+  --section-accent: #3c53a6;
+  --section-hover: #293d87;
+  --section-soft: #edf1ff;
+  --section-line: #cdd7f0;
+  --rose-surface: #fff0f5;
+}
+#main.nursery-main > section {
+  --hp-ink: var(--section-ink);
+  --hp-muted: var(--section-muted);
+  --hp-line: var(--section-line);
+  --hp-pink-deep: var(--section-accent);
+  --hp-pink-soft: var(--section-soft);
+  color: var(--section-ink);
+}
+#main.nursery-main > section .section-heading h2,
+#main.nursery-main > section .text-link { color: var(--section-accent); }
+#main.nursery-main > section :is(.section-heading p, .feature-item p, .food-card p, .experience-copy p) { color: var(--section-muted); }
+#main.nursery-main > section .button.secondary { color: var(--section-accent); border-color: var(--section-accent); background: #fff; box-shadow: none; }
+#main.nursery-main > section .button.secondary:hover { color: var(--section-hover); background: var(--section-soft); border-color: var(--section-hover); }
+#main.nursery-main > section .text-link:hover { color: var(--section-hover); }
+#main.nursery-main > section .button.primary,
+#main.nursery-main .dream-visit { background: var(--nursery-accent); color: #fff; border-color: transparent; }
+#main.nursery-main > section .button.primary:hover,
+#main.nursery-main .dream-visit:hover { background: #962060; }
+#main.nursery-main > section :is(a, button):focus-visible { outline-color: var(--section-accent); }
+
+/* TOP → Instagram: ローズの下地を波形とフェードにも引き継ぐ。 */
+#main.nursery-main :is(.dream-hero, #instagram) {
+  --section-ink: #492d40;
+  --section-muted: #705260;
+  --section-accent: #ad286e;
+  --section-hover: #862055;
+  --section-soft: #fff0f5;
+  --section-line: #efc5d8;
+}
+#main.nursery-main .dream-description { color: var(--section-muted); }
+#main.nursery-main .dream-about { color: var(--section-accent); }
+#main.nursery-main .dream-about:hover { color: var(--section-hover); }
+#main.nursery-main .dream-controls button { color: var(--section-accent); border-color: var(--section-accent); background: #fff9fc; }
+#main.nursery-main .dream-controls button:hover { background: #fbe0eb; }
+#main.nursery-main .dream-thumb.is-active { border-color: var(--section-accent); background: var(--section-soft); }
+#main.nursery-main .dream-wave { fill: var(--rose-surface); }
+#main.nursery-main #instagram { background: var(--rose-surface); }
+#main.nursery-main #instagram .section-heading h2 { color: var(--section-accent); }
+#main.nursery-main #instagram .ig-marquee::before { background: linear-gradient(to right, var(--rose-surface) 8%, #fff0f5b3 45%, #fff0f500); }
+#main.nursery-main #instagram .ig-marquee::after { background: linear-gradient(to left, var(--rose-surface) 8%, #fff0f5b3 45%, #fff0f500); }
+
+/* 特長 → 理念: 黄色を核に、温かな茶系の文字とクリームの余白。 */
+#main.nursery-main #features {
+  --section-ink: #51422d;
+  --section-muted: #6a5c49;
+  --section-accent: #79541f;
+  background: #fffdf6;
+}
+#main.nursery-main #concept { --section-accent: #65441b; --section-hover: #4e3211; --section-muted: #57462c; }
+#main.nursery-main .concept-statement h2,
+#main.nursery-main .concept-statement .text-link { color: var(--section-accent); }
+#main.nursery-main .concept-statement p { color: var(--section-muted); }
+
+/* クラス紹介: 虹色を受け止める、低彩度の青い下地。 */
+#main.nursery-main #classes { background: #f7f8ff; }
+#main.nursery-main #classes .center-cta .text-link { color: var(--section-accent); }
+
+/* 特別指導: ラベンダーの見出し・写真の影・操作ボタンを統一。 */
+#main.nursery-main #childcare {
+  --section-ink: #49385c;
+  --section-muted: #6a5a79;
+  --section-accent: #694299;
+  --section-hover: #4d2d77;
+  --section-soft: #e9e0f5;
+  --section-line: #d7c8eb;
+  background: #f4effb;
+}
+#main.nursery-main .experience-copy h2 { color: var(--section-ink); }
+#main.nursery-main #childcare::before { background: #e4daf6; }
+#main.nursery-main #childcare::after { background: var(--section-soft); }
+#main.nursery-main .experience-copy h2 span { color: var(--section-accent); }
+#main.nursery-main .experience-photo { background: #fff; box-shadow: 10px 12px 0 var(--nursery-lavender); }
+#main.nursery-main .lesson-list strong { color: var(--section-accent); }
+
+/* 食育: 写真の枠から補足・リンクまで、畑を感じるグリーン系。 */
+#main.nursery-main #food {
+  --section-ink: #294a3f;
+  --section-muted: #506b60;
+  --section-accent: #196650;
+  --section-hover: #104b3a;
+  --section-soft: #e2f3e9;
+  --section-line: #bfdccd;
+  background: #f5fbf7;
+}
+#main.nursery-main .food-photo { background: #b8e3cf; }
+#main.nursery-main .food-card:nth-child(2) .food-photo { background: #cfeadb; }
+#main.nursery-main .food-card h3 { color: var(--section-accent); }
+#main.nursery-main .food-care-note { color: var(--section-muted); }
+
+/* 行事: 青の下地に四季の色。見出し・箇条書きも各季節に連動。 */
+#main.nursery-main #events { background: #eef3fc; }
+#main.nursery-main .season-card.spring { --season-ink: #933965; --season-soft: #f9e8f0; }
+#main.nursery-main .season-card.summer { --season-ink: #206957; --season-soft: #e3f3ed; }
+#main.nursery-main .season-card.autumn { --season-ink: #83531f; --season-soft: #fbefdb; }
+#main.nursery-main .season-card.winter { --season-ink: #614491; --season-soft: #eee7f8; }
+#main.nursery-main .season-card h3,
+#main.nursery-main .season-card li::before { color: var(--season-ink); }
+#main.nursery-main .season-card > img { background: var(--season-soft); }
+
+/* 入園案内: 暖かな黄色に茶系の本文。見学CTAのみブランド色。 */
+#main.nursery-main #admission {
+  --section-ink: #55412b;
+  --section-muted: #6b5b47;
+  --section-accent: #7c551e;
+  --section-hover: #593b12;
+  --section-soft: #fff3d4;
+  --section-line: #e9d6b0;
+  background: #fffdf7;
+}
+#main.nursery-main .admission-copy h2 { color: var(--section-accent); }
+#main.nursery-main .admission-copy > p { color: var(--section-muted); }
+#main.nursery-main .visit-invite { background: #f7dc8b; }
+#main.nursery-main .visit-invite :is(h3, p) { color: #57412a; }
+
+/* 施設情報: 青みのグレーで、表と地図を一つの情報ブロックに。 */
+#main.nursery-main #overview { background: #fff; }
+#main.nursery-main .overview-table a { text-decoration-color: var(--section-line); }
+#main.nursery-main .map-card { background: #f2f5fc; }
+#main.nursery-main .map-road { stroke: #d5def0; }
+#main.nursery-main .map-water { stroke: #b9d8ed; }
+
+/* レスポンシブは通常フローで再配置。スクロール量や編集時の座標に依存しない。 */
+@media (max-width: 900px) {
+  #main.nursery-main .feature-grid { grid-template-columns: 1fr; gap: 36px; }
+  #main.nursery-main .feature-item { display: grid; grid-template-columns: 150px minmax(0, 1fr); column-gap: 26px; text-align: left; }
+  #main.nursery-main .feature-art { grid-row: 1 / 3; align-self: center; width: 150px; height: 140px; margin: 0; }
+  #main.nursery-main .feature-art img { width: 132px; height: 120px; }
+  #main.nursery-main .feature-item h3 { align-self: end; margin: 0 0 10px; font-size: 1rem; }
+  #main.nursery-main .feature-item p { align-self: start; max-width: none; margin: 0; padding: 0; }
+  #main.nursery-main .concept-band { padding-block: 80px; }
+  #main.nursery-main .experiences-inner { grid-template-columns: 1fr; }
+  #main.nursery-main .experience-photo { max-width: 560px; margin: auto; height: clamp(260px, 54vw, 390px); }
+  #main.nursery-main .lesson-list { max-width: 560px; width: 100%; margin-inline: auto; }
+  #main.nursery-main .food-grid { display: grid; grid-template-columns: 1fr; gap: 40px; }
+  #main.nursery-main .food-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 28px; }
+  #main.nursery-main .food-photo { grid-row: 1 / 3; margin: 0; height: 225px; }
+  #main.nursery-main .food-card h3 { align-self: end; }
+  #main.nursery-main .hscroll-track { width: 100%; margin: 0 auto; padding: 0; overflow: visible; }
+  #main.nursery-main .hscroll-item { width: auto; }
+  #main.nursery-main .season-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 24px; }
+  #main.nursery-main .admission-inner { grid-template-columns: 1fr; }
+  #main.nursery-main .visit-invite { max-width: none; }
+}
+
+@media (max-width: 540px) {
+  #main.nursery-main .section-heading { margin-bottom: 30px; }
+  #main.nursery-main .section-heading p { font-size: .88rem; }
+  #main.nursery-main .section-mascot { width: 84px; height: 74px; margin-bottom: 12px; }
+  #main.nursery-main .feature-item { grid-template-columns: 1fr; max-width: 360px; margin-inline: auto; }
+  #main.nursery-main .feature-art { grid-row: auto; width: min(100%, 270px); height: 178px; margin: 0 auto; padding-bottom: 14px; }
+  #main.nursery-main .feature-art img { width: 186px; height: 142px; }
+  #main.nursery-main .feature-item h3 { align-self: auto; margin: -18px auto 14px; font-size: .98rem; }
+  #main.nursery-main .feature-item p { max-width: 300px; margin-inline: auto; font-size: .9rem; }
+  #main.nursery-main .concept-band { padding-block: 72px; border-radius: 40% 60% 40% 60% / 4% 5% 4% 5%; }
+  #main.nursery-main .concept-statement h2 { font-size: 1.45rem; line-height: 1.8; }
+  #main.nursery-main .concept-statement p { font-size: .86rem; }
+  #main.nursery-main .concept-cloud { top: 26px; right: 8%; width: 60px; }
+  #main.nursery-main .concept-garden { bottom: 12px; left: 4%; width: 52px; }
+  #main.nursery-main .class-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 10px; }
+  #main.nursery-main .class-card { padding: 20px 5px; }
+  #main.nursery-main .class-card img { width: 50px; height: 50px; }
+  #main.nursery-main .class-card strong { font-size: .9rem; }
+  #main.nursery-main .experience-copy h2 { font-size: 1.7rem; }
+  #main.nursery-main .lesson-list { gap: 8px; }
+  #main.nursery-main .lesson-list strong { font-size: .72rem; }
+  #main.nursery-main .food-card { display: block; max-width: 380px; margin-inline: auto; }
+  #main.nursery-main .food-photo { height: 250px; margin-bottom: 20px; }
+  #main.nursery-main .food-care-note { text-align: left; }
+  #main.nursery-main .season-grid { gap: 30px 16px; }
+  #main.nursery-main .season-card { display: block; padding: 0; }
+  #main.nursery-main .season-card > img { width: 100%; height: auto; aspect-ratio: 1 / 1; margin-bottom: 14px; }
+  #main.nursery-main .season-card h3 { flex-direction: column; align-items: flex-start; gap: 8px; font-size: .9rem; }
+  #main.nursery-main .season-card h3 span { width: 36px; height: 36px; font-size: 1.05rem; }
+  #main.nursery-main .season-card li { font-size: .75rem; }
+  #main.nursery-main #instagram { padding-block: 55px; }
+  #main.nursery-main .visit-invite { padding: 28px 20px; gap: 8px; }
+  #main.nursery-main .visit-invite .visit-guide { flex-basis: 65px; width: 65px; height: 170px; }
+  #main.nursery-main .visit-invite h3 { font-size: 1.3rem; }
+  #main.nursery-main .visit-invite p { font-size: .86rem; }
+  #main.nursery-main .visit-invite .button { padding-inline: 15px; font-size: .8rem; }
+}
+
+/* =========================================================================
+   キャラクター素材（assets/mascots/chara-*.webp / item-*.webp）
+   すべて装飾なので本文の流れを押し広げない位置に置き、スマホでは縮小する。
+   ========================================================================= */
+@keyframes chara-sway {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(-2deg); }
+}
+
+/* TOP: 写真のふちから手をふるライオン。写真の高さ（幅÷1.36）を基準に置く */
+#main.nursery-main .dream-chara {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: clamp(-46px, -2.6vw, -20px);
+  width: clamp(112px, 11vw, 158px);
+  height: auto;
+  margin-top: calc(73.5% - clamp(88px, 8.6vw, 124px));
+  pointer-events: none;
+  filter: drop-shadow(0 6px 10px rgba(73, 43, 66, .14));
+  animation: chara-sway 5.5s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+/* 特長: 透過キャラを淡い色のまるの上に */
+#main.nursery-main .feature-art img { filter: drop-shadow(0 6px 8px rgba(81, 66, 45, .1)); }
+
+/* 理念: 6匹の集合を言葉の横に */
+#main.nursery-main .concept-statement:has(.concept-friends) {
+  display: grid;
+  grid-template-columns: clamp(170px, 20vw, 250px) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: center;
+  max-width: 960px;
+  text-align: left;
+}
+#main.nursery-main .concept-statement:has(.concept-friends) p { margin-inline: 0; }
+#main.nursery-main .concept-friends {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 14px rgba(101, 68, 27, .16));
+}
+
+/* クラス: 全身のキャラがカードのふちから顔を出す */
+#main.nursery-main .class-grid { padding-top: 46px; row-gap: 62px; }
+#main.nursery-main .class-card { justify-content: flex-start; min-height: 0; padding: 0 10px 22px; }
+#main.nursery-main .class-card .class-chara {
+  width: clamp(88px, 8.4vw, 112px);
+  height: clamp(88px, 8.4vw, 112px);
+  margin: -46px 0 6px;
+  filter: drop-shadow(0 5px 6px rgba(53, 46, 67, .14));
+}
+#main.nursery-main .class-card strong { font-size: 1.02rem; white-space: nowrap; }
+#main.nursery-main .season-card li { word-break: keep-all; overflow-wrap: anywhere; }
+
+/* 特別指導: 動物が先生役 */
+#main.nursery-main .lesson-list li { gap: 6px; }
+#main.nursery-main .lesson-list img { width: clamp(84px, 7.4vw, 108px); height: clamp(76px, 6.8vw, 96px); }
+
+/* 行事: 季節の服を着たキャラが写真の角にちょこんと */
+#main.nursery-main .season-card { position: relative; }
+#main.nursery-main .season-card > img.season-chara {
+  position: absolute;
+  z-index: 2;
+  top: clamp(-34px, -2.4vw, -22px);
+  right: clamp(-14px, -.8vw, -6px);
+  width: clamp(80px, 8vw, 112px);
+  height: auto;
+  aspect-ratio: auto;
+  margin: 0;
+  border-radius: 0;
+  background: none;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 5px 6px rgba(53, 46, 67, .16));
+}
+#main.nursery-main .season-grid { padding-top: 12px; }
+
+/* Instagram: 帯の境目に座って絵をかくリス（高さを増やさない） */
+#main.nursery-main #instagram { overflow: visible; }
+#main.nursery-main .ig-chara {
+  position: absolute;
+  z-index: 2;
+  top: clamp(-58px, -4vw, -40px);
+  right: max(18px, calc(50% - 560px));
+  width: clamp(84px, 8.5vw, 124px);
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 8px rgba(73, 45, 64, .14));
+}
+
+/* 入園案内: 旗を持ったひよこが見学をご案内 */
+#main.nursery-main .visit-invite .visit-guide {
+  flex: 0 0 clamp(96px, 10vw, 134px);
+  width: clamp(96px, 10vw, 134px);
+  height: auto;
+  transform: none;
+  animation: chara-sway 6s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+/* 飾りの小物は色がはっきりしているので薄くしない */
+#main.nursery-main .sec-deco[src*="assets/mascots/"] { opacity: 1; filter: drop-shadow(0 4px 6px rgba(53, 46, 67, .12)); }
+
+/* 行事: 見出しの右上にガーランド（上辺のカーブを避けて少し下げる） */
+#main.nursery-main #events > .sec-deco.deco-tr { top: clamp(30px, 4vw, 60px); }
+
+/* 施設概要: 門柱の兵隊さんが看板をはさんでお出迎え。足元の高さを揃える */
+#main.nursery-main .welcome-gate {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(6px, 1.8vw, 22px);
+  width: min(100%, 520px);
+  margin: 0 auto clamp(22px, 3vw, 36px);
+}
+#main.nursery-main .gate-soldier {
+  flex: none;
+  width: clamp(58px, 8.2vw, 104px);
+  height: auto;
+  filter: drop-shadow(0 6px 6px rgba(53, 46, 67, .16));
+  animation: gate-bob 6s ease-in-out infinite;
+}
+#main.nursery-main .gate-soldier-right { animation-delay: -3s; }
+#main.nursery-main .gate-sign {
+  position: relative;
+  flex: 0 1 clamp(160px, 22vw, 280px);
+  min-width: 0;
+  container-type: inline-size;
+}
+#main.nursery-main .gate-sign img { display: block; width: 100%; height: auto; filter: drop-shadow(0 6px 6px rgba(53, 46, 67, .14)); }
+/* 看板の板の部分（上から22〜73%）に文字を収める。文字は看板の幅に比例 */
+#main.nursery-main .gate-sign p {
+  position: absolute;
+  inset: 25% 13% 30%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #5c3714;
+  font-family: "Zen Maru Gothic", sans-serif;
+  font-weight: 900;
+  font-size: 15px;
+  font-size: 7.8cqw;
+  line-height: 1.25;
+  letter-spacing: .04em;
+  text-align: center;
+  white-space: nowrap;
+}
+#main.nursery-main .gate-sign p span { font-size: 1.6em; color: #a8321f; letter-spacing: .08em; }
+@keyframes gate-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@media (max-width: 900px) {
+  #main.nursery-main .dream-chara { left: -8px; width: clamp(84px, 17vw, 120px); margin-top: calc(73.5% - clamp(64px, 13vw, 94px)); }
+  #main.nursery-main .concept-statement:has(.concept-friends) { grid-template-columns: 1fr; gap: 18px; justify-items: center; text-align: center; }
+  #main.nursery-main .concept-statement:has(.concept-friends) p { margin-inline: auto; }
+  #main.nursery-main .concept-friends { width: clamp(150px, 34vw, 210px); }
+  #main.nursery-main .class-grid { row-gap: 58px; }
+  #main.nursery-main .gate-soldier { width: clamp(58px, 11vw, 104px); }
+  #main.nursery-main .gate-sign { flex-basis: clamp(160px, 32vw, 280px); }
+}
+
+@media (max-width: 540px) {
+  #main.nursery-main .class-grid { padding-top: 34px; gap: 48px 10px; }
+  #main.nursery-main .class-card { padding: 0 4px 18px; }
+  #main.nursery-main .class-card .class-chara { width: 76px; height: 76px; margin: -34px 0 4px; }
+  #main.nursery-main .class-card strong { font-size: clamp(.84rem, 4.2vw, 1.02rem); }
+  #main.nursery-main .lesson-list { gap: 6px; }
+  #main.nursery-main .lesson-list img { width: clamp(58px, 18vw, 76px); height: clamp(54px, 16.5vw, 70px); }
+  #main.nursery-main .lesson-list strong { font-size: clamp(.66rem, 3.1vw, .74rem); line-height: 1.45; }
+  #main.nursery-main .season-card > img.season-chara { top: -20px; right: -6px; width: 64px; }
+  #main.nursery-main .ig-chara { top: -38px; right: 14px; width: 74px; }
+  #main.nursery-main .visit-invite .visit-guide { flex-basis: 76px; width: 76px; height: auto; }
+  #main.nursery-main .welcome-gate { gap: 6px; }
+  #main.nursery-main .gate-soldier { width: clamp(54px, 17vw, 78px); }
+  #main.nursery-main .gate-sign { flex-basis: clamp(150px, 50vw, 220px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main.nursery-main :is(.dream-chara, .visit-invite .visit-guide, .concept-cloud, .gate-soldier) { animation: none; }
+}
+
+/* ホバーアニメーション（本体は site.css 末尾）。TOP では ID 付きのルールが
+   pointer-events と待機アニメーションを決めているので、ここで上書きする。
+   待機のゆれ（transform）は止めずに、ホバーの動き（translate / rotate / scale）を重ねる */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  #main.nursery-main :is(.section-mascot, .sec-deco, .concept-cloud, .concept-garden, .dream-chara, .ig-chara),
+  #main.nursery-main .season-card > img.season-chara {
+    pointer-events: auto;
+  }
+  #main.nursery-main .dream-chara:hover { animation: chara-sway 5.5s ease-in-out infinite, hp-hop .8s cubic-bezier(.3, .7, .4, 1) both; }
+  #main.nursery-main .visit-invite:hover .visit-guide { animation: chara-sway 6s ease-in-out infinite, hp-hop .8s cubic-bezier(.3, .7, .4, 1) both; }
+  #main.nursery-main .concept-cloud:hover { animation: chara-sway 7s ease-in-out infinite, hp-drift 1.8s ease-in-out infinite; }
+}

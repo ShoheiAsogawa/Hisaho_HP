@@ -13,13 +13,26 @@
 - `news.html` - お知らせ
 - `styles.css` - ベース（リセット、ヘッダー土台）
 - `site.css` - サイト共通のデザインシステム。`<body class="hisaho">` に適用される
+- `nursery-main.css` - トップページ本文専用。画像配置・やわらかいフレーム・スマホ対応（ヘッダーとフッターは対象外）
+- `IMAGE-PLACEMENT.md` - 使用画像と配置場所の対応表
 - `script.js` - スクロール表示
 - `marquee.js` - Instagram投稿が無限に流れるマーキー（トップ・お知らせページで使用）
-- `assets/frame-wave.png` - パンフレット由来の虹色ブロブ。全ページの上下フレームに使用
-- `assets/frame-hill.png` - 緑の丘（予備）
-- `assets/illust/` - 水彩イラスト素材76点（透過PNG・用途がわかる名前に整理済み）
-- `assets/instagram/` - Instagram投稿画像（`post-*.jpg`。投稿と同じ 4:5 比率）
-- `assets/deco/` - イラストの元データ（未整理・重い。整理済み版は `assets/illust/`）
+
+### 画像フォルダ（`assets/`）
+
+| フォルダ | 中身 | 名前の付け方 |
+| --- | --- | --- |
+| `brand/` | ロゴ `logo-hisaho.png`、全ページ上下の虹色フレーム `frame-rainbow-wave.png` | 役割名 |
+| `nav/` | ヘッダーの動物アイコン6つ | `nav-<動物>.png` |
+| `photos/` | 園の写真（TOPスライダー・食育・行事） | `hero-<順番>-<内容>.jpg` / `<テーマ>-<内容>.jpg` |
+| `mascots/` | 太線スタイルのキャラと小物（WebP・透過）、門柱の兵隊さん（PNG・透過） | `chara-<動物>-<ポーズ>` / `item-<もの>` / `soldier-left・right` |
+| `illust/` | 水彩イラストの素材集（Deco Studio 用のパレット） | `<分類>-<もの>.png` |
+| `instagram/` | Instagram投稿画像（投稿と同じ 4:5 比率） | `post-<内容>.jpg` |
+| `_archive/` | 今はどのページでも使っていない旧素材（削除せず保管） | 元の名前のまま |
+| `_inbox/` | 新しい素材の受け取り口・加工前の元データ（Gitには入らない） | 自由 |
+| `deco/` | Deco Studio が書き出す素材・元データ（Gitには入らない。公開に使うものは `mascots/` へ移す） | 自由 |
+
+どの画像がどこに使われているかは `IMAGE-PLACEMENT.md` にまとめています。
 
 ## デザインの決まりごと
 
