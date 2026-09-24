@@ -2647,19 +2647,111 @@ body.hisaho {
 .hisaho .news-article {
   max-width: 760px;
   margin: 0 auto;
+  padding: clamp(24px, 4vw, 44px);
+  border-radius: 28px;
+  background: var(--hp-white);
+  box-shadow: var(--hp-shadow-soft);
 }
 
-.hisaho .news-back {
-  display: inline-block;
-  margin-bottom: 16px;
+.hisaho .news-article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px dashed var(--hp-line);
+  color: var(--hp-muted);
+  font-size: 0.9rem;
+}
+
+.hisaho .news-article .news-body p {
+  font-size: 1rem;
+  line-height: 1.95;
+}
+
+.hisaho .news-related {
+  margin: 28px 0 0;
+}
+
+.hisaho .news-contact {
+  margin-top: 36px;
+  padding: 22px 24px;
+  border-radius: 22px;
+  background: var(--hp-pink-soft);
+}
+
+.hisaho .news-contact-title {
+  margin: 0 0 6px;
+  color: var(--hp-pink-deep);
+  font-weight: 900;
+}
+
+.hisaho .news-contact p {
+  margin: 0;
+  color: var(--hp-muted);
+  font-size: 0.92rem;
+}
+
+.hisaho .news-contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.hisaho .news-pager {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 30px;
+}
+
+.hisaho .news-pager-link {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--hp-line);
+  border-radius: 16px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.hisaho .news-pager-link.older {
+  text-align: right;
+}
+
+.hisaho .news-pager-link small {
+  color: var(--hp-pink-deep);
   font-weight: 700;
 }
 
-.hisaho .news-kicker {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 18px;
+.hisaho .news-pager-link span {
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.hisaho .news-back-wrap {
+  margin: 28px 0 0;
+  text-align: center;
+}
+
+.hisaho .news-back {
+  font-weight: 700;
+}
+
+.hisaho .news-missing {
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .hisaho .news-pager {
+    grid-template-columns: 1fr;
+  }
+
+  .hisaho .news-pager-link.older {
+    text-align: left;
+  }
 }
 
 .hisaho .news-body h2,

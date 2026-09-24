@@ -86,17 +86,19 @@ async function renderNewsDetail(request: Request, env: Env, id: number): Promise
   assetUrl.pathname = "/news.html";
   const asset = await env.ASSETS.fetch(new Request(assetUrl, request));
   if (!asset.ok) return asset;
-  const row = await env.DB.prepare(
-    "SELECT id, published_at, category, tag_class, title, body, link_href, link_label, sort_order, published FROM news WHERE id = ? AND published = 1",
-  ).bind(id).first<NewsRow>();
-  if (!row) return new Response("記事が見つかりません", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
-  const plainTitle = row.title.replace(/<[^>]+>/g, "");
-  const link = safeHref(row.link_href);
-  const linkHtml = link ? `<p><a class="text-link" href="${escapeAttr(link)}">${allowWbr(row.link_label || "詳しく見る")}</a></p>` : "";
-  const tag = row.tag_class ? ` class="tag ${escapeAttr(row.tag_class)}"` : ` class="tag"`;
-  const label = escapeHtml(row.published_at.replace("-", ".").slice(0, 7));
-  const article = `<article class="news-article"><a class="news-back" href="/news.html">お知らせ一覧へ</a><p class="news-kicker"><time datetime="${escapeAttr(row.published_at)}">${label}</time><span${tag}>${escapeHtml(row.category)}</span></p>${renderBody(row.body)}${linkHtml}</article>`;
-  return new HTMLRewriter()
+  const result = await env.DB.prepare(
+    "SELECT id, published_at, category, tag_class, title, body, link_href, link_label, sort_order, published FROM news WHERE published = 1 ORDER BY sort_order ASC, published_at DESC, id DESC",
+  ).all<NewsRow>();
+  const rows = result.results ?? [];
+  const index = rows.findIndex((item) => item.id === id);
+  const row = rows[index];
+  const newer = index > 0 ? rows[index - 1] : null;
+  const older = index >= 0 && index < rows.length - 1 ? rows[index + 1] : null;
+  const plainTitle = row ? row.title.replace(/<[^>]+>/g, "") : "記事が見つかりません";
+  const description = row ? excerpt(row.body) : "お探しのお知らせは、公開を終了したか、アドレスが変わった可能性があります。";
+  const article = row ? renderDetailArticle(row, newer, older) : renderMissingArticle();
+  const heroLead = row ? "ひさほ保育園からのお知らせです。" : "お知らせ一覧から、ほかの記事をご覧ください。";
+  const rewritten = new HTMLRewriter()
     .on("head", { element(element) { element.prepend('<base href="/">', { html: true }); } })
     .on("link, script, img, source, a", {
       element(element) {
@@ -108,10 +110,54 @@ async function renderNewsDetail(request: Request, env: Env, id: number): Promise
       },
     })
     .on("title", { element(element) { element.setInnerContent(`${plainTitle} | お知らせ | 認定こども園 ひさほ保育園`); } })
-    .on(".page-hero-inner h1", { element(element) { element.setInnerContent(allowWbr(row.title), { html: true }); } })
-    .on(".page-hero-inner p", { element(element) { element.setInnerContent("お知らせの詳細です。"); } })
+    .on('meta[name="description"]', { element(element) { element.setAttribute("content", description); } })
+    .on(".page-hero-inner .eyebrow", { element(element) { element.setInnerContent("News"); } })
+    .on(".page-hero-inner h1", { element(element) { element.setInnerContent(row ? allowWbr(row.title) : "記事が見つかりません", { html: true }); } })
+    .on(".page-hero-inner p:not(.eyebrow)", { element(element) { element.setInnerContent(heroLead, { html: true }); } })
     .on("#news", { element(element) { element.setInnerContent(article, { html: true }); } })
     .transform(asset);
+  if (row) return rewritten;
+  return new Response(rewritten.body, { status: 404, headers: rewritten.headers });
+}
+
+function formatMonth(value: string): string {
+  const [year, month, day] = value.split("-");
+  if (day) return `${year}年${Number(month)}月${Number(day)}日`;
+  return `${year}年${Number(month)}月`;
+}
+
+function renderDetailArticle(row: NewsRow, newer: NewsRow | null, older: NewsRow | null): string {
+  const tag = row.tag_class ? ` class="tag ${escapeAttr(row.tag_class)}"` : ` class="tag"`;
+  const link = safeHref(row.link_href);
+  const related = link
+    ? `<div class="news-related"><a class="button primary" href="${escapeAttr(link)}">${allowWbr(row.link_label || "詳しく見る")}</a></div>`
+    : "";
+  const pager = [
+    newer ? `<a class="news-pager-link newer" href="/news/${newer.id}"><small>新しい記事</small><span>${allowWbr(newer.title)}</span></a>` : "<span></span>",
+    older ? `<a class="news-pager-link older" href="/news/${older.id}"><small>前の記事</small><span>${allowWbr(older.title)}</span></a>` : "<span></span>",
+  ].join("");
+  return `<article class="news-article">
+    <div class="news-article-meta"><span${tag}>${escapeHtml(row.category)}</span><time datetime="${escapeAttr(row.published_at)}">${escapeHtml(formatMonth(row.published_at))}</time></div>
+    ${renderBody(row.body)}
+    ${related}
+    <aside class="news-contact">
+      <p class="news-contact-title">ご質問・園見学のご相談</p>
+      <p>この記事について気になることがあれば、お気軽にお問い合わせください。</p>
+      <div class="news-contact-actions">
+        <a class="button primary" href="/visit.html#contact">お問い合わせ</a>
+        <a class="button" href="tel:0724275688">072-427-5688</a>
+      </div>
+    </aside>
+    <nav class="news-pager" aria-label="ほかのお知らせ">${pager}</nav>
+    <p class="news-back-wrap"><a class="news-back" href="/news.html">お知らせ一覧へ戻る</a></p>
+  </article>`;
+}
+
+function renderMissingArticle(): string {
+  return `<article class="news-article news-missing">
+    <p>お探しのお知らせは、公開を終了したか、アドレスが変わった可能性があります。</p>
+    <p class="news-back-wrap"><a class="button primary" href="/news.html">お知らせ一覧へ</a></p>
+  </article>`;
 }
 
 function rootUrl(value: string): string {
@@ -508,29 +554,64 @@ const ADMIN_HTML = `<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet" />
   <style>
-    :root { color-scheme: light; --pink:#ff66c4; --ink:#4a3144; --line:#f4cfe4; --bg:#fff8fc; }
+    :root { color-scheme: light; --pink:#e0529f; --pink-dark:#b83580; --ink:#34282f; --muted:#7a6570; --line:#ecdde6; --panel:#fff; --bg:#f7f3f5; }
     * { box-sizing: border-box; }
-    body { margin:0; font-family:"Zen Maru Gothic", sans-serif; color:var(--ink); background:linear-gradient(180deg,#fff 0,#fff0f8 240px); }
-    header, main { width:min(920px, calc(100% - 32px)); margin:0 auto; }
-    header { display:flex; justify-content:space-between; gap:16px; align-items:center; padding:28px 0 8px; }
-    h1 { font-size:1.6rem; margin:0; }
-    a { color:#c43d93; }
+    body { margin:0; font-family:"Zen Maru Gothic", sans-serif; color:var(--ink); background:var(--bg); }
+    a { color:var(--pink-dark); }
     button, input, textarea, select { font:inherit; }
-    button { border:0; border-radius:999px; background:var(--pink); color:#fff; padding:10px 16px; cursor:pointer; }
+    button { border:0; border-radius:10px; background:var(--pink); color:#fff; padding:10px 16px; font-weight:700; cursor:pointer; }
+    button:hover { background:var(--pink-dark); }
+    button:disabled { opacity:.45; cursor:default; }
     button.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
-    button.warn { background:#fff; color:#b4234a; border:1px solid #f3b3c6; }
-    .card { background:#fff; border:1px solid var(--line); border-radius:24px; padding:20px; margin:16px 0 28px; box-shadow:0 10px 30px rgba(255,102,196,.08); }
-    form.login { display:grid; gap:12px; max-width:420px; }
-    label { display:grid; gap:6px; font-weight:700; }
-    input, textarea, select { width:100%; border:1px solid var(--line); border-radius:14px; padding:10px 12px; background:#fff; color:var(--ink); }
-    textarea { min-height:110px; resize:vertical; }
-    .grid { display:grid; grid-template-columns: 160px 1fr 160px; gap:12px; }
+    button.ghost:hover { background:#fbf5f8; }
+    button.warn { background:#fff; color:#b4234a; border:1px solid #f1c2d0; }
+    .topbar { position:sticky; top:0; z-index:5; display:flex; justify-content:space-between; gap:16px; align-items:center; padding:12px 24px; background:#fff; border-bottom:1px solid var(--line); }
+    .brand { display:grid; gap:2px; }
+    .brand small { color:var(--muted); font-size:.78rem; }
+    .brand strong { font-size:1.1rem; }
     .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    article { border-top:1px dashed var(--line); padding:16px 0; }
-    article:first-child { border-top:0; padding-top:0; }
-    .meta { color:#8a6478; font-size:.92rem; }
-    .error { color:#b4234a; min-height:1.2em; }
-    .hidden { display:none; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px; }
+    .login-wrap { display:grid; place-items:center; min-height:calc(100vh - 70px); padding:24px; }
+    form.login { display:grid; gap:14px; width:min(380px, 100%); }
+    form.login h1 { margin:0; font-size:1.3rem; }
+    label { display:grid; gap:6px; font-size:.88rem; font-weight:700; }
+    input, textarea, select { width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; background:#fff; color:var(--ink); }
+    input:focus, select:focus, .editor:focus { outline:2px solid #f6c1df; outline-offset:0; }
+    .meta { margin:0; color:var(--muted); font-size:.84rem; }
+    .error { margin:0; color:#b4234a; min-height:1.2em; font-size:.88rem; }
+    .hidden { display:none !important; }
+    .workspace { display:grid; grid-template-columns:320px minmax(0, 1fr); gap:20px; padding:20px 24px 48px; }
+    .sidebar { display:grid; gap:12px; align-content:start; position:sticky; top:84px; max-height:calc(100vh - 104px); }
+    .sidebar-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .sidebar-head h2 { margin:0; font-size:1rem; }
+    .filters { display:flex; gap:6px; }
+    .filters button { flex:1; padding:6px 8px; border-radius:999px; font-size:.8rem; background:#fff; color:var(--muted); border:1px solid var(--line); }
+    .filters button.is-on { background:var(--ink); color:#fff; border-color:var(--ink); }
+    .post-list { display:grid; gap:8px; overflow:auto; padding-right:2px; }
+    .post { display:grid; gap:6px; padding:12px; border:1px solid var(--line); border-radius:12px; background:#fff; cursor:pointer; text-align:left; color:inherit; }
+    .post:hover { border-color:#e7b8d2; }
+    .post.is-active { border-color:var(--pink); box-shadow:0 0 0 2px #fbd9ea; }
+    .post-title { font-weight:700; line-height:1.45; }
+    .post-meta { display:flex; flex-wrap:wrap; gap:6px; align-items:center; color:var(--muted); font-size:.78rem; }
+    .badge { padding:2px 8px; border-radius:999px; font-size:.72rem; font-weight:700; }
+    .badge.live { background:#e2f6ec; color:#1d7a4a; }
+    .badge.draft { background:#f1eef0; color:#6d5c65; }
+    .post-actions { display:flex; gap:4px; }
+    .post-actions button { padding:4px 8px; border-radius:8px; font-size:.75rem; }
+    .editor-area { display:grid; grid-template-columns:minmax(0, 1fr) 280px; gap:20px; align-items:start; }
+    .main-col { display:grid; gap:14px; }
+    .title-input { font-size:1.35rem; font-weight:700; padding:14px 16px; }
+    .side-col { display:grid; gap:14px; position:sticky; top:84px; }
+    .side-col h3 { margin:0 0 12px; font-size:.95rem; }
+    .field-stack { display:grid; gap:12px; }
+    .switch { display:flex; gap:10px; align-items:center; font-weight:700; }
+    .switch input { width:auto; }
+    .publish-actions { display:grid; gap:8px; margin-top:14px; }
+    .status-line { display:flex; justify-content:space-between; align-items:center; font-size:.84rem; color:var(--muted); }
+    .toast { position:fixed; right:20px; bottom:20px; z-index:10; padding:12px 16px; border-radius:12px; background:var(--ink); color:#fff; font-weight:700; box-shadow:0 12px 30px rgba(0,0,0,.18); }
+    .empty { padding:18px; border:1px dashed var(--line); border-radius:12px; color:var(--muted); text-align:center; font-size:.88rem; }
+    @media (max-width:1080px) { .editor-area { grid-template-columns:1fr; } .side-col { position:static; } }
+    @media (max-width:820px) { .workspace { grid-template-columns:1fr; padding:14px; } .sidebar { position:static; max-height:none; } .topbar { padding:10px 14px; } }
     .wysiwyg { border:1px solid #d5dbe3; border-radius:10px; background:#fff; overflow:hidden; }
     .wysiwyg-bar { display:flex; flex-wrap:wrap; gap:2px; align-items:center; padding:6px; background:#f4f6f8; border-bottom:1px solid #e1e5ea; }
     .wysiwyg-bar button, .wysiwyg-bar select { width:34px; height:34px; margin:0; padding:0; border:0; border-radius:6px; background:transparent; color:#52606d; }
@@ -539,48 +620,54 @@ const ADMIN_HTML = `<!DOCTYPE html>
     .wysiwyg-bar svg { width:18px; height:18px; display:block; margin:auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
     .wysiwyg-bar .sep { width:1px; height:22px; margin:0 4px; background:#d5dbe3; }
     .wysiwyg-bar input[type="color"] { width:28px; height:28px; padding:0; border:0; background:transparent; }
-    .editor { min-height:260px; border:0; border-radius:0; padding:14px; background:#fff; font-weight:500; line-height:1.7; }
-    .editor:empty:before { content:"ここに文章を書いてください。選択して太字や見出しにできます。"; color:#b08aa0; }
-    .editor h2, .editor h3 { margin:0.6em 0 0.3em; }
-    .editor img { max-width:100%; }
-    .editor:focus { outline:2px solid #ffd0ea; }
-    .editor img { max-width:100%; height:auto; border-radius:12px; }
+    .editor { min-height:420px; border:0; border-radius:0; padding:18px 20px; background:#fff; font-weight:500; line-height:1.85; }
+    .editor:empty:before { content:"本文を入力してください。文字を選んでから、上のアイコンで装飾できます。"; color:#a98f9c; }
+    .editor h2, .editor h3 { margin:0.8em 0 0.3em; line-height:1.4; }
+    .editor img { display:block; max-width:100%; height:auto; margin:10px 0; border-radius:12px; }
     .editor table { width:100%; border-collapse:collapse; }
     .editor td { border:1px solid #e1e5ea; padding:8px; }
-    @media (max-width:720px) { .grid { grid-template-columns:1fr; } header { align-items:flex-start; flex-direction:column; } }
+    .editor blockquote { margin:10px 0; padding-left:12px; border-left:4px solid var(--line); color:var(--muted); }
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <p class="meta">認定こども園 ひさほ保育園</p>
-      <h1>お知らせ管理</h1>
+  <header class="topbar">
+    <div class="brand">
+      <small>認定こども園 ひさほ保育園</small>
+      <strong>お知らせ管理</strong>
     </div>
     <div class="row">
-      <a href="/news.html">公開ページを見る</a>
+      <a href="/news.html" target="_blank" rel="noopener">サイトを表示</a>
       <button id="logout" class="ghost hidden" type="button">ログアウト</button>
     </div>
   </header>
   <main>
-    <section id="login-card" class="card">
-      <form id="login-form" class="login">
-        <label>管理パスワード<input id="password" type="password" autocomplete="current-password" required /></label>
+    <section id="login-card" class="login-wrap">
+      <form id="login-form" class="login card">
+        <h1>ログイン</h1>
+        <p class="meta">お知らせを書いたり直したりするには、管理用パスワードを入力してください。</p>
+        <label>パスワード<input id="password" type="password" autocomplete="current-password" required /></label>
         <button type="submit">ログイン</button>
         <p id="login-error" class="error"></p>
       </form>
     </section>
-    <section id="editor" class="hidden">
-      <form id="news-form" class="card">
-        <h2 id="form-title">新しいお知らせ</h2>
-        <div class="grid">
-          <label>年月<input name="published_at" placeholder="2026-09" required /></label>
-          <label>見出し<input name="title" required /></label>
-          <label>区分
-            <select name="category">
-              <option>行事</option><option>国際交流</option><option>新しい取り組み</option><option>園見学</option><option>採用</option><option>お知らせ</option>
-            </select>
-          </label>
+    <section id="editor" class="workspace hidden">
+      <aside class="sidebar">
+        <div class="sidebar-head">
+          <h2>記事一覧 <span id="count" class="meta"></span></h2>
+          <button id="new-post" type="button">＋ 新規作成</button>
         </div>
+        <input id="search" type="search" placeholder="タイトルで探す" aria-label="記事を検索" />
+        <div class="filters" role="group" aria-label="表示する記事">
+          <button type="button" data-filter="all" class="is-on">すべて</button>
+          <button type="button" data-filter="live">公開中</button>
+          <button type="button" data-filter="draft">下書き</button>
+        </div>
+        <div id="list" class="post-list"></div>
+      </aside>
+      <form id="news-form" class="editor-area">
+        <div class="main-col">
+          <p id="form-title" class="meta">新しい記事を作成中</p>
+          <input name="title" class="title-input" placeholder="タイトルを入力" aria-label="タイトル" required />
         <div class="wysiwyg">
           <div class="wysiwyg-bar" id="toolbar">
             <select id="block-style" aria-label="段落">
@@ -618,28 +705,46 @@ const ADMIN_HTML = `<!DOCTYPE html>
           </div>
           <div id="body-editor" class="editor" contenteditable="true" aria-label="本文"></div>
         </div>
-        <div class="grid">
-          <label>ラベル色
-            <select name="tag_class">
-              <option value="">標準</option>
-              <option value="tag-pink">ピンク</option>
-              <option value="tag-out">アクセント</option>
-            </select>
-          </label>
-          <label>リンク先<input name="link_href" placeholder="visit.html" /></label>
-          <label>リンク文言<input name="link_label" placeholder="詳しく見る" /></label>
         </div>
-        <label class="row"><input name="published" type="checkbox" checked style="width:auto" /> 公開する</label>
-        <p class="meta">上のアイコンで、選んだ文章の太さ・配置・リスト・リンク・画像を変えられます。</p>
-        <div class="row">
-          <button type="submit">保存する</button>
-          <button id="cancel" class="ghost hidden" type="button">新規入力に戻す</button>
+        <div class="side-col">
+          <section class="card">
+            <h3>公開設定</h3>
+            <div class="field-stack">
+              <label class="switch"><input name="published" type="checkbox" checked /> サイトに公開する</label>
+              <label>掲載年月<input name="published_at" type="month" required /></label>
+              <label>カテゴリ
+                <select name="category">
+                  <option>お知らせ</option><option>行事</option><option>国際交流</option><option>新しい取り組み</option><option>園見学</option><option>採用</option>
+                </select>
+              </label>
+              <label>カテゴリの色
+                <select name="tag_class">
+                  <option value="">グレー</option>
+                  <option value="tag-pink">ピンク</option>
+                  <option value="tag-out">アクセント</option>
+                </select>
+              </label>
+            </div>
+            <div class="publish-actions">
+              <button id="save" type="submit">公開する</button>
+              <a id="view-post" class="hidden" href="#" target="_blank" rel="noopener">公開ページで確認</a>
+              <button id="delete-post" class="warn hidden" type="button">この記事を削除</button>
+            </div>
+            <p id="form-error" class="error"></p>
+          </section>
+          <section class="card">
+            <h3>記事の下に出すボタン</h3>
+            <div class="field-stack">
+              <label>ボタンの文字<input name="link_label" placeholder="例：園見学を予約する" /></label>
+              <label>リンク先<input name="link_href" placeholder="例：visit.html" /></label>
+              <p class="meta">空欄のままならボタンは表示されません。</p>
+            </div>
+          </section>
         </div>
-        <p id="form-error" class="error"></p>
       </form>
-      <section id="list" class="card"></section>
     </section>
   </main>
+  <div id="toast" class="toast hidden" role="status"></div>
   <script>
     const loginCard = document.querySelector("#login-card");
     const editor = document.querySelector("#editor");
@@ -647,15 +752,28 @@ const ADMIN_HTML = `<!DOCTYPE html>
     const editorBody = document.querySelector("#body-editor");
     const form = document.querySelector("#news-form");
     const logout = document.querySelector("#logout");
-    const cancel = document.querySelector("#cancel");
+    const saveButton = document.querySelector("#save");
+    const deleteButton = document.querySelector("#delete-post");
+    const viewLink = document.querySelector("#view-post");
     let editing = null;
     let items = [];
+    let filter = "all";
+    let dirty = false;
 
     async function api(path, options = {}) {
       const response = await fetch(path, { credentials: "same-origin", headers: { "content-type": "application/json" }, ...options });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || "保存できませんでした");
+      if (!response.ok) throw new Error(data.error || "保存できませんでした。時間をおいてもう一度お試しください。");
       return data;
+    }
+
+    let toastTimer;
+    function toast(message) {
+      const element = document.querySelector("#toast");
+      element.textContent = message;
+      element.classList.remove("hidden");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => element.classList.add("hidden"), 2600);
     }
 
     function showApp(on) {
@@ -664,50 +782,86 @@ const ADMIN_HTML = `<!DOCTYPE html>
       logout.classList.toggle("hidden", !on);
     }
 
+    function confirmDiscard() {
+      return !dirty || confirm("保存していない変更があります。破棄して移動しますか？");
+    }
+
+    function thisMonth() {
+      const now = new Date();
+      return now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+    }
+
+    function syncActions() {
+      const item = items.find((entry) => entry.id === editing);
+      saveButton.textContent = form.published.checked ? (editing ? "更新する" : "公開する") : "下書き保存";
+      deleteButton.classList.toggle("hidden", !editing);
+      viewLink.classList.toggle("hidden", !(item && item.published === 1));
+      if (item) viewLink.href = "/news/" + item.id;
+    }
+
     function resetForm() {
       editing = null;
       form.reset();
       form.published.checked = true;
+      form.published_at.value = thisMonth();
       editorBody.innerHTML = "";
-      document.querySelector("#form-title").textContent = "新しいお知らせ";
-      cancel.classList.add("hidden");
+      document.querySelector("#form-title").textContent = "新しい記事を作成中";
       document.querySelector("#form-error").textContent = "";
+      dirty = false;
+      syncActions();
+      render();
     }
 
     function fillForm(item) {
       editing = item.id;
-      form.published_at.value = item.published_at;
-      form.title.value = item.title;
+      form.published_at.value = String(item.published_at).slice(0, 7);
+      form.title.value = item.title.replaceAll("<wbr>", "");
       form.category.value = item.category;
       editorBody.innerHTML = item.body;
       form.tag_class.value = item.tag_class || "";
       form.link_href.value = item.link_href || "";
       form.link_label.value = item.link_label || "";
       form.published.checked = item.published === 1;
-      document.querySelector("#form-title").textContent = "お知らせを編集";
-      cancel.classList.remove("hidden");
+      document.querySelector("#form-title").textContent = "記事を編集中";
+      document.querySelector("#form-error").textContent = "";
+      dirty = false;
+      syncActions();
+      render();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function render() {
-      list.innerHTML = items.length ? "" : "<p>まだお知らせはありません。</p>";
-      items.forEach((item, index) => {
-        const article = document.createElement("article");
-        const status = item.published === 1 ? "公開中" : "下書き";
-        article.innerHTML = \`<p class="meta">\${item.published_at} / \${item.category} / \${status}</p><h3></h3><p></p>\`;
-        article.querySelector("h3").textContent = item.title.replaceAll("<wbr>", "");
-        article.querySelector("p:last-child").textContent = item.body.replace(/<[^>]+>/g, "").slice(0, 120);
+      const query = document.querySelector("#search").value.trim();
+      const visible = items.filter((item) => {
+        if (filter === "live" && item.published !== 1) return false;
+        if (filter === "draft" && item.published === 1) return false;
+        return !query || item.title.includes(query);
+      });
+      document.querySelector("#count").textContent = "（" + items.length + "件）";
+      list.innerHTML = visible.length ? "" : '<p class="empty">該当する記事はありません。</p>';
+      visible.forEach((item) => {
+        const index = items.indexOf(item);
+        const card = document.createElement("div");
+        card.className = "post" + (item.id === editing ? " is-active" : "");
+        card.tabIndex = 0;
+        const live = item.published === 1;
+        card.innerHTML = '<div class="post-meta"><span class="badge ' + (live ? "live" : "draft") + '">' + (live ? "公開中" : "下書き") + '</span><span></span></div><div class="post-title"></div>';
+        card.querySelector(".post-meta span:last-child").textContent = String(item.published_at).replace("-", ".") + " ・ " + item.category;
+        card.querySelector(".post-title").textContent = item.title.replaceAll("<wbr>", "");
         const actions = document.createElement("div");
-        actions.className = "row";
-        const up = button("上へ", () => move(index, -1));
-        const down = button("下へ", () => move(index, 1));
-        const edit = button("編集", () => fillForm(item), "ghost");
-        const remove = button("削除", () => removeItem(item), "warn");
-        if (index === 0) up.disabled = true;
-        if (index === items.length - 1) down.disabled = true;
-        actions.append(up, down, edit, remove);
-        article.append(actions);
-        list.append(article);
+        actions.className = "post-actions";
+        const up = button("↑ 上へ", () => move(index, -1), "ghost");
+        const down = button("↓ 下へ", () => move(index, 1), "ghost");
+        up.title = "一覧で上に表示";
+        down.title = "一覧で下に表示";
+        if (index === 0 || query || filter !== "all") up.disabled = true;
+        if (index === items.length - 1 || query || filter !== "all") down.disabled = true;
+        actions.append(up, down);
+        card.append(actions);
+        const open = () => { if (item.id !== editing && confirmDiscard()) fillForm(item); };
+        card.addEventListener("click", (event) => { if (!event.target.closest("button")) open(); });
+        card.addEventListener("keydown", (event) => { if (event.key === "Enter" && event.target === card) open(); });
+        list.append(card);
       });
     }
 
@@ -724,6 +878,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
       const data = await api("/api/news");
       items = data.news;
       render();
+      syncActions();
     }
 
     async function move(index, delta) {
@@ -732,14 +887,18 @@ const ADMIN_HTML = `<!DOCTYPE html>
       [next[index], next[target]] = [next[target], next[index]];
       await api("/api/news/reorder", { method: "POST", body: JSON.stringify({ ids: next.map((item) => item.id) }) });
       await load();
+      toast("並び順を変更しました");
     }
 
-    async function removeItem(item) {
-      if (!confirm("このお知らせを削除しますか？")) return;
+    deleteButton.addEventListener("click", async () => {
+      const item = items.find((entry) => entry.id === editing);
+      if (!item || !confirm("「" + item.title.replaceAll("<wbr>", "") + "」を削除します。元に戻せませんがよろしいですか？")) return;
       await api("/api/news/" + item.id, { method: "DELETE" });
-      if (editing === item.id) resetForm();
+      dirty = false;
       await load();
-    }
+      resetForm();
+      toast("記事を削除しました");
+    });
 
     document.querySelector("#login-form").addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -747,10 +906,10 @@ const ADMIN_HTML = `<!DOCTYPE html>
       try {
         await api("/api/login", { method: "POST", body: JSON.stringify({ password: document.querySelector("#password").value }) });
         showApp(true);
-        resetForm();
         await load();
+        resetForm();
       } catch (error) {
-        document.querySelector("#login-error").textContent = error.message;
+        document.querySelector("#login-error").textContent = "パスワードが違います。";
       }
     });
 
@@ -758,6 +917,11 @@ const ADMIN_HTML = `<!DOCTYPE html>
       event.preventDefault();
       const error = document.querySelector("#form-error");
       error.textContent = "";
+      if (!editorBody.textContent.trim() && !editorBody.querySelector("img")) {
+        error.textContent = "本文を入力してください。";
+        editorBody.focus();
+        return;
+      }
       const payload = {
         published_at: form.published_at.value,
         title: form.title.value,
@@ -768,14 +932,36 @@ const ADMIN_HTML = `<!DOCTYPE html>
         link_label: form.link_label.value,
         published: form.published.checked
       };
+      const wasEditing = Boolean(editing);
+      saveButton.disabled = true;
       try {
-        if (editing) await api("/api/news/" + editing, { method: "PUT", body: JSON.stringify(payload) });
-        else await api("/api/news", { method: "POST", body: JSON.stringify(payload) });
-        resetForm();
+        const saved = editing
+          ? await api("/api/news/" + editing, { method: "PUT", body: JSON.stringify(payload) })
+          : await api("/api/news", { method: "POST", body: JSON.stringify(payload) });
+        dirty = false;
         await load();
+        const id = editing || saved?.news?.id || saved?.id;
+        const item = items.find((entry) => entry.id === id);
+        if (item) fillForm(item);
+        toast(!payload.published ? "下書きを保存しました" : wasEditing ? "更新しました" : "公開しました");
       } catch (err) {
         error.textContent = err.message;
+      } finally {
+        saveButton.disabled = false;
       }
+    });
+
+    form.addEventListener("input", () => { dirty = true; syncActions(); });
+    editorBody.addEventListener("input", () => { dirty = true; });
+    window.addEventListener("beforeunload", (event) => { if (dirty) event.preventDefault(); });
+    document.querySelector("#new-post").addEventListener("click", () => { if (confirmDiscard()) resetForm(); });
+    document.querySelector("#search").addEventListener("input", render);
+    document.querySelectorAll("[data-filter]").forEach((element) => {
+      element.addEventListener("click", () => {
+        filter = element.dataset.filter;
+        document.querySelectorAll("[data-filter]").forEach((other) => other.classList.toggle("is-on", other === element));
+        render();
+      });
     });
 
     document.querySelectorAll("[data-cmd]").forEach((button) => {
@@ -855,13 +1041,13 @@ const ADMIN_HTML = `<!DOCTYPE html>
       return new File([blob], "photo.jpg", { type: "image/jpeg" });
     }
 
-    cancel.addEventListener("click", resetForm);
     logout.addEventListener("click", async () => {
+      if (!confirmDiscard()) return;
       await api("/api/logout", { method: "POST", body: "{}" });
       showApp(false);
     });
 
-    api("/api/me").then(async () => { showApp(true); await load(); }).catch(() => showApp(false));
+    api("/api/me").then(async () => { showApp(true); await load(); resetForm(); }).catch(() => showApp(false));
   </script>
 </body>
 </html>`;
