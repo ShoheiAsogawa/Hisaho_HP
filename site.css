@@ -2837,7 +2837,7 @@ body.hisaho {
 }
 
 .hisaho.news-detail-page #news > :not(.sec-deco) {
-  max-width: 760px;
+  max-width: min(960px, 100%);
   margin-inline: auto;
 }
 
@@ -2901,63 +2901,6 @@ body.hisaho {
 .hisaho .news-related {
   margin: 28px 0 0;
   text-align: center;
-}
-
-.hisaho .news-contact {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 8px 20px;
-  align-items: center;
-  margin-top: 24px;
-  padding: 22px 26px;
-  border: 2px dashed var(--hp-line);
-  border-radius: 24px;
-  background: var(--hp-pink-soft);
-}
-
-.hisaho .news-contact-mascot {
-  width: 64px;
-  height: auto;
-}
-
-.hisaho .news-contact-title {
-  margin: 0 0 4px;
-  color: var(--hp-pink-deep);
-  font-size: 1.02rem;
-  font-weight: 900;
-}
-
-.hisaho .news-contact p {
-  margin: 0;
-  color: var(--hp-muted);
-  font-size: 0.9rem;
-}
-
-.hisaho .news-contact-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.hisaho .news-contact .button {
-  min-height: 46px;
-  padding-inline: 22px;
-  white-space: nowrap;
-}
-
-.hisaho .news-tel {
-  border: 2px solid var(--hp-pink-deep);
-  background: var(--hp-white);
-  color: var(--hp-pink-deep);
-}
-
-.hisaho .news-tel svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linejoin: round;
 }
 
 .hisaho .news-pager {
@@ -3060,24 +3003,6 @@ body.hisaho {
 }
 
 @media (max-width: 700px) {
-  .hisaho .news-contact {
-    grid-template-columns: auto 1fr;
-    padding: 20px;
-  }
-
-  .hisaho .news-contact-mascot {
-    width: 52px;
-  }
-
-  .hisaho .news-contact-actions {
-    grid-column: 1 / -1;
-  }
-
-  .hisaho .news-contact-actions .button {
-    flex: 1 1 140px;
-    justify-content: center;
-  }
-
   .hisaho .news-pager {
     grid-template-columns: 1fr;
     gap: 10px;

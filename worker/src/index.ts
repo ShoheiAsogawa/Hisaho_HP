@@ -215,17 +215,6 @@ function renderDetailArticle(row: NewsRow, newer: NewsRow | null, older: NewsRow
       ${related}
     </div>
   </article>
-  <aside class="news-contact">
-    <img class="news-contact-mascot" src="/assets/mascots/chara-panda-heart.webp" alt="" aria-hidden="true" width="367" height="440" loading="lazy" decoding="async">
-    <div class="news-contact-text">
-      <p class="news-contact-title">ご質問・園見学のご相談</p>
-      <p>この記事について気になることがあれば、お気軽にお問い合わせください。</p>
-    </div>
-    <div class="news-contact-actions">
-      <a class="button primary" href="/visit.html#contact">お問い合わせ</a>
-      <a class="button news-tel" href="tel:0724275688"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5h2.6l1.4 4-2 1.4a12 12 0 0 0 6.5 6.5l1.4-2 4 1.4v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z"/></svg>072-427-5688</a>
-    </div>
-  </aside>
   ${pager}
   <p class="news-back-wrap"><a class="news-back" href="/news.html">お知らせ一覧へ戻る</a></p>`;
 }
