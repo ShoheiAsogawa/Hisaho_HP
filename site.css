@@ -2200,8 +2200,8 @@ body.hisaho {
 
   .hisaho .nav-item img {
     grid-row: auto;
-    width: clamp(30px, 8.4vw, 44px);
-    height: clamp(30px, 8.4vw, 44px);
+    width: clamp(44px, 12vw, 48px);
+    height: clamp(44px, 12vw, 48px);
   }
 
   .hisaho .nav-item strong {
@@ -3795,7 +3795,7 @@ body.hisaho {
   }
 
   .hisaho .nav-item {
-    grid-template-rows: 44px auto;
+    grid-template-rows: 50px auto;
     align-content: center;
     align-items: center;
     min-height: 58px;
@@ -3804,8 +3804,8 @@ body.hisaho {
   }
 
   .hisaho .nav-item img {
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
   }
 
   .hisaho .nav-item strong {

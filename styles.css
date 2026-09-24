@@ -69,7 +69,7 @@ img { max-width: 100%; display: block; }
   min-width: 64px; padding: 4px; color: var(--ink); text-align: center;
   transition: color 0.2s ease;
 }
-.nav-item img { width: clamp(54px, 4.6vw, 70px); height: clamp(54px, 4.6vw, 70px); object-fit: contain; }
+.nav-item img { width: clamp(68px, 6vw, 84px); height: clamp(68px, 6vw, 84px); object-fit: contain; }
 .nav-item strong { font-size: clamp(0.72rem, 1vw, 0.86rem); line-height: 1.15; white-space: nowrap; }
 .nav-item span {
   font-family: "Kosugi Maru", sans-serif; font-size: 0.5rem; line-height: 1;
