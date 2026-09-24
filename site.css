@@ -2684,6 +2684,19 @@ body.hisaho {
   font-weight: 700;
 }
 
+.hisaho .news-body table {
+  width: 100%;
+  margin: 12px 0;
+  border-collapse: collapse;
+}
+
+.hisaho .news-body th,
+.hisaho .news-body td {
+  padding: 8px 10px;
+  border: 1px solid var(--hp-line);
+  text-align: left;
+}
+
 /* 2カラム（画像 + テキスト / テキスト + CTA） */
 .hisaho .split {
   display: grid;

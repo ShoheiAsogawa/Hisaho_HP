@@ -328,12 +328,35 @@ function json(data: unknown, status = 200): Response {
 function renderBody(body: string): string {
   const safe = sanitizeRich(body);
   if (!safe) return "";
-  if (/<(p|div|ul|ol|img|h2|h3|blockquote)\b/i.test(safe)) return `<div class="news-body">${safe}</div>`;
+  if (/<(p|div|ul|ol|img|h2|h3|blockquote|table)\b/i.test(safe)) return `<div class="news-body">${safe}</div>`;
   return `<div class="news-body"><p>${safe}</p></div>`;
 }
 
+function alignStyle(attrs: string): string {
+  const style = /style\s*=\s*"([^"]*)"/i.exec(attrs)?.[1] ?? "";
+  const align = /text-align\s*:\s*(left|center|right|justify)/i.exec(style)?.[1]?.toLowerCase();
+  return align ? ` style="text-align:${align}"` : "";
+}
+
+function colorStyle(attrs: string): string {
+  const style = /style\s*=\s*"([^"]*)"/i.exec(attrs)?.[1] ?? "";
+  const parts: string[] = [];
+  const color = safeColor(/[^a-z-]color\s*:\s*([^;]+)/i.exec(`;${style}`)?.[1] ?? /(?:^|;)color\s*:\s*([^;]+)/i.exec(style)?.[1] ?? "");
+  const background = safeColor(/background-color\s*:\s*([^;]+)/i.exec(style)?.[1] ?? "");
+  if (color) parts.push(`color:${color}`);
+  if (background) parts.push(`background-color:${background}`);
+  return parts.join(";");
+}
+
+function safeColor(value: string): string | null {
+  const color = value.trim();
+  if (/^#[0-9a-f]{3,8}$/i.test(color)) return color;
+  if (/^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/i.test(color)) return color.replace(/\s+/g, "");
+  return null;
+}
+
 function sanitizeRich(input: string): string {
-  const allowed = new Set(["p", "div", "br", "strong", "b", "em", "i", "img", "wbr", "ul", "ol", "li", "h2", "h3", "blockquote", "a"]);
+  const allowed = new Set(["p", "div", "br", "strong", "b", "em", "i", "u", "s", "strike", "span", "img", "wbr", "ul", "ol", "li", "h2", "h3", "blockquote", "a", "table", "thead", "tbody", "tr", "th", "td"]);
   let html = "";
   let skipping = false;
   const pattern = /<\/?([a-zA-Z0-9]+)([^>]*)>|([^<]+)/g;
@@ -355,6 +378,16 @@ function sanitizeRich(input: string): string {
     }
     if (match[0].startsWith("</")) {
       html += `</${name}>`;
+      continue;
+    }
+    const alignable = new Set(["p", "div", "h2", "h3", "li", "blockquote", "td", "th"]);
+    if (alignable.has(name)) {
+      html += `<${name}${alignStyle(match[2] ?? "")}>`;
+      continue;
+    }
+    if (name === "span") {
+      const style = colorStyle(match[2] ?? "");
+      html += style ? `<span style="${style}">` : "<span>";
       continue;
     }
     if (name === "a") {
@@ -498,14 +531,22 @@ const ADMIN_HTML = `<!DOCTYPE html>
     .meta { color:#8a6478; font-size:.92rem; }
     .error { color:#b4234a; min-height:1.2em; }
     .hidden { display:none; }
-    .toolbar { display:flex; gap:8px; flex-wrap:wrap; }
-    .toolbar button.is-on { background:#ffe3f3; color:#c43d93; }
-    .editor { min-height:220px; border:1px solid var(--line); border-radius:14px; padding:12px; background:#fff; font-weight:500; line-height:1.7; }
+    .wysiwyg { border:1px solid #d5dbe3; border-radius:10px; background:#fff; overflow:hidden; }
+    .wysiwyg-bar { display:flex; flex-wrap:wrap; gap:2px; align-items:center; padding:6px; background:#f4f6f8; border-bottom:1px solid #e1e5ea; }
+    .wysiwyg-bar button, .wysiwyg-bar select { width:34px; height:34px; margin:0; padding:0; border:0; border-radius:6px; background:transparent; color:#52606d; }
+    .wysiwyg-bar select { width:auto; height:34px; padding:0 8px; font-size:.92rem; }
+    .wysiwyg-bar button:hover, .wysiwyg-bar select:hover, .wysiwyg-bar button.is-on { background:#e6ebf0; color:#1f2933; }
+    .wysiwyg-bar svg { width:18px; height:18px; display:block; margin:auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+    .wysiwyg-bar .sep { width:1px; height:22px; margin:0 4px; background:#d5dbe3; }
+    .wysiwyg-bar input[type="color"] { width:28px; height:28px; padding:0; border:0; background:transparent; }
+    .editor { min-height:260px; border:0; border-radius:0; padding:14px; background:#fff; font-weight:500; line-height:1.7; }
     .editor:empty:before { content:"ここに文章を書いてください。選択して太字や見出しにできます。"; color:#b08aa0; }
     .editor h2, .editor h3 { margin:0.6em 0 0.3em; }
     .editor img { max-width:100%; }
     .editor:focus { outline:2px solid #ffd0ea; }
     .editor img { max-width:100%; height:auto; border-radius:12px; }
+    .editor table { width:100%; border-collapse:collapse; }
+    .editor td { border:1px solid #e1e5ea; padding:8px; }
     @media (max-width:720px) { .grid { grid-template-columns:1fr; } header { align-items:flex-start; flex-direction:column; } }
   </style>
 </head>
@@ -540,20 +581,43 @@ const ADMIN_HTML = `<!DOCTYPE html>
             </select>
           </label>
         </div>
-        <div class="toolbar" id="toolbar">
-          <button class="ghost" type="button" data-cmd="bold">太字</button>
-          <button class="ghost" type="button" data-cmd="italic">斜体</button>
-          <button class="ghost" type="button" data-block="h2">大見出し</button>
-          <button class="ghost" type="button" data-block="h3">小見出し</button>
-          <button class="ghost" type="button" data-block="p">本文</button>
-          <button class="ghost" type="button" data-cmd="insertUnorderedList">箇条書き</button>
-          <button class="ghost" type="button" data-cmd="insertOrderedList">番号</button>
-          <button class="ghost" type="button" data-block="blockquote">引用</button>
-          <button class="ghost" type="button" id="insert-link">リンク</button>
-          <button class="ghost" type="button" id="insert-image">画像</button>
-          <input id="image-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden />
+        <div class="wysiwyg">
+          <div class="wysiwyg-bar" id="toolbar">
+            <select id="block-style" aria-label="段落">
+              <option value="p">段落</option>
+              <option value="h2">見出し</option>
+              <option value="h3">小見出し</option>
+              <option value="blockquote">引用</option>
+            </select>
+            <span class="sep"></span>
+            <button type="button" data-cmd="bold" aria-label="太字"><svg viewBox="0 0 24 24"><path d="M7 5h6a4 4 0 0 1 0 8H7zM7 13h7a4 4 0 0 1 0 8H7z"/></svg></button>
+            <button type="button" data-cmd="italic" aria-label="斜体"><svg viewBox="0 0 24 24"><path d="M15 5H9M19 19H9M14 5l-4 14"/></svg></button>
+            <button type="button" data-cmd="insertUnorderedList" aria-label="箇条書き"><svg viewBox="0 0 24 24"><path d="M9 7h11M9 12h11M9 17h11"/><circle cx="5" cy="7" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="17" r="1" fill="currentColor" stroke="none"/></svg></button>
+            <button type="button" data-cmd="insertOrderedList" aria-label="番号付きリスト"><svg viewBox="0 0 24 24"><path d="M10 7h10M10 12h10M10 17h10M4 8V5l-1 .5M4 12h2M5 10v4M4 19c.8-1 2-1 2 0s-2 1-2 2h3"/></svg></button>
+            <button type="button" data-block="blockquote" aria-label="引用"><svg viewBox="0 0 24 24"><path d="M8 8H5v5h4v5H4M19 8h-3v5h4v5h-5"/></svg></button>
+            <span class="sep"></span>
+            <button type="button" data-cmd="justifyLeft" aria-label="左寄せ"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h10M4 14h16M4 18h10"/></svg></button>
+            <button type="button" data-cmd="justifyCenter" aria-label="中央"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 10h10M4 14h16M7 18h10"/></svg></button>
+            <button type="button" data-cmd="justifyRight" aria-label="右寄せ"><svg viewBox="0 0 24 24"><path d="M4 6h16M10 10h10M4 14h16M10 18h10"/></svg></button>
+            <button type="button" data-cmd="justifyFull" aria-label="両端"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg></button>
+            <span class="sep"></span>
+            <button type="button" id="insert-link" aria-label="リンク"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></button>
+            <button type="button" data-cmd="unlink" aria-label="リンク解除"><svg viewBox="0 0 24 24"><path d="M9 15l6-6M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1M4 20l3-3M17 7l3-3"/></svg></button>
+            <button type="button" id="insert-image" aria-label="画像"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.4" fill="currentColor" stroke="none"/><path d="m8 16 3-3 2 2 3-4 3 5"/></svg></button>
+            <button type="button" id="insert-table" aria-label="表"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/><path d="M4 10h16M4 15h16M10 5v14M15 5v14"/></svg></button>
+            <input id="image-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden />
+          </div>
+          <div class="wysiwyg-bar">
+            <button type="button" data-cmd="underline" aria-label="下線"><svg viewBox="0 0 24 24"><path d="M7 5v6a5 5 0 0 0 10 0V5M6 19h12"/></svg></button>
+            <button type="button" data-cmd="strikeThrough" aria-label="打ち消し線"><svg viewBox="0 0 24 24"><path d="M5 12h14M8 7c.5-1.5 2-2 4-2s3 .6 3 2-1 2-3 2h-2c-2 0-4 .6-4 2.5S8 16 12 16s4-.8 4.5-2"/></svg></button>
+            <label aria-label="文字色"><input id="text-color" type="color" value="#4a3144" /></label>
+            <label aria-label="背景色"><input id="mark-color" type="color" value="#fff3c4" /></label>
+            <span class="sep"></span>
+            <button type="button" data-cmd="undo" aria-label="元に戻す"><svg viewBox="0 0 24 24"><path d="M8 8H4v4M4 12a8 8 0 1 0 2-5"/></svg></button>
+            <button type="button" data-cmd="redo" aria-label="やり直す"><svg viewBox="0 0 24 24"><path d="M16 8h4v4M20 12a8 8 0 1 1-2-5"/></svg></button>
+          </div>
+          <div id="body-editor" class="editor" contenteditable="true" aria-label="本文"></div>
         </div>
-        <label>本文<div id="body-editor" class="editor" contenteditable="true"></div></label>
         <div class="grid">
           <label>ラベル色
             <select name="tag_class">
@@ -566,7 +630,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
           <label>リンク文言<input name="link_label" placeholder="詳しく見る" /></label>
         </div>
         <label class="row"><input name="published" type="checkbox" checked style="width:auto" /> 公開する</label>
-        <p class="meta">文章を選んでボタンを押すと、太字・見出し・リスト・リンクにできます。Ctrl+B で太字、Ctrl+I で斜体です。</p>
+        <p class="meta">上のアイコンで、選んだ文章の太さ・配置・リスト・リンク・画像を変えられます。</p>
         <div class="row">
           <button type="submit">保存する</button>
           <button id="cancel" class="ghost hidden" type="button">新規入力に戻す</button>
@@ -728,11 +792,27 @@ const ADMIN_HTML = `<!DOCTYPE html>
         markToolbar();
       });
     });
+    document.querySelector("#block-style").addEventListener("change", (event) => {
+      editorBody.focus();
+      document.execCommand("formatBlock", false, "<" + event.target.value + ">");
+    });
     document.querySelector("#insert-link").addEventListener("click", () => {
       const href = prompt("リンク先のURL", "https://");
       if (!href) return;
       editorBody.focus();
       document.execCommand("createLink", false, href);
+    });
+    document.querySelector("#text-color").addEventListener("input", (event) => {
+      editorBody.focus();
+      document.execCommand("foreColor", false, event.target.value);
+    });
+    document.querySelector("#mark-color").addEventListener("input", (event) => {
+      editorBody.focus();
+      document.execCommand("hiliteColor", false, event.target.value);
+    });
+    document.querySelector("#insert-table").addEventListener("click", () => {
+      editorBody.focus();
+      document.execCommand("insertHTML", false, "<table><tr><td>　</td><td>　</td></tr><tr><td>　</td><td>　</td></tr></table>");
     });
     document.addEventListener("selectionchange", markToolbar);
     function markToolbar() {
