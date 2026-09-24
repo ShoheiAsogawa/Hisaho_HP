@@ -305,13 +305,19 @@
 #main.nursery-main #instagram .section-heading { margin-bottom: 36px; }
 
 #main.nursery-main .admission-section { background: #fff; padding-block: calc(var(--nursery-space) + 36px) var(--nursery-space); }
-#main.nursery-main .admission-inner { align-items: center; gap: 45px; }
+#main.nursery-main .admission-inner { align-items: stretch; gap: clamp(28px, 4vw, 64px); }
+#main.nursery-main .admission-copy { display: flex; flex-direction: column; justify-content: center; }
 #main.nursery-main .admission-copy h2 { font-size: clamp(1.6rem, 2.7vw, 2.5rem); }
-#main.nursery-main .support-list > div { gap: 12px; }
-#main.nursery-main .visit-invite { display: flex; gap: 14px; align-items: center; background: #f7d873; border: 0; border-radius: 44px 70px 48px 58px; padding: 32px 24px; box-shadow: none; }
+#main.nursery-main .admission-copy > p { max-width: 36em; }
+#main.nursery-main .support-list { display: grid; gap: 10px; margin-top: 8px; border: 0; }
+#main.nursery-main .support-list > div { align-items: center; gap: 12px 20px; padding: 14px 18px; border: 0; border-radius: 16px; background: #fff; }
+#main.nursery-main .support-list span { white-space: nowrap; text-align: right; }
+#main.nursery-main .visit-invite { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 8px 18px; align-content: center; align-items: center; height: 100%; margin: 0; padding: clamp(24px, 3vw, 36px); border: 0; border-radius: 28px; background: #f7dc8b; box-shadow: none; }
+#main.nursery-main .visit-invite::after { content: none; }
 #main.nursery-main .visit-invite :is(h3, p) { color: #44352d; }
-#main.nursery-main .visit-invite .visit-guide { display: block; flex: 0 0 100px; width: 100px; height: 200px; margin: 0; object-fit: contain; transform: scaleX(-1); }
-#main.nursery-main .visit-invite h3 { font-size: 1.5rem; }
+#main.nursery-main .visit-invite .visit-guide { display: block; width: 128px; height: auto; max-height: 168px; margin: 0; object-fit: contain; transform: scaleX(-1); }
+#main.nursery-main .visit-invite h3 { margin-bottom: 8px; font-size: clamp(1.25rem, 1.8vw, 1.5rem); }
+#main.nursery-main .visit-invite p { margin-bottom: 16px; }
 #main.nursery-main .overview { padding-top: 28px; }
 
 /* 配色の役割: セクション色 = 見出し・補助操作、共通ピンク = 見学/フォロー。
@@ -502,7 +508,8 @@
   #main.nursery-main .hscroll-item { width: auto; }
   #main.nursery-main .season-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 24px; }
   #main.nursery-main .admission-inner { grid-template-columns: 1fr; }
-  #main.nursery-main .visit-invite { max-width: none; }
+  #main.nursery-main .visit-invite { grid-template-columns: 96px minmax(0, 1fr); max-width: 640px; width: 100%; }
+  #main.nursery-main .visit-invite .visit-guide { width: 96px; max-height: 140px; }
 }
 
 @media (max-width: 540px) {
@@ -536,8 +543,9 @@
   #main.nursery-main .season-card h3 span { width: 36px; height: 36px; font-size: 1.05rem; }
   #main.nursery-main .season-card li { font-size: .75rem; }
   #main.nursery-main #instagram { padding-block: 55px; }
-  #main.nursery-main .visit-invite { padding: 28px 20px; gap: 8px; }
-  #main.nursery-main .visit-invite .visit-guide { flex-basis: 65px; width: 65px; height: 170px; }
+  #main.nursery-main .visit-invite { padding: 22px 16px; gap: 8px 12px; grid-template-columns: 72px minmax(0, 1fr); }
+  #main.nursery-main .visit-invite .visit-guide { width: 72px; max-height: 120px; height: auto; }
+  #main.nursery-main .support-list span { white-space: normal; }
   #main.nursery-main .visit-invite h3 { font-size: 1.3rem; }
   #main.nursery-main .visit-invite p { font-size: .86rem; }
   #main.nursery-main .visit-invite .button { padding-inline: 15px; font-size: .8rem; }
@@ -637,10 +645,11 @@
 
 /* 入園案内: 旗を持ったひよこが見学をご案内 */
 #main.nursery-main .visit-invite .visit-guide {
-  flex: 0 0 clamp(96px, 10vw, 134px);
-  width: clamp(96px, 10vw, 134px);
+  flex: none;
+  width: 128px;
   height: auto;
-  transform: none;
+  max-height: 168px;
+  transform: scaleX(-1);
   animation: chara-sway 6s ease-in-out infinite;
   transform-origin: 50% 100%;
 }
