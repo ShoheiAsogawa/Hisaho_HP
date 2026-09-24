@@ -1237,13 +1237,30 @@ body.hisaho {
 
 .hisaho .map-card {
   position: relative;
-  min-height: 100%;
+  min-height: 360px;
   overflow: hidden;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
   border: 2px solid var(--hp-line);
   border-radius: 28px;
   background: #f8fbfd;
+}
+
+.hisaho .map-card iframe {
+  flex: 1;
+  width: 100%;
+  min-height: 300px;
+  border: 0;
+}
+
+.hisaho .map-card > a {
+  display: block;
+  padding: 12px 16px;
+  text-align: center;
+  color: var(--hp-pink-deep);
+  background: #fff;
+  font-size: 0.86rem;
+  font-weight: 900;
 }
 
 .hisaho .map-card svg {
