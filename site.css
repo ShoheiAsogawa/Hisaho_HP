@@ -2618,6 +2618,16 @@ body.hisaho {
   transition: transform 0.4s ease;
 }
 
+/* 写真がない記事：動物みんなのイラストを切らずに、やさしい背景の上に置く。 */
+.hisaho :is(.news-thumb, .news-article-cover).is-illust {
+  background: radial-gradient(circle at 50% 60%, #fff 0 38%, var(--hp-pink-soft) 72%);
+}
+
+.hisaho :is(.news-thumb, .news-article-cover).is-illust img {
+  object-fit: contain;
+  padding: 8%;
+}
+
 .hisaho :is(.news-row, .home-news-card):hover .news-thumb img {
   transform: scale(1.04);
 }

@@ -22,15 +22,8 @@ const COOKIE = "hisaho_cms";
 const SESSION_MS = 1000 * 60 * 60 * 12;
 const CATEGORIES = ["行事", "国際交流", "新しい取り組み", "園見学", "採用", "お知らせ"];
 const TAGS = new Set(["", "tag-pink", "tag-out"]);
-// 本文に写真がない記事は、カテゴリに合う園の写真をTOP画像にする。
-const FALLBACK_COVERS: Record<string, string> = {
-  行事: "/assets/photos/hero-05-medals.jpg",
-  国際交流: "/assets/photos/hero-01-cucumber-harvest.jpg",
-  新しい取り組み: "/assets/photos/spring-flower-watering.jpg",
-  園見学: "/assets/photos/hero-06-group-photo.jpg",
-  採用: "/assets/photos/hero-03-watermelon.jpg",
-  お知らせ: "/assets/photos/hero-02-pineapple.jpg",
-};
+// 本文に写真がない記事は、動物みんなのイラストをTOP画像にする。
+const FALLBACK_COVER = "/assets/mascots/chara-friends-all.webp";
 const HOME_NEWS_LIMIT = 3;
 
 export default {
@@ -127,7 +120,8 @@ function renderDate(row: NewsRow): string {
 
 function renderThumb(row: NewsRow): string {
   const cover = coverFor(row);
-  return `<span class="news-thumb"><img src="${escapeAttr(cover.src)}" alt="" loading="lazy" decoding="async"></span>`;
+  const cls = cover.fromBody ? "news-thumb" : "news-thumb is-illust";
+  return `<span class="${cls}"><img src="${escapeAttr(cover.src)}" alt="" loading="lazy" decoding="async"></span>`;
 }
 
 type Cover = { src: string; alt: string; fromBody: boolean };
@@ -135,9 +129,7 @@ type Cover = { src: string; alt: string; fromBody: boolean };
 function coverFor(row: NewsRow): Cover {
   const found = sanitizeRich(row.body).match(/<img src="([^"]+)" alt="([^"]*)">/);
   if (found) return { src: decodeAttr(found[1]), alt: decodeAttr(found[2]), fromBody: true };
-  const fallbacks = Object.values(FALLBACK_COVERS);
-  const src = FALLBACK_COVERS[row.category] ?? fallbacks[row.id % fallbacks.length];
-  return { src, alt: "", fromBody: false };
+  return { src: FALLBACK_COVER, alt: "", fromBody: false };
 }
 
 // TOP画像に使った写真は本文から外し、残った空の段落も片付ける。
@@ -210,7 +202,7 @@ function renderDetailArticle(row: NewsRow, newer: NewsRow | null, older: NewsRow
   const cover = coverFor(row);
   const body = cover.fromBody ? withoutFirstImage(row.body) : row.body;
   return `<article class="news-article">
-    <figure class="news-article-cover"><img src="${escapeAttr(cover.src)}" alt="${escapeAttr(cover.alt)}" decoding="async"></figure>
+    <figure class="news-article-cover${cover.fromBody ? "" : " is-illust"}"><img src="${escapeAttr(cover.src)}" alt="${escapeAttr(cover.alt)}" decoding="async"></figure>
     <div class="news-article-meta"><span${tag}>${escapeHtml(row.category)}</span><time datetime="${escapeAttr(row.published_at)}">${escapeHtml(formatMonth(row.published_at))}</time></div>
     ${renderBody(body)}
     ${related}
@@ -813,7 +805,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
           </section>
           <section class="card">
             <h3>TOP画像</h3>
-            <p class="meta">本文の最初の写真が、トップページ・お知らせ一覧・記事ページのTOP画像になります。写真がない記事は、カテゴリに合わせた園の写真を自動で表示します。</p>
+            <p class="meta">本文の最初の写真が、トップページ・お知らせ一覧・記事ページのTOP画像になります。写真がない記事は、動物みんなのイラストを表示します。</p>
           </section>
           <section class="card">
             <h3>記事の下に出すボタン</h3>
