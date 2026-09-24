@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "hisaho-hp-test",
+  "main": "worker/src/index.ts",
+  "compatibility_date": "2026-09-24",
+  "account_id": "d5161ecb7edb179a3a37b71add830296",
+  "workers_dev": true,
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none",
+    "run_worker_first": ["/admin", "/admin/*", "/api/*", "/news.html"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "hisaho-hp-cms",
+      "database_id": "cfdbb41e-2d81-4640-8b2f-5c079d3ac6ad"
+    }
+  ]
+}

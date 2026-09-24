@@ -56,6 +56,31 @@
 
 ブラウザで `index.html` を開いて確認できます。
 
+## テスト公開（Cloudflare）
+
+公開サイトとお知らせ管理は、同じ Cloudflare Worker で配信しています。
+
+- テストサイト: https://hisaho-hp-test.noiseless-rib.workers.dev
+- 管理画面: https://hisaho-hp-test.noiseless-rib.workers.dev/admin
+- お知らせは D1（`hisaho-hp-cms`）に保存され、公開中の記事だけ `news.html` に反映されます
+
+初回のデータベース作成:
+
+```bash
+npm install
+npx wrangler d1 execute hisaho-hp-cms --remote --file=schema.sql
+```
+
+管理パスワードはリポジトリに置かず、Worker のシークレットにします。
+
+```bash
+npx wrangler secret put CMS_PASSWORD
+npx wrangler secret put CMS_SESSION_SECRET
+npm run deploy
+```
+
+ローカル確認は `.dev.vars.example` を `.dev.vars` にコピーしてから `npm run dev` です。
+
 ## 装飾・編集（Deco Studio）
 
 デスクトップの `DecoStudio` フォルダで編集します（このフォルダへのコピーは不要です）。
