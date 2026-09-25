@@ -798,12 +798,19 @@ const ADMIN_HTML = `<!DOCTYPE html>
     body { margin:0; font-family:"Zen Maru Gothic", sans-serif; color:var(--ink); background:var(--bg); }
     a { color:var(--pink-dark); }
     button, input, textarea, select { font:inherit; }
-    button { border:0; border-radius:10px; background:var(--pink); color:#fff; padding:10px 16px; font-weight:700; cursor:pointer; }
-    button:hover { background:#ee8eb9; }
-    button:disabled { opacity:.45; cursor:default; }
-    button.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
-    button.ghost:hover { background:#fbf5f8; }
-    button.warn { background:#fff; color:#b4234a; border:1px solid #f1c2d0; }
+    button { border:1px solid transparent; border-radius:8px; background:var(--pink); color:#fff; height:36px; padding:0 14px; font-weight:500; letter-spacing:.01em; cursor:pointer; }
+    button:hover { background:#d45d98; }
+    button:disabled { opacity:.4; cursor:default; }
+    button.ghost, a.quiet { background:#fff; color:var(--ink); border:1px solid var(--line); }
+    button.ghost:hover, a.quiet:hover { background:#fbf7f9; }
+    .text-btn, a.text-link { display:inline-flex; align-items:center; height:32px; padding:0 8px; border:0; border-radius:8px; background:transparent; color:var(--muted); font-weight:500; text-decoration:none; }
+    .text-btn:hover, a.text-link:hover { background:#f7f1f4; color:var(--ink); }
+    .text-btn.danger { color:#a45068; }
+    .text-btn.danger:hover { background:#fdf4f6; color:#8c3148; }
+    .icon-btn { width:34px; height:34px; padding:0; background:#fff; color:var(--muted); border:1px solid var(--line); }
+    .icon-btn:hover { background:#fbf7f9; color:var(--ink); }
+    .btn-block { width:100%; }
+    .danger-zone { margin-top:4px; padding-top:12px; border-top:1px solid var(--line); }
     .topbar { position:sticky; top:0; z-index:5; display:flex; justify-content:space-between; gap:16px; align-items:center; padding:12px 24px; background:#fff; border-bottom:1px solid var(--line); }
     .brand { display:grid; gap:2px; }
     .brand small { color:var(--muted); font-size:.78rem; }
@@ -823,9 +830,12 @@ const ADMIN_HTML = `<!DOCTYPE html>
     .sidebar { display:grid; gap:12px; align-content:start; position:sticky; top:84px; max-height:calc(100vh - 104px); }
     .sidebar-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
     .sidebar-head h2 { margin:0; font-size:1rem; }
-    .filters { display:flex; gap:6px; }
-    .filters button { flex:1; padding:6px 8px; border-radius:999px; font-size:.8rem; background:#fff; color:var(--muted); border:1px solid var(--line); }
-    .filters button.is-on { background:var(--ink); color:#fff; border-color:var(--ink); }
+    .mode-nav, .filters { display:flex; gap:2px; padding:3px; background:#f3e9ee; border-radius:10px; }
+    .mode-nav button, .filters button { flex:1; height:30px; padding:0 10px; border:0; border-radius:8px; background:transparent; color:var(--muted); font-size:.8rem; font-weight:500; }
+    .mode-nav button:hover, .filters button:hover { background:rgba(255,255,255,.55); color:var(--ink); }
+    .mode-nav button.is-on, .filters button.is-on { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(52,40,47,.08); }
+    .mode-nav button.is-on:hover, .filters button.is-on:hover { background:#fff; }
+    .top-tools { gap:2px; }
     .post-list { display:grid; gap:8px; overflow:auto; padding-right:2px; }
     .post { display:grid; gap:6px; padding:12px; border:1px solid var(--line); border-radius:12px; background:#fff; cursor:pointer; text-align:left; color:inherit; }
     .post:hover { border-color:#e7b8d2; }
@@ -835,8 +845,8 @@ const ADMIN_HTML = `<!DOCTYPE html>
     .badge { padding:2px 8px; border-radius:999px; font-size:.72rem; font-weight:700; }
     .badge.live { background:#e2f6ec; color:#1d7a4a; }
     .badge.draft { background:#f1eef0; color:#6d5c65; }
-    .post-actions { display:flex; gap:4px; }
-    .post-actions button { padding:4px 8px; border-radius:8px; font-size:.75rem; }
+    .post-actions { display:flex; gap:6px; }
+    .post-actions .icon-btn { width:auto; min-width:34px; padding:0 8px; font-size:.75rem; }
     .editor-area { display:grid; grid-template-columns:minmax(0, 1fr) 280px; gap:20px; align-items:start; }
     .main-col { display:grid; gap:14px; }
     .title-input { font-size:1.35rem; font-weight:700; padding:14px 16px; }
@@ -845,13 +855,15 @@ const ADMIN_HTML = `<!DOCTYPE html>
     .field-stack { display:grid; gap:12px; }
     .switch { display:flex; gap:10px; align-items:center; font-weight:700; }
     .switch input { width:auto; }
-    .publish-actions { display:grid; gap:8px; margin-top:14px; }
+    .publish-actions { display:grid; gap:8px; margin-top:16px; justify-items:start; }
+    .publish-actions .btn-block { justify-self:stretch; }
     .status-line { display:flex; justify-content:space-between; align-items:center; font-size:.84rem; color:var(--muted); }
     .toast { position:fixed; right:20px; bottom:20px; z-index:10; padding:12px 16px; border-radius:12px; background:var(--ink); color:#fff; font-weight:700; box-shadow:0 12px 30px rgba(0,0,0,.18); }
     .empty { padding:18px; border:1px dashed var(--line); border-radius:12px; color:var(--muted); text-align:center; font-size:.88rem; }
     .inbox-workspace { align-items:start; }
-    .inbox-workspace .row { align-items:stretch; }
-    .inbox-workspace .row input { flex:1; min-width:0; width:auto; }
+    .search-row { display:flex; gap:8px; align-items:center; }
+    .search-row input { flex:1; min-width:0; width:auto; }
+    .search-row .icon-btn { width:auto; padding:0 12px; }
     #inquiry-badge { margin-left:6px; background:#fde7f3; color:var(--pink-dark); }
     .inq-hint { margin:0; }
     .inq-item { width:100%; }
@@ -867,10 +879,11 @@ const ADMIN_HTML = `<!DOCTYPE html>
     .inquiry-detail { position:sticky; top:84px; max-height:calc(100vh - 104px); overflow:auto; display:grid; gap:16px; align-content:start; }
     .detail-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
     .detail-head h2 { margin:8px 0 0; font-size:1.45rem; line-height:1.35; }
-    .detail-actions { display:flex; flex-wrap:wrap; gap:8px; }
-    .detail-actions a { display:inline-flex; align-items:center; border-radius:10px; background:var(--pink); color:#fff; padding:10px 16px; font-weight:700; text-decoration:none; }
-    .detail-actions a:hover { background:var(--pink-dark); }
-    .detail-actions a.quiet { background:#fff; color:var(--ink); border:1px solid var(--line); }
+    .detail-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .detail-actions a, .detail-actions button { height:34px; display:inline-flex; align-items:center; text-decoration:none; }
+    .detail-actions a.primary { background:var(--pink); color:#fff; padding:0 14px; border-radius:8px; font-weight:500; }
+    .detail-actions a.primary:hover { background:#d45d98; }
+    .detail-actions a.quiet { padding:0 12px; border-radius:8px; }
     .fact-grid { display:grid; grid-template-columns:8.5em minmax(0,1fr); gap:10px 14px; margin:0; }
     .fact-grid dt { color:var(--muted); font-size:.82rem; }
     .fact-grid dd { margin:0; font-weight:700; overflow-wrap:anywhere; }
@@ -883,7 +896,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
     }
     @media (min-width:821px) { #inquiry-back { display:none; } }
     @media (max-width:1080px) { .editor-area { grid-template-columns:1fr; } .side-col { position:static; } }
-    @media (max-width:820px) { .workspace { grid-template-columns:1fr; padding:14px; } .sidebar { position:static; max-height:none; } .topbar { padding:10px 14px; } }
+    @media (max-width:820px) { .workspace { grid-template-columns:1fr; padding:14px; } .sidebar { position:static; max-height:none; } .topbar { padding:10px 14px; flex-wrap:wrap; } .mode-nav { order:3; width:100%; } }
     .wysiwyg { border:1px solid #d5dbe3; border-radius:10px; background:#fff; overflow:hidden; }
     .wysiwyg-bar { display:flex; flex-wrap:wrap; gap:2px; align-items:center; padding:6px; background:#f4f6f8; border-bottom:1px solid #e1e5ea; }
     .wysiwyg-bar button, .wysiwyg-bar select { width:34px; height:34px; margin:0; padding:0; border:0; border-radius:6px; background:transparent; color:#52606d; }
@@ -907,10 +920,13 @@ const ADMIN_HTML = `<!DOCTYPE html>
       <small>認定こども園 ひさほ保育園</small>
       <strong>お知らせ管理</strong>
     </div>
-    <div class="row">
-      <a href="/news.html" target="_blank" rel="noopener">サイトを表示</a>
-      <button id="show-inquiries" class="ghost hidden" type="button">問い合わせ<span id="inquiry-badge" class="badge hidden"></span></button>
-      <button id="logout" class="ghost hidden" type="button">ログアウト</button>
+    <nav id="mode-nav" class="mode-nav hidden" aria-label="管理メニュー">
+      <button id="show-editor" class="is-on" type="button">記事</button>
+      <button id="show-inquiries" type="button">問い合わせ<span id="inquiry-badge" class="badge hidden"></span></button>
+    </nav>
+    <div class="row top-tools">
+      <a class="text-link" href="/news.html" target="_blank" rel="noopener">サイトを見る</a>
+      <button id="logout" class="text-btn hidden" type="button">ログアウト</button>
     </div>
   </header>
   <main>
@@ -926,13 +942,12 @@ const ADMIN_HTML = `<!DOCTYPE html>
     <section id="inbox" class="workspace inbox-workspace hidden">
       <aside class="sidebar">
         <div class="sidebar-head">
-          <h2>問い合わせ <span id="inquiry-count" class="meta"></span></h2>
-          <button id="back-editor" class="ghost" type="button">記事へ戻る</button>
+          <h2>届いた順 <span id="inquiry-count" class="meta"></span></h2>
         </div>
-        <p class="meta inq-hint">新しい順です。↑↓キーで移動できます。</p>
-        <div class="row">
+        <p class="meta inq-hint">↑↓キーで前後の問い合わせに移動できます。</p>
+        <div class="search-row">
           <input id="inquiry-search" type="search" placeholder="名前・電話・内容で探す" aria-label="問い合わせを検索" />
-          <button id="reload-inquiries" class="ghost" type="button">更新</button>
+          <button id="reload-inquiries" class="icon-btn" type="button" aria-label="一覧を更新">更新</button>
         </div>
         <div class="filters" id="inquiry-filters" role="group" aria-label="種類で絞り込み">
           <button type="button" data-topic="all" class="is-on">すべて</button>
@@ -948,8 +963,8 @@ const ADMIN_HTML = `<!DOCTYPE html>
       <aside class="sidebar">
         <div class="sidebar-head">
           <h2>記事一覧 <span id="count" class="meta"></span></h2>
-          <button id="new-post" type="button">＋ 新規作成</button>
         </div>
+        <button id="new-post" class="btn-block" type="button">新しい記事</button>
         <input id="search" type="search" placeholder="タイトルで探す" aria-label="記事を検索" />
         <div class="filters" role="group" aria-label="表示する記事">
           <button type="button" data-filter="all" class="is-on">すべて</button>
@@ -1020,9 +1035,8 @@ const ADMIN_HTML = `<!DOCTYPE html>
               </label>
             </div>
             <div class="publish-actions">
-              <button id="save" type="submit">公開する</button>
-              <a id="view-post" class="hidden" href="#" target="_blank" rel="noopener">公開ページで確認</a>
-              <button id="delete-post" class="warn hidden" type="button">この記事を削除</button>
+              <button id="save" class="btn-block" type="submit">公開する</button>
+              <a id="view-post" class="text-link hidden" href="#" target="_blank" rel="noopener">公開ページを見る</a>
             </div>
             <p id="form-error" class="error"></p>
           </section>
@@ -1038,6 +1052,9 @@ const ADMIN_HTML = `<!DOCTYPE html>
               <p class="meta">空欄のままならボタンは表示されません。</p>
             </div>
           </section>
+          <div class="danger-zone">
+            <button id="delete-post" class="text-btn danger hidden" type="button">この記事を削除</button>
+          </div>
         </div>
       </form>
     </section>
@@ -1078,8 +1095,13 @@ const ADMIN_HTML = `<!DOCTYPE html>
       loginCard.classList.toggle("hidden", on);
       editor.classList.toggle("hidden", !on);
       logout.classList.toggle("hidden", !on);
-      document.querySelector("#show-inquiries").classList.toggle("hidden", !on);
+      document.querySelector("#mode-nav").classList.toggle("hidden", !on);
       document.querySelector("#inbox").classList.add("hidden");
+      setMode("editor");
+    }
+    function setMode(mode) {
+      document.querySelector("#show-editor").classList.toggle("is-on", mode === "editor");
+      document.querySelector("#show-inquiries").classList.toggle("is-on", mode === "inbox");
     }
 
     let inquiries = [];
@@ -1243,7 +1265,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
       const titles = document.createElement("div");
       const back = document.createElement("button");
       back.id = "inquiry-back";
-      back.className = "ghost";
+      back.className = "text-btn";
       back.type = "button";
       back.textContent = "一覧へ戻る";
       back.addEventListener("click", () => document.querySelector("#inbox").classList.remove("is-reading"));
@@ -1262,6 +1284,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
       const digits = phoneDigits(item.phone);
       if (digits.length >= 10) {
         const call = document.createElement("a");
+        call.className = "primary";
         call.href = "tel:" + digits;
         call.textContent = "電話する";
         actions.append(call);
@@ -1279,12 +1302,6 @@ const ADMIN_HTML = `<!DOCTYPE html>
       copy.textContent = "内容をコピー";
       copy.addEventListener("click", () => copyInquiry(item));
       actions.append(copy);
-      const remove = document.createElement("button");
-      remove.className = "warn";
-      remove.type = "button";
-      remove.textContent = "削除する";
-      remove.addEventListener("click", () => removeInquiry(item));
-      actions.append(remove);
       if (item.resume_name) {
         const file = document.createElement("a");
         file.className = "quiet";
@@ -1319,7 +1336,15 @@ const ADMIN_HTML = `<!DOCTYPE html>
       const message = document.createElement("p");
       message.className = "message-block";
       message.textContent = String(item.message || "").trim() || "メッセージはありません。";
-      detail.append(head, actions, facts, messageLabel, message);
+      const danger = document.createElement("div");
+      danger.className = "danger-zone";
+      const remove = document.createElement("button");
+      remove.className = "text-btn danger";
+      remove.type = "button";
+      remove.textContent = "この問い合わせを削除";
+      remove.addEventListener("click", () => removeInquiry(item));
+      danger.append(remove);
+      detail.append(head, actions, facts, messageLabel, message, danger);
     }
     async function removeInquiry(item) {
       const name = item.parent_name || "この問い合わせ";
@@ -1350,6 +1375,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
       const inbox = document.querySelector("#inbox");
       inbox.classList.remove("hidden");
       inbox.classList.remove("is-reading");
+      setMode("inbox");
       const list = document.querySelector("#inquiry-list");
       list.innerHTML = '<p class="empty">読み込んでいます…</p>';
       try {
@@ -1368,6 +1394,13 @@ const ADMIN_HTML = `<!DOCTYPE html>
       }
     }
     document.querySelector("#show-inquiries").addEventListener("click", () => { openInbox(); });
+    document.querySelector("#show-editor").addEventListener("click", () => {
+      if (!confirmDiscard()) return;
+      document.querySelector("#inbox").classList.add("hidden");
+      document.querySelector("#inbox").classList.remove("is-reading");
+      editor.classList.remove("hidden");
+      setMode("editor");
+    });
     document.querySelector("#reload-inquiries").addEventListener("click", () => { openInbox(); });
     document.querySelector("#inquiry-search").addEventListener("input", () => { renderInbox(); });
     document.querySelectorAll("[data-topic]").forEach((element) => {
@@ -1377,11 +1410,6 @@ const ADMIN_HTML = `<!DOCTYPE html>
         inquirySelected = null;
         renderInbox();
       });
-    });
-    document.querySelector("#back-editor").addEventListener("click", () => {
-      document.querySelector("#inbox").classList.add("hidden");
-      document.querySelector("#inbox").classList.remove("is-reading");
-      editor.classList.remove("hidden");
     });
     document.addEventListener("keydown", (event) => {
       const inbox = document.querySelector("#inbox");
@@ -1472,8 +1500,8 @@ const ADMIN_HTML = `<!DOCTYPE html>
         card.querySelector(".post-title").textContent = item.title.replaceAll("<wbr>", "");
         const actions = document.createElement("div");
         actions.className = "post-actions";
-        const up = button("↑ 上へ", () => move(index, -1), "ghost");
-        const down = button("↓ 下へ", () => move(index, 1), "ghost");
+        const up = button("↑", () => move(index, -1), "icon-btn");
+        const down = button("↓", () => move(index, 1), "icon-btn");
         up.title = "一覧で上に表示";
         down.title = "一覧で下に表示";
         if (index === 0 || query || filter !== "all") up.disabled = true;
