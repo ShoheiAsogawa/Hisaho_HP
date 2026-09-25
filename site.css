@@ -75,6 +75,7 @@ body.hisaho {
 
 .hisaho .nav-item img {
   transition: transform 0.2s ease;
+  filter: drop-shadow(0 2px 5px rgba(70, 40, 60, 0.3));
 }
 
 .hisaho .nav-item:hover img,
