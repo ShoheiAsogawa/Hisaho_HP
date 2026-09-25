@@ -260,6 +260,8 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   if (request.method === "GET" && url.pathname === "/api/inquiries") return listInquiries(env);
   const resumeMatch = url.pathname.match(/^\/api\/inquiries\/(\d+)\/resume$/);
   if (resumeMatch && request.method === "GET") return downloadResume(env, Number(resumeMatch[1]));
+  const inquiryMatch = url.pathname.match(/^\/api\/inquiries\/(\d+)$/);
+  if (inquiryMatch && request.method === "DELETE") return deleteInquiry(env, Number(inquiryMatch[1]));
   if (request.method === "GET" && url.pathname === "/api/news") return listNews(env, true);
   if (request.method === "POST" && url.pathname === "/api/media") return uploadMedia(request, env);
   if (request.method === "POST" && url.pathname === "/api/news") return createNews(request, env);
@@ -394,6 +396,14 @@ async function forwardContact(input: { topic: string; parentName: string; childN
 
 function clip(value: unknown, max: number): string {
   return String(value ?? "").replace(/[\r\n]+/g, " ").replace(/[ \t]+/g, " ").trim().slice(0, max);
+}
+
+async function deleteInquiry(env: Env, id: number): Promise<Response> {
+  const row = await env.DB.prepare("SELECT resume_key FROM inquiries WHERE id = ?").bind(id).first<{ resume_key: string }>();
+  if (!row) return json({ error: "見つかりません" }, 404);
+  if (row.resume_key && env.FILES) await env.FILES.delete(row.resume_key);
+  await env.DB.prepare("DELETE FROM inquiries WHERE id = ?").bind(id).run();
+  return json({ ok: true });
 }
 
 async function listInquiries(env: Env): Promise<Response> {
@@ -1269,6 +1279,12 @@ const ADMIN_HTML = `<!DOCTYPE html>
       copy.textContent = "内容をコピー";
       copy.addEventListener("click", () => copyInquiry(item));
       actions.append(copy);
+      const remove = document.createElement("button");
+      remove.className = "warn";
+      remove.type = "button";
+      remove.textContent = "削除する";
+      remove.addEventListener("click", () => removeInquiry(item));
+      actions.append(remove);
       if (item.resume_name) {
         const file = document.createElement("a");
         file.className = "quiet";
@@ -1304,6 +1320,19 @@ const ADMIN_HTML = `<!DOCTYPE html>
       message.className = "message-block";
       message.textContent = String(item.message || "").trim() || "メッセージはありません。";
       detail.append(head, actions, facts, messageLabel, message);
+    }
+    async function removeInquiry(item) {
+      const name = item.parent_name || "この問い合わせ";
+      if (!confirm("「" + name + "」の問い合わせを削除します。元に戻せませんがよろしいですか？")) return;
+      try {
+        await api("/api/inquiries/" + item.id, { method: "DELETE" });
+        inquiries = inquiries.filter((entry) => entry.id !== item.id);
+        inquirySelected = null;
+        renderInbox();
+        toast("問い合わせを削除しました");
+      } catch (error) {
+        toast("削除できませんでした");
+      }
     }
     async function copyInquiry(item) {
       const lines = [topicName(item.topic), formatWhen(item.created_at), ""];
