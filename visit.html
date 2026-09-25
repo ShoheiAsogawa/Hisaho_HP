@@ -178,9 +178,9 @@
             </div>
             <form class="soft-form" id="contact-form">
               <div class="topic-switch" role="tablist" aria-label="お問い合わせの種類">
-                <button type="button" role="tab" data-topic="visit" aria-selected="true">園見学</button>
-                <button type="button" role="tab" data-topic="recruit" aria-selected="false">採用</button>
-                <button type="button" role="tab" data-topic="other" aria-selected="false">その他</button>
+                <button type="button" role="tab" data-topic="visit" aria-selected="true"><span>園見学</span><small>入園のご相談</small></button>
+                <button type="button" role="tab" data-topic="recruit" aria-selected="false"><span>採用</span><small>働く相談</small></button>
+                <button type="button" role="tab" data-topic="other" aria-selected="false"><span>その他</span><small>給食など</small></button>
               </div>
               <input type="hidden" name="topic" value="visit" />
               <label class="hp-honeypot">
@@ -221,6 +221,13 @@
                   <option>1〜3年</option>
                   <option>4年以上</option>
                 </select>
+              </label>
+              <label data-for="recruit" class="resume-field">
+                履歴書
+                <span class="resume-pick">
+                  <input type="file" name="resume" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png" />
+                  <span class="resume-note">PDF・Word・写真。8MBまで。なくても送れます。</span>
+                </span>
               </label>
               <label>
                 メールアドレス
@@ -326,16 +333,16 @@
                 const button = form.querySelector("button[type=submit]");
                 status.textContent = "";
                 button.disabled = true;
-                const data = Object.fromEntries(new FormData(form).entries());
+                const data = new FormData(form);
                 try {
                   const response = await fetch("/api/contact", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
+                    body: data
                   });
                   const body = await response.json().catch(() => ({}));
                   if (!response.ok) throw new Error(body.error || "送信できませんでした");
                   form.reset();
+                  applyTopic(topicFromHash());
                   contactPop.hidden = false;
                   document.body.classList.add("contact-pop-open");
                   contactPop.querySelector("[data-close-pop]").focus();

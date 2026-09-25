@@ -29,6 +29,12 @@
           "database_name": "hisaho-hp-cms",
           "database_id": "5863e00b-09c5-4cc9-b344-a07b19ffb821"
         }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "FILES",
+          "bucket_name": "hisaho-hp-files"
+        }
       ]
     }
   }

@@ -1,6 +1,7 @@
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  FILES?: R2Bucket;
   CMS_PASSWORD?: string;
   CMS_SESSION_SECRET?: string;
 }
@@ -257,6 +258,8 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   if (!session) return json({ error: "ログインが必要です" }, 401);
   if (request.method === "GET" && url.pathname === "/api/me") return json({ ok: true });
   if (request.method === "GET" && url.pathname === "/api/inquiries") return listInquiries(env);
+  const resumeMatch = url.pathname.match(/^\/api\/inquiries\/(\d+)\/resume$/);
+  if (resumeMatch && request.method === "GET") return downloadResume(env, Number(resumeMatch[1]));
   if (request.method === "GET" && url.pathname === "/api/news") return listNews(env, true);
   if (request.method === "POST" && url.pathname === "/api/media") return uploadMedia(request, env);
   if (request.method === "POST" && url.pathname === "/api/news") return createNews(request, env);
@@ -269,9 +272,30 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
 
 const CONTACT_TO = "hisahohoikuen@gmail.com";
 
-async function submitContact(request: Request, env: Env): Promise<Response> {
+async function readContactBody(request: Request): Promise<{ body: Record<string, unknown>; resume: File | null } | null> {
+  const type = request.headers.get("content-type") ?? "";
+  if (type.includes("multipart/form-data")) {
+    const form = await request.formData().catch(() => null);
+    if (!form) return null;
+    const body: Record<string, unknown> = {};
+    let resume: File | null = null;
+    for (const [key, value] of form.entries()) {
+      if (value instanceof File) {
+        if (key === "resume" && value.size > 0) resume = value;
+      } else {
+        body[key] = value;
+      }
+    }
+    return { body, resume };
+  }
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
-  if (!body || String(body.company ?? "").trim()) return json({ ok: true });
+  return body ? { body, resume: null } : null;
+}
+
+async function submitContact(request: Request, env: Env): Promise<Response> {
+  const parsed = await readContactBody(request);
+  if (!parsed || String(parsed.body.company ?? "").trim()) return json({ ok: true });
+  const body = parsed.body;
   const topic = clip(body.topic, 20);
   const parentName = clip(body.parent_name, 80);
   const childAge = topic === "recruit" ? clip(body.role, 40) : topic === "other" ? "" : clip(body.child_age, 40);
@@ -284,20 +308,51 @@ async function submitContact(request: Request, env: Env): Promise<Response> {
     return json({ error: "入力内容を確認してください" }, 400);
   }
   if (topic !== "other" && !childAge) return json({ error: "入力内容を確認してください" }, 400);
+  const resume = topic === "recruit" ? parsed.resume : null;
+  const stored = await storeResume(env, resume);
+  if (!stored.ok) return json({ error: stored.error }, 400);
   const recent = await env.DB.prepare(
     "SELECT COUNT(*) AS n FROM inquiries WHERE email = ? AND created_at >= datetime('now', '-1 hour')",
   ).bind(email).first<{ n: number }>();
   if ((recent?.n ?? 0) >= 5) return json({ error: "しばらく時間をおいて再度お試しください" }, 429);
   await env.DB.prepare(
-    "INSERT INTO inquiries (parent_name, child_age, email, phone, message, topic, detail) VALUES (?, ?, ?, ?, ?, ?, ?)",
-  ).bind(parentName, childAge, email, phone, message, topic, detail).run();
-  const mailed = await forwardContact({ topic, parentName, childAge, detail, email, phone, message });
+    "INSERT INTO inquiries (parent_name, child_age, email, phone, message, topic, detail, resume_name, resume_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  ).bind(parentName, childAge, email, phone, message, topic, detail, stored.name, stored.key).run();
+  const mailed = await forwardContact({ topic, parentName, childAge, detail, email, phone, message, resumeName: stored.name });
   return json({ ok: true, mailed });
+}
+
+async function storeResume(env: Env, resume: File | null): Promise<{ ok: true; name: string; key: string } | { ok: false; error: string }> {
+  if (!resume) return { ok: true, name: "", key: "" };
+  if (resume.size > 8_000_000) return { ok: false, error: "履歴書は8MB以下にしてください" };
+  const ext = resumeExtension(resume);
+  if (!ext) return { ok: false, error: "履歴書はPDF、Word、JPEG、PNGにしてください" };
+  if (!env.FILES) return { ok: false, error: "履歴書を保存できませんでした" };
+  const key = `resumes/${crypto.randomUUID()}.${ext}`;
+  await env.FILES.put(key, await resume.arrayBuffer(), {
+    httpMetadata: { contentType: resume.type || "application/octet-stream" },
+  });
+  return { ok: true, name: clip(resume.name, 120), key };
+}
+
+function resumeExtension(file: File): string | null {
+  const types: Record<string, string> = {
+    "application/pdf": "pdf",
+    "application/msword": "doc",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+    "image/jpeg": "jpg",
+    "image/png": "png",
+  };
+  if (types[file.type]) return types[file.type];
+  const match = /\.(pdf|docx|doc|jpe?g|png)$/i.exec(file.name);
+  if (!match) return null;
+  const ext = match[1].toLowerCase();
+  return ext === "jpeg" ? "jpg" : ext;
 }
 
 const TOPIC_LABEL: Record<string, string> = { visit: "園見学", recruit: "採用", other: "その他" };
 
-async function forwardContact(input: { topic: string; parentName: string; childAge: string; detail: string; email: string; phone: string; message: string }): Promise<boolean> {
+async function forwardContact(input: { topic: string; parentName: string; childAge: string; detail: string; email: string; phone: string; message: string; resumeName: string }): Promise<boolean> {
   const label = TOPIC_LABEL[input.topic] ?? "お問い合わせ";
   const about = input.topic === "recruit"
     ? `希望職種: ${input.childAge}\nご経験: ${input.detail || "未記入"}`
@@ -310,6 +365,7 @@ async function forwardContact(input: { topic: string; parentName: string; childA
     about,
     `メール: ${input.email}`,
     `電話: ${input.phone || "未記入"}`,
+    input.resumeName ? `履歴書: ${input.resumeName}` : "",
     "",
     input.message,
   ].filter((line) => line !== "").join("\n");
@@ -339,9 +395,23 @@ function clip(value: unknown, max: number): string {
 
 async function listInquiries(env: Env): Promise<Response> {
   const result = await env.DB.prepare(
-    "SELECT id, parent_name, child_age, email, phone, message, topic, detail, created_at FROM inquiries ORDER BY id DESC LIMIT 100",
+    "SELECT id, parent_name, child_age, email, phone, message, topic, detail, resume_name, created_at FROM inquiries ORDER BY id DESC LIMIT 100",
   ).all();
   return json({ inquiries: result.results ?? [] });
+}
+
+async function downloadResume(env: Env, id: number): Promise<Response> {
+  const row = await env.DB.prepare("SELECT resume_name, resume_key FROM inquiries WHERE id = ?").bind(id).first<{ resume_name: string; resume_key: string }>();
+  if (!row?.resume_key || !env.FILES) return new Response("見つかりません", { status: 404 });
+  const object = await env.FILES.get(row.resume_key);
+  if (!object) return new Response("見つかりません", { status: 404 });
+  const name = row.resume_name || "resume";
+  const headers = new Headers({
+    "content-type": object.httpMetadata?.contentType || "application/octet-stream",
+    "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(name)}`,
+    "cache-control": "private, no-store",
+  });
+  return new Response(object.body, { headers });
 }
 
 async function listNews(env: Env, includeDrafts: boolean): Promise<Response> {
@@ -962,7 +1032,8 @@ const ADMIN_HTML = `<!DOCTYPE html>
       list.innerHTML = rows.length ? rows.map((item) => {
         const topic = topicNames[item.topic] || "園見学";
         const extra = item.topic === "other" ? "" : " / " + escapeText(item.child_age || "") + (item.detail ? " / " + escapeText(item.detail) : "");
-        return '<article class="card" style="margin-top:12px;padding:16px"><p class="meta">' + escapeText(item.created_at) + " ・ " + topic + '</p><h3>' + escapeText(item.parent_name) + extra + '</h3><p>' + escapeText(item.email) + (item.phone ? ' / ' + escapeText(item.phone) : '') + '</p><p style="white-space:pre-wrap">' + escapeText(item.message) + '</p></article>';
+        const resume = item.resume_name ? '<p><a href="/api/inquiries/' + item.id + '/resume">' + escapeText(item.resume_name) + '</a></p>' : '';
+        return '<article class="card" style="margin-top:12px;padding:16px"><p class="meta">' + escapeText(item.created_at) + " ・ " + topic + '</p><h3>' + escapeText(item.parent_name) + extra + '</h3><p>' + escapeText(item.email) + (item.phone ? ' / ' + escapeText(item.phone) : '') + '</p>' + resume + '<p style="white-space:pre-wrap">' + escapeText(item.message) + '</p></article>';
       }).join('') : '<p class="empty">まだ問い合わせはありません。</p>';
       editor.classList.add("hidden");
       document.querySelector("#inbox").classList.remove("hidden");

@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS inquiries (
   message TEXT NOT NULL,
   topic TEXT NOT NULL DEFAULT 'visit',
   detail TEXT NOT NULL DEFAULT '',
+  resume_name TEXT NOT NULL DEFAULT '',
+  resume_key TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
