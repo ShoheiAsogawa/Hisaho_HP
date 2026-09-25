@@ -299,6 +299,7 @@ async function submitContact(request: Request, env: Env): Promise<Response> {
   const topic = clip(body.topic, 20);
   const parentName = clip(body.parent_name, 80);
   const childAge = topic === "recruit" ? clip(body.role, 40) : topic === "other" ? "" : clip(body.child_age, 40);
+  const childName = topic === "visit" ? clip(body.child_name, 80) : "";
   const detail = topic === "recruit" ? clip(body.detail, 40) : "";
   const email = clip(body.email, 120);
   const phone = clip(body.phone, 40);
@@ -309,6 +310,7 @@ async function submitContact(request: Request, env: Env): Promise<Response> {
   if (!known || !parentName || !message || !emailOk || phoneDigits.length < 10) {
     return json({ error: "入力内容を確認してください" }, 400);
   }
+  if (topic === "visit" && !childName) return json({ error: "入力内容を確認してください" }, 400);
   if (topic !== "other" && !childAge) return json({ error: "入力内容を確認してください" }, 400);
   const resume = topic === "recruit" ? parsed.resume : null;
   const stored = await storeResume(env, resume);
@@ -318,9 +320,9 @@ async function submitContact(request: Request, env: Env): Promise<Response> {
   ).bind(phone).first<{ n: number }>();
   if ((recent?.n ?? 0) >= 5) return json({ error: "しばらく時間をおいて再度お試しください" }, 429);
   await env.DB.prepare(
-    "INSERT INTO inquiries (parent_name, child_age, email, phone, message, topic, detail, resume_name, resume_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-  ).bind(parentName, childAge, email, phone, message, topic, detail, stored.name, stored.key).run();
-  const mailed = await forwardContact({ topic, parentName, childAge, detail, email, phone, message, resumeName: stored.name });
+    "INSERT INTO inquiries (parent_name, child_name, child_age, email, phone, message, topic, detail, resume_name, resume_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  ).bind(parentName, childName, childAge, email, phone, message, topic, detail, stored.name, stored.key).run();
+  const mailed = await forwardContact({ topic, parentName, childName, childAge, detail, email, phone, message, resumeName: stored.name });
   return json({ ok: true, mailed });
 }
 
@@ -354,13 +356,13 @@ function resumeExtension(file: File): string | null {
 
 const TOPIC_LABEL: Record<string, string> = { visit: "園見学", recruit: "採用", other: "その他" };
 
-async function forwardContact(input: { topic: string; parentName: string; childAge: string; detail: string; email: string; phone: string; message: string; resumeName: string }): Promise<boolean> {
+async function forwardContact(input: { topic: string; parentName: string; childName: string; childAge: string; detail: string; email: string; phone: string; message: string; resumeName: string }): Promise<boolean> {
   const label = TOPIC_LABEL[input.topic] ?? "お問い合わせ";
   const about = input.topic === "recruit"
     ? `希望職種: ${input.childAge}\nご経験: ${input.detail || "未記入"}`
     : input.topic === "other"
       ? ""
-      : `お子さまの年齢: ${input.childAge}`;
+      : `お子さまのお名前: ${input.childName}\nお子さまの年齢: ${input.childAge}`;
   const text = [
     `種類: ${label}`,
     `お名前: ${input.parentName}`,
@@ -396,7 +398,7 @@ function clip(value: unknown, max: number): string {
 
 async function listInquiries(env: Env): Promise<Response> {
   const result = await env.DB.prepare(
-    "SELECT id, parent_name, child_age, email, phone, message, topic, detail, resume_name, created_at FROM inquiries ORDER BY id DESC LIMIT 100",
+    "SELECT id, parent_name, child_name, child_age, email, phone, message, topic, detail, resume_name, created_at FROM inquiries ORDER BY id DESC LIMIT 100",
   ).all();
   return json({ inquiries: result.results ?? [] });
 }
@@ -1032,7 +1034,11 @@ const ADMIN_HTML = `<!DOCTYPE html>
       const topicNames = { visit: "園見学", recruit: "採用", other: "その他" };
       list.innerHTML = rows.length ? rows.map((item) => {
         const topic = topicNames[item.topic] || "園見学";
-        const extra = item.topic === "other" ? "" : " / " + escapeText(item.child_age || "") + (item.detail ? " / " + escapeText(item.detail) : "");
+        const extra = item.topic === "other"
+          ? ""
+          : item.topic === "visit"
+            ? " / " + escapeText(item.child_name || "") + " / " + escapeText(item.child_age || "")
+            : " / " + escapeText(item.child_age || "") + (item.detail ? " / " + escapeText(item.detail) : "");
         const resume = item.resume_name ? '<p><a href="/api/inquiries/' + item.id + '/resume">' + escapeText(item.resume_name) + '</a></p>' : '';
         const contact = escapeText(item.phone || "") + (item.email ? " / " + escapeText(item.email) : "");
         return '<article class="card" style="margin-top:12px;padding:16px"><p class="meta">' + escapeText(item.created_at) + " ・ " + topic + '</p><h3>' + escapeText(item.parent_name) + extra + '</h3><p>' + contact + '</p>' + resume + '<p style="white-space:pre-wrap">' + escapeText(item.message) + '</p></article>';
