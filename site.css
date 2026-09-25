@@ -2361,127 +2361,98 @@ body.hisaho {
 
 /* 保育理念 */
 .hisaho .philosophy {
-  background:
-    radial-gradient(circle at 8% 18%, rgba(255, 189, 89, 0.28), transparent 28%),
-    radial-gradient(circle at 92% 80%, rgba(255, 102, 196, 0.18), transparent 26%),
-    linear-gradient(180deg, #fff 0%, #fff8fc 100%);
+  background: #fff;
 }
 
-.hisaho .philosophy-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(16px, 2.4vw, 28px);
-  max-width: 980px;
+.hisaho .philosophy-board {
+  max-width: 860px;
   margin: 0 auto;
+  padding: clamp(8px, 1.5vw, 16px) clamp(18px, 3vw, 36px);
+  border: 3px solid #f4cfe4;
+  border-radius: 32px;
+  background: #fff;
 }
 
-.hisaho .philosophy-card {
-  position: relative;
-  overflow: hidden;
-  min-height: 280px;
-  padding: clamp(28px, 4vw, 42px) clamp(24px, 3vw, 36px) 28px;
-  border-radius: 36px;
-  box-shadow: var(--hp-shadow);
+.hisaho .philosophy-row {
+  display: grid;
+  grid-template-columns: 148px 1fr;
+  align-items: center;
+  gap: clamp(12px, 2vw, 28px);
+  padding: clamp(18px, 2.4vw, 28px) 8px;
 }
 
-.hisaho .philosophy-card::before,
-.hisaho .philosophy-card::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.hisaho .philosophy-roots {
-  background:
-    radial-gradient(circle at 88% 18%, rgba(255, 255, 255, 0.7), transparent 34%),
-    linear-gradient(160deg, #e7f8f2 0%, #b7eadc 58%, #7dceba 100%);
-  color: #24584c;
-}
-
-.hisaho .philosophy-roots::before {
-  width: 180px;
-  height: 180px;
-  right: -46px;
-  bottom: -58px;
-  background: rgba(255, 255, 255, 0.28);
-}
-
-.hisaho .philosophy-roots::after {
-  width: 14px;
-  height: 14px;
-  left: 28px;
-  bottom: 28px;
-  box-shadow:
-    22px -8px 0 rgba(255, 255, 255, 0.55),
-    44px 6px 0 rgba(36, 88, 76, 0.16),
-    68px -4px 0 rgba(255, 255, 255, 0.4);
+.hisaho .philosophy-row + .philosophy-row {
+  border-top: 2px dashed #f4cfe4;
 }
 
 .hisaho .philosophy-joy {
-  background:
-    radial-gradient(circle at 12% 16%, rgba(255, 243, 201, 0.95), transparent 32%),
-    linear-gradient(160deg, #ffe4f2 0%, #ffb3dc 55%, #ff7ec4 100%);
-  color: #8a215c;
+  direction: rtl;
 }
 
-.hisaho .philosophy-joy::before {
-  width: 210px;
-  height: 210px;
-  right: -70px;
-  top: -70px;
-  background: rgba(255, 255, 255, 0.28);
-}
-
-.hisaho .philosophy-joy::after {
-  width: 18px;
-  height: 18px;
-  left: 34px;
-  bottom: 26px;
-  background: #fff3c9;
-  box-shadow:
-    28px 8px 0 #fff,
-    52px -6px 0 rgba(255, 189, 89, 0.9);
+.hisaho .philosophy-joy > div {
+  direction: ltr;
 }
 
 .hisaho .philosophy-art {
-  position: absolute;
-  right: -8px;
-  bottom: -12px;
-  width: min(46%, 210px);
-  height: auto;
-  pointer-events: none;
+  width: 148px;
+  height: 132px;
+  object-fit: contain;
+  object-position: center bottom;
 }
 
 .hisaho .philosophy-kicker {
   display: inline-grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
-  margin: 0 0 18px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.72);
+  width: 42px;
+  height: 42px;
+  margin: 0 0 8px;
+  border-radius: 12px;
+  background: #80d9c4;
+  color: #24584c;
   font-weight: 900;
-  letter-spacing: 0.04em;
 }
 
-.hisaho .philosophy-card h3 {
-  position: relative;
-  z-index: 1;
-  max-width: 8em;
+.hisaho .philosophy-joy .philosophy-kicker {
+  background: #ff66c4;
+  color: #fff;
+}
+
+.hisaho .philosophy-row h3 {
   margin: 0;
-  font-size: clamp(1.7rem, 3vw, 2.35rem);
+  color: var(--hp-ink);
+  font-size: clamp(1.7rem, 3.2vw, 2.4rem);
   font-weight: 900;
   line-height: 1.35;
 }
 
-@media (max-width: 760px) {
-  .hisaho .philosophy-grid {
-    grid-template-columns: 1fr;
+.hisaho .philosophy-roots h3 {
+  text-decoration: underline;
+  text-decoration-color: #80d9c4;
+  text-decoration-thickness: 8px;
+  text-underline-offset: 6px;
+}
+
+.hisaho .philosophy-joy h3 {
+  text-decoration: underline;
+  text-decoration-color: #ffbd59;
+  text-decoration-thickness: 8px;
+  text-underline-offset: 6px;
+}
+
+@media (max-width: 640px) {
+  .hisaho .philosophy-row,
+  .hisaho .philosophy-joy {
+    direction: ltr;
+    grid-template-columns: 96px 1fr;
   }
 
-  .hisaho .philosophy-card {
-    min-height: 230px;
+  .hisaho .philosophy-art {
+    width: 96px;
+    height: 96px;
+  }
+
+  .hisaho .philosophy-row h3 {
+    font-size: 1.45rem;
   }
 }
 .hisaho .goal-grid {
