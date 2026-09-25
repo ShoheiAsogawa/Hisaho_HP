@@ -2381,44 +2381,18 @@ body.hisaho {
   gap: 2px;
 }
 
-.hisaho .philosophy-copy::before,
-.hisaho .philosophy-copy::after {
-  content: "";
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.hisaho .philosophy-roots .philosophy-stroke {
+  color: #3f9a86;
 }
 
-.hisaho .philosophy-roots .philosophy-copy::before {
-  top: -6px;
-  left: -14px;
-  background: #ffbd59;
-  box-shadow: 16px 10px 0 #80d9c4;
-}
-
-.hisaho .philosophy-roots .philosophy-copy::after {
-  right: -10px;
-  bottom: 18px;
-  background: #ff66c4;
-}
-
-.hisaho .philosophy-joy .philosophy-copy::before {
-  top: 4px;
-  right: -16px;
-  background: #ffbd59;
-  box-shadow: -18px 12px 0 #ffb3dc;
-}
-
-.hisaho .philosophy-joy .philosophy-copy::after {
-  left: -8px;
-  bottom: 16px;
-  background: #80d9c4;
+.hisaho .philosophy-joy .philosophy-stroke {
+  color: #e25aa0;
 }
 
 .hisaho .philosophy-stroke {
-  width: min(100%, 280px);
-  height: 28px;
+  display: block;
+  width: min(100%, 340px);
+  height: auto;
 }
 
 .hisaho .philosophy-ornament {
@@ -2427,8 +2401,9 @@ body.hisaho {
 }
 
 .hisaho .philosophy-ornament svg {
-  width: 160px;
-  height: 28px;
+  display: block;
+  width: 220px;
+  height: auto;
 }
 
 .hisaho .philosophy-phrase h3 {
