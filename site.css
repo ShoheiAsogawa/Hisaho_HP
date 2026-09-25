@@ -2771,6 +2771,34 @@ body.hisaho {
   font-weight: 900;
 }
 
+.hisaho .field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hisaho .need {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+}
+
+.hisaho .need-must {
+  background: #ad286e;
+  color: #fff;
+}
+
+.hisaho .need-opt {
+  background: #f3e6ec;
+  color: #8a6174;
+}
+
 .hisaho .soft-form label[hidden] {
   display: none;
 }

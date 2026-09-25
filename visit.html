@@ -188,11 +188,11 @@
                 <input type="text" name="company" tabindex="-1" autocomplete="off" />
               </label>
               <label>
-                <span id="name-caption">保護者さまのお名前</span>
+                <span class="field-label"><span id="name-caption">保護者さまのお名前</span><em class="need need-must">必須</em></span>
                 <input type="text" name="parent_name" autocomplete="name" required />
               </label>
               <label data-for="visit">
-                お子さまの年齢
+                <span class="field-label">お子さまの年齢<em class="need need-must">必須</em></span>
                 <select name="child_age" required>
                   <option value="">選択してください</option>
                   <option>0歳</option>
@@ -205,7 +205,7 @@
                 </select>
               </label>
               <label data-for="recruit">
-                希望する職種
+                <span class="field-label">希望する職種<em class="need need-must">必須</em></span>
                 <select name="role" required>
                   <option value="">選択してください</option>
                   <option>保育士</option>
@@ -214,7 +214,7 @@
                 </select>
               </label>
               <label data-for="recruit">
-                ご経験
+                <span class="field-label">ご経験<em class="need need-opt">任意</em></span>
                 <select name="detail">
                   <option value="">選択してください</option>
                   <option>未経験</option>
@@ -223,22 +223,22 @@
                 </select>
               </label>
               <label data-for="recruit" class="resume-field">
-                履歴書
+                <span class="field-label">履歴書<em class="need need-opt">任意</em></span>
                 <span class="resume-pick">
                   <input type="file" name="resume" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png" />
                   <span class="resume-note">PDF・Word・写真。8MBまで。なくても送れます。</span>
                 </span>
               </label>
               <label>
-                メールアドレス
+                <span class="field-label">メールアドレス<em class="need need-must">必須</em></span>
                 <input type="email" name="email" autocomplete="email" required />
               </label>
               <label>
-                電話番号
+                <span class="field-label">電話番号<em class="need need-opt">任意</em></span>
                 <input type="tel" name="phone" autocomplete="tel" />
               </label>
               <label>
-                <span id="message-caption">見学希望日・相談内容</span>
+                <span class="field-label"><span id="message-caption">見学希望日・相談内容</span><em class="need need-must">必須</em></span>
                 <textarea name="message" rows="6" required></textarea>
               </label>
               <button class="button primary" type="submit">
