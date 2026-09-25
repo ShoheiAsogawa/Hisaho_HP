@@ -839,6 +839,39 @@ const ADMIN_HTML = `<!DOCTYPE html>
     .status-line { display:flex; justify-content:space-between; align-items:center; font-size:.84rem; color:var(--muted); }
     .toast { position:fixed; right:20px; bottom:20px; z-index:10; padding:12px 16px; border-radius:12px; background:var(--ink); color:#fff; font-weight:700; box-shadow:0 12px 30px rgba(0,0,0,.18); }
     .empty { padding:18px; border:1px dashed var(--line); border-radius:12px; color:var(--muted); text-align:center; font-size:.88rem; }
+    .inbox-workspace { align-items:start; }
+    .inbox-workspace .row { align-items:stretch; }
+    .inbox-workspace .row input { flex:1; min-width:0; width:auto; }
+    #inquiry-badge { margin-left:6px; background:#fde7f3; color:var(--pink-dark); }
+    .inq-hint { margin:0; }
+    .inq-item { width:100%; }
+    .inq-kicker { display:flex; justify-content:space-between; gap:8px; align-items:center; }
+    .chip { display:inline-flex; align-items:center; padding:2px 8px; border-radius:999px; font-size:.72rem; font-weight:700; }
+    .chip.visit { background:#fde7f3; color:#b83580; }
+    .chip.recruit { background:#e3f6ea; color:#1d7a4a; }
+    .chip.other { background:#f1eef0; color:#6d5c65; }
+    .chip.file { background:#fff6df; color:#8a5a12; }
+    .inq-name { font-weight:700; line-height:1.4; }
+    .inq-sub, .inq-preview { color:var(--muted); font-size:.78rem; line-height:1.5; }
+    .inq-preview { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .inquiry-detail { position:sticky; top:84px; max-height:calc(100vh - 104px); overflow:auto; display:grid; gap:16px; align-content:start; }
+    .detail-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+    .detail-head h2 { margin:8px 0 0; font-size:1.45rem; line-height:1.35; }
+    .detail-actions { display:flex; flex-wrap:wrap; gap:8px; }
+    .detail-actions a { display:inline-flex; align-items:center; border-radius:10px; background:var(--pink); color:#fff; padding:10px 16px; font-weight:700; text-decoration:none; }
+    .detail-actions a:hover { background:var(--pink-dark); }
+    .detail-actions a.quiet { background:#fff; color:var(--ink); border:1px solid var(--line); }
+    .fact-grid { display:grid; grid-template-columns:8.5em minmax(0,1fr); gap:10px 14px; margin:0; }
+    .fact-grid dt { color:var(--muted); font-size:.82rem; }
+    .fact-grid dd { margin:0; font-weight:700; overflow-wrap:anywhere; }
+    .message-block { margin:0; white-space:pre-wrap; line-height:1.85; background:#fbf8f9; border-radius:12px; padding:16px; }
+    .placeholder-detail { min-height:360px; display:grid; place-items:center; text-align:center; color:var(--muted); }
+    @media (max-width:820px) {
+      .inquiry-detail { position:static; max-height:none; }
+      .inbox-workspace.is-reading .sidebar { display:none; }
+      .inbox-workspace:not(.is-reading) .inquiry-detail { display:none; }
+    }
+    @media (min-width:821px) { #inquiry-back { display:none; } }
     @media (max-width:1080px) { .editor-area { grid-template-columns:1fr; } .side-col { position:static; } }
     @media (max-width:820px) { .workspace { grid-template-columns:1fr; padding:14px; } .sidebar { position:static; max-height:none; } .topbar { padding:10px 14px; } }
     .wysiwyg { border:1px solid #d5dbe3; border-radius:10px; background:#fff; overflow:hidden; }
@@ -866,7 +899,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
     </div>
     <div class="row">
       <a href="/news.html" target="_blank" rel="noopener">サイトを表示</a>
-      <button id="show-inquiries" class="ghost hidden" type="button">問い合わせ</button>
+      <button id="show-inquiries" class="ghost hidden" type="button">問い合わせ<span id="inquiry-badge" class="badge hidden"></span></button>
       <button id="logout" class="ghost hidden" type="button">ログアウト</button>
     </div>
   </header>
@@ -880,14 +913,26 @@ const ADMIN_HTML = `<!DOCTYPE html>
         <p id="login-error" class="error"></p>
       </form>
     </section>
-    <section id="inbox" class="workspace hidden">
-      <div class="card" style="padding:20px">
+    <section id="inbox" class="workspace inbox-workspace hidden">
+      <aside class="sidebar">
         <div class="sidebar-head">
-          <h2>届いた問い合わせ</h2>
-          <button id="back-editor" class="ghost" type="button">記事編集へ戻る</button>
+          <h2>問い合わせ <span id="inquiry-count" class="meta"></span></h2>
+          <button id="back-editor" class="ghost" type="button">記事へ戻る</button>
         </div>
-        <div id="inquiry-list"></div>
-      </div>
+        <p class="meta inq-hint">新しい順です。↑↓キーで移動できます。</p>
+        <div class="row">
+          <input id="inquiry-search" type="search" placeholder="名前・電話・内容で探す" aria-label="問い合わせを検索" />
+          <button id="reload-inquiries" class="ghost" type="button">更新</button>
+        </div>
+        <div class="filters" id="inquiry-filters" role="group" aria-label="種類で絞り込み">
+          <button type="button" data-topic="all" class="is-on">すべて</button>
+          <button type="button" data-topic="visit">園見学</button>
+          <button type="button" data-topic="recruit">採用</button>
+          <button type="button" data-topic="other">その他</button>
+        </div>
+        <div id="inquiry-list" class="post-list" role="listbox" aria-label="問い合わせ一覧"></div>
+      </aside>
+      <div id="inquiry-detail" class="card inquiry-detail"></div>
     </section>
     <section id="editor" class="workspace hidden">
       <aside class="sidebar">
@@ -1027,28 +1072,304 @@ const ADMIN_HTML = `<!DOCTYPE html>
       document.querySelector("#inbox").classList.add("hidden");
     }
 
-    document.querySelector("#show-inquiries").addEventListener("click", async () => {
-      const data = await api("/api/inquiries");
+    let inquiries = [];
+    let inquiryTopic = "all";
+    let inquirySelected = null;
+
+    function topicName(topic) {
+      return { visit: "園見学", recruit: "採用", other: "その他" }[topic] || "園見学";
+    }
+    function topicClass(topic) {
+      return topic === "recruit" ? "recruit" : topic === "other" ? "other" : "visit";
+    }
+    function parseUtc(value) {
+      const match = String(value || "").match(/^(\\d{4})-(\\d{2})-(\\d{2})[ T](\\d{2}):(\\d{2})/);
+      if (!match) return null;
+      return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]));
+    }
+    function pad2(value) { return String(value).padStart(2, "0"); }
+    function formatWhen(value) {
+      const utc = parseUtc(value);
+      if (utc == null) return String(value || "");
+      const jst = new Date(utc + 9 * 60 * 60 * 1000);
+      return jst.getUTCFullYear() + "年" + (jst.getUTCMonth() + 1) + "月" + jst.getUTCDate() + "日 " + pad2(jst.getUTCHours()) + ":" + pad2(jst.getUTCMinutes());
+    }
+    function relativeWhen(value) {
+      const utc = parseUtc(value);
+      if (utc == null) return "";
+      const minutes = Math.floor((Date.now() - utc) / 60000);
+      if (minutes < 1) return "たった今";
+      if (minutes < 60) return minutes + "分前";
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return hours + "時間前";
+      const days = Math.floor(hours / 24);
+      if (days < 31) return days + "日前";
+      return formatWhen(value);
+    }
+    function oneLine(value) {
+      return String(value || "").replace(/\\s+/g, " ").trim();
+    }
+    function phoneDigits(value) {
+      return String(value || "").replace(/\\D/g, "");
+    }
+    function inquiryFacts(item) {
+      const topic = item.topic || "visit";
+      const facts = [];
+      if (topic === "visit") {
+        facts.push(["お子さまのお名前", item.child_name || "未記入"]);
+        facts.push(["年齢", item.child_age || "未記入"]);
+      } else if (topic === "recruit") {
+        facts.push(["希望職種", item.child_age || "未記入"]);
+        facts.push(["ご経験", item.detail || "未記入"]);
+      }
+      facts.push(["電話番号", item.phone || "未記入"]);
+      facts.push(["メール", item.email || "未記入"]);
+      if (item.resume_name) facts.push(["履歴書", item.resume_name]);
+      return facts;
+    }
+    function inquirySubtitle(item) {
+      const topic = item.topic || "visit";
+      if (topic === "visit") return [item.child_name, item.child_age].filter(Boolean).join("・");
+      if (topic === "recruit") return [item.child_age, item.detail].filter(Boolean).join("・");
+      return "";
+    }
+    function visibleInquiries() {
+      const query = document.querySelector("#inquiry-search").value.trim().toLowerCase();
+      return inquiries.filter((item) => {
+        const topic = item.topic || "visit";
+        if (inquiryTopic !== "all" && topic !== inquiryTopic) return false;
+        if (!query) return true;
+        const hay = [item.parent_name, item.child_name, item.child_age, item.phone, item.email, item.message, item.detail, item.resume_name, topicName(topic)].join(" ").toLowerCase();
+        return hay.includes(query);
+      });
+    }
+    function inboxNarrow() {
+      return window.matchMedia("(max-width: 820px)").matches;
+    }
+    function renderInbox() {
+      const rows = visibleInquiries();
+      const counts = { all: inquiries.length, visit: 0, recruit: 0, other: 0 };
+      inquiries.forEach((item) => {
+        const topic = item.topic || "visit";
+        if (counts[topic] != null) counts[topic] += 1;
+      });
+      const labels = { all: "すべて", visit: "園見学", recruit: "採用", other: "その他" };
+      document.querySelectorAll("[data-topic]").forEach((element) => {
+        element.textContent = labels[element.dataset.topic] + " " + counts[element.dataset.topic];
+      });
+      document.querySelector("#inquiry-count").textContent = rows.length + "件";
+      const badge = document.querySelector("#inquiry-badge");
+      badge.textContent = String(inquiries.length);
+      badge.classList.toggle("hidden", !inquiries.length);
+      if (inquirySelected && !rows.some((item) => item.id === inquirySelected)) inquirySelected = null;
+      if (!inquirySelected && rows[0] && !inboxNarrow()) inquirySelected = rows[0].id;
       const list = document.querySelector("#inquiry-list");
-      const rows = data.inquiries || [];
-      const topicNames = { visit: "園見学", recruit: "採用", other: "その他" };
-      list.innerHTML = rows.length ? rows.map((item) => {
-        const topic = topicNames[item.topic] || "園見学";
-        const extra = item.topic === "other"
-          ? ""
-          : item.topic === "visit"
-            ? " / " + escapeText(item.child_name || "") + " / " + escapeText(item.child_age || "")
-            : " / " + escapeText(item.child_age || "") + (item.detail ? " / " + escapeText(item.detail) : "");
-        const resume = item.resume_name ? '<p><a href="/api/inquiries/' + item.id + '/resume">' + escapeText(item.resume_name) + '</a></p>' : '';
-        const contact = escapeText(item.phone || "") + (item.email ? " / " + escapeText(item.email) : "");
-        return '<article class="card" style="margin-top:12px;padding:16px"><p class="meta">' + escapeText(item.created_at) + " ・ " + topic + '</p><h3>' + escapeText(item.parent_name) + extra + '</h3><p>' + contact + '</p>' + resume + '<p style="white-space:pre-wrap">' + escapeText(item.message) + '</p></article>';
-      }).join('') : '<p class="empty">まだ問い合わせはありません。</p>';
+      list.innerHTML = "";
+      if (!rows.length) {
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = inquiries.length ? "条件に合う問い合わせはありません。" : "まだ問い合わせはありません。";
+        list.append(empty);
+      }
+      rows.forEach((item) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "post inq-item" + (item.id === inquirySelected ? " is-active" : "");
+        card.setAttribute("role", "option");
+        card.setAttribute("aria-selected", item.id === inquirySelected ? "true" : "false");
+        const kicker = document.createElement("div");
+        kicker.className = "inq-kicker";
+        const chip = document.createElement("span");
+        chip.className = "chip " + topicClass(item.topic);
+        chip.textContent = topicName(item.topic);
+        const when = document.createElement("span");
+        when.className = "inq-sub";
+        when.textContent = relativeWhen(item.created_at);
+        kicker.append(chip, when);
+        const name = document.createElement("div");
+        name.className = "inq-name";
+        name.textContent = item.parent_name || "名前未記入";
+        card.append(kicker, name);
+        const sub = inquirySubtitle(item);
+        if (sub) {
+          const line = document.createElement("div");
+          line.className = "inq-sub";
+          line.textContent = sub;
+          card.append(line);
+        }
+        const preview = document.createElement("div");
+        preview.className = "inq-preview";
+        preview.textContent = oneLine(item.message) || "メッセージはありません";
+        card.append(preview);
+        if (item.resume_name) {
+          const file = document.createElement("span");
+          file.className = "chip file";
+          file.textContent = "履歴書あり";
+          card.append(file);
+        }
+        card.addEventListener("click", () => {
+          inquirySelected = item.id;
+          document.querySelector("#inbox").classList.add("is-reading");
+          renderInbox();
+        });
+        list.append(card);
+      });
+      renderInquiryDetail(rows.find((item) => item.id === inquirySelected) || null);
+      const active = list.querySelector(".is-active");
+      if (active && document.activeElement && document.activeElement.classList.contains("inq-item")) active.focus();
+    }
+    function renderInquiryDetail(item) {
+      const detail = document.querySelector("#inquiry-detail");
+      detail.innerHTML = "";
+      if (!item) {
+        const empty = document.createElement("div");
+        empty.className = "placeholder-detail";
+        empty.textContent = "左の一覧から問い合わせを選ぶと、連絡先と内容がここに出ます。";
+        detail.append(empty);
+        return;
+      }
+      const head = document.createElement("div");
+      head.className = "detail-head";
+      const titles = document.createElement("div");
+      const back = document.createElement("button");
+      back.id = "inquiry-back";
+      back.className = "ghost";
+      back.type = "button";
+      back.textContent = "一覧へ戻る";
+      back.addEventListener("click", () => document.querySelector("#inbox").classList.remove("is-reading"));
+      const chip = document.createElement("span");
+      chip.className = "chip " + topicClass(item.topic);
+      chip.textContent = topicName(item.topic);
+      const heading = document.createElement("h2");
+      heading.textContent = item.parent_name || "名前未記入";
+      const when = document.createElement("p");
+      when.className = "meta";
+      when.textContent = formatWhen(item.created_at) + "（" + relativeWhen(item.created_at) + "）";
+      titles.append(chip, heading, when);
+      head.append(back, titles);
+      const actions = document.createElement("div");
+      actions.className = "detail-actions";
+      const digits = phoneDigits(item.phone);
+      if (digits.length >= 10) {
+        const call = document.createElement("a");
+        call.href = "tel:" + digits;
+        call.textContent = "電話する";
+        actions.append(call);
+      }
+      if (item.email) {
+        const mail = document.createElement("a");
+        mail.className = "quiet";
+        mail.href = "mailto:" + item.email;
+        mail.textContent = "メールする";
+        actions.append(mail);
+      }
+      const copy = document.createElement("button");
+      copy.className = "ghost";
+      copy.type = "button";
+      copy.textContent = "内容をコピー";
+      copy.addEventListener("click", () => copyInquiry(item));
+      actions.append(copy);
+      if (item.resume_name) {
+        const file = document.createElement("a");
+        file.className = "quiet";
+        file.href = "/api/inquiries/" + item.id + "/resume";
+        file.textContent = "履歴書をダウンロード";
+        actions.append(file);
+      }
+      const facts = document.createElement("dl");
+      facts.className = "fact-grid";
+      inquiryFacts(item).forEach((pair) => {
+        const term = document.createElement("dt");
+        term.textContent = pair[0];
+        const value = document.createElement("dd");
+        if (pair[0] === "電話番号" && digits) {
+          const link = document.createElement("a");
+          link.href = "tel:" + digits;
+          link.textContent = pair[1];
+          value.append(link);
+        } else if (pair[0] === "メール" && item.email) {
+          const link = document.createElement("a");
+          link.href = "mailto:" + item.email;
+          link.textContent = pair[1];
+          value.append(link);
+        } else {
+          value.textContent = pair[1];
+        }
+        facts.append(term, value);
+      });
+      const messageLabel = document.createElement("p");
+      messageLabel.className = "meta";
+      messageLabel.textContent = "メッセージ";
+      const message = document.createElement("p");
+      message.className = "message-block";
+      message.textContent = String(item.message || "").trim() || "メッセージはありません。";
+      detail.append(head, actions, facts, messageLabel, message);
+    }
+    async function copyInquiry(item) {
+      const lines = [topicName(item.topic), formatWhen(item.created_at), ""];
+      inquiryFacts(item).forEach((pair) => lines.push(pair[0] + "：" + pair[1]));
+      lines.push("", String(item.message || "").trim());
+      try {
+        await navigator.clipboard.writeText(lines.join("\\n"));
+        toast("問い合わせ内容をコピーしました");
+      } catch (error) {
+        toast("コピーできませんでした");
+      }
+    }
+    async function openInbox() {
       editor.classList.add("hidden");
-      document.querySelector("#inbox").classList.remove("hidden");
+      const inbox = document.querySelector("#inbox");
+      inbox.classList.remove("hidden");
+      inbox.classList.remove("is-reading");
+      const list = document.querySelector("#inquiry-list");
+      list.innerHTML = '<p class="empty">読み込んでいます…</p>';
+      try {
+        const data = await api("/api/inquiries");
+        inquiries = data.inquiries || [];
+        inquirySelected = null;
+        renderInbox();
+        document.querySelector("#inquiry-search").focus();
+      } catch (error) {
+        list.innerHTML = "";
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = "読み込めませんでした。更新してもう一度お試しください。";
+        list.append(empty);
+        toast("問い合わせを読み込めませんでした");
+      }
+    }
+    document.querySelector("#show-inquiries").addEventListener("click", () => { openInbox(); });
+    document.querySelector("#reload-inquiries").addEventListener("click", () => { openInbox(); });
+    document.querySelector("#inquiry-search").addEventListener("input", () => { renderInbox(); });
+    document.querySelectorAll("[data-topic]").forEach((element) => {
+      element.addEventListener("click", () => {
+        inquiryTopic = element.dataset.topic;
+        document.querySelectorAll("[data-topic]").forEach((other) => other.classList.toggle("is-on", other === element));
+        inquirySelected = null;
+        renderInbox();
+      });
     });
     document.querySelector("#back-editor").addEventListener("click", () => {
       document.querySelector("#inbox").classList.add("hidden");
+      document.querySelector("#inbox").classList.remove("is-reading");
       editor.classList.remove("hidden");
+    });
+    document.addEventListener("keydown", (event) => {
+      const inbox = document.querySelector("#inbox");
+      if (inbox.classList.contains("hidden")) return;
+      if (event.target.closest("input, textarea, select")) return;
+      if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+      const rows = visibleInquiries();
+      if (!rows.length) return;
+      const found = rows.findIndex((item) => item.id === inquirySelected);
+      const index = found < 0 ? (event.key === "ArrowDown" ? -1 : 0) : found;
+      const next = event.key === "ArrowDown" ? Math.min(rows.length - 1, index + 1) : Math.max(0, index - 1);
+      inquirySelected = rows[next].id;
+      inbox.classList.add("is-reading");
+      renderInbox();
+      const active = document.querySelector("#inquiry-list .is-active");
+      if (active) active.focus();
+      event.preventDefault();
     });
     function escapeText(value) {
       return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
