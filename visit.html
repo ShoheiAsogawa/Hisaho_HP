@@ -157,14 +157,16 @@
       </section>
 
       <section class="band band-pink" id="contact">
+        <span id="recruit" class="topic-anchor"></span>
+        <span id="other" class="topic-anchor"></span>
         <img class="sec-deco deco-tr deco-s" src="assets/mascots/item-notebook.webp" alt="" aria-hidden="true" width="440" height="400" loading="lazy" decoding="async" />
         <div class="band-inner">
           <div class="form-shell reveal">
             <div>
               <p class="eyebrow" style="color: var(--hp-pink-deep); font-weight: 700">Contact</p>
-              <h2>見学申込・<br class="mobile-break" />お問い合わせ</h2>
-              <p>
-                このフォームから園へ届きます。
+              <h2 id="contact-heading">見学申込・<br class="mobile-break" />お問い合わせ</h2>
+              <p id="contact-lead">
+                入園や園見学のご相談を、このフォームから園へ送れます。
                 お急ぎの場合はお電話でも受け付けています。
               </p>
               <div class="contact-box">
@@ -175,15 +177,21 @@
               </div>
             </div>
             <form class="soft-form" id="contact-form">
+              <div class="topic-switch" role="tablist" aria-label="お問い合わせの種類">
+                <button type="button" role="tab" data-topic="visit" aria-selected="true">園見学</button>
+                <button type="button" role="tab" data-topic="recruit" aria-selected="false">採用</button>
+                <button type="button" role="tab" data-topic="other" aria-selected="false">その他</button>
+              </div>
+              <input type="hidden" name="topic" value="visit" />
               <label class="hp-honeypot">
                 会社名
                 <input type="text" name="company" tabindex="-1" autocomplete="off" />
               </label>
               <label>
-                保護者さまのお名前
+                <span id="name-caption">保護者さまのお名前</span>
                 <input type="text" name="parent_name" autocomplete="name" required />
               </label>
-              <label>
+              <label data-for="visit">
                 お子さまの年齢
                 <select name="child_age" required>
                   <option value="">選択してください</option>
@@ -196,6 +204,24 @@
                   <option>出産予定・その他</option>
                 </select>
               </label>
+              <label data-for="recruit">
+                希望する職種
+                <select name="role" required>
+                  <option value="">選択してください</option>
+                  <option>保育士</option>
+                  <option>栄養士・調理</option>
+                  <option>用務・その他</option>
+                </select>
+              </label>
+              <label data-for="recruit">
+                ご経験
+                <select name="detail">
+                  <option value="">選択してください</option>
+                  <option>未経験</option>
+                  <option>1〜3年</option>
+                  <option>4年以上</option>
+                </select>
+              </label>
               <label>
                 メールアドレス
                 <input type="email" name="email" autocomplete="email" required />
@@ -205,11 +231,11 @@
                 <input type="tel" name="phone" autocomplete="tel" />
               </label>
               <label>
-                見学希望日・相談内容
+                <span id="message-caption">見学希望日・相談内容</span>
                 <textarea name="message" rows="6" required></textarea>
               </label>
               <button class="button primary" type="submit">
-                見学希望を送る
+                <span id="submit-label">見学希望を送る</span>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
               </button>
               <p id="contact-status" class="note" role="status"></p>
@@ -235,6 +261,64 @@
               document.addEventListener("keydown", (event) => {
                 if (event.key === "Escape" && !contactPop.hidden) closeContactPop();
               });
+              const topicCopy = {
+                visit: {
+                  heading: "見学申込・お問い合わせ",
+                  lead: "入園や園見学のご相談を、このフォームから園へ送れます。お急ぎの場合はお電話でも受け付けています。",
+                  name: "保護者さまのお名前",
+                  message: "見学希望日・相談内容",
+                  button: "見学希望を送る"
+                },
+                recruit: {
+                  heading: "採用のお問い合わせ",
+                  lead: "採用や職場見学のご相談を、このフォームから園へ送れます。お急ぎの場合はお電話でも受け付けています。",
+                  name: "お名前",
+                  message: "ご質問・自己PR",
+                  button: "採用の相談を送る"
+                },
+                other: {
+                  heading: "その他のお問い合わせ",
+                  lead: "給食や園の生活など、その他のご相談をこのフォームから園へ送れます。お急ぎの場合はお電話でも受け付けています。",
+                  name: "お名前",
+                  message: "ご相談内容",
+                  button: "送信する"
+                }
+              };
+              const contactForm = document.querySelector("#contact-form");
+              function topicFromHash() {
+                const hash = location.hash.replace("#", "");
+                return topicCopy[hash] ? hash : "visit";
+              }
+              function applyTopic(topic) {
+                const copy = topicCopy[topic] || topicCopy.visit;
+                contactForm.querySelector("[name=topic]").value = topic;
+                contactForm.querySelectorAll("[data-for]").forEach((label) => {
+                  const on = label.dataset.for.split(" ").includes(topic);
+                  label.hidden = !on;
+                  label.querySelectorAll("input, select, textarea").forEach((input) => {
+                    input.disabled = !on;
+                  });
+                });
+                document.querySelectorAll(".topic-switch [data-topic]").forEach((button) => {
+                  const on = button.dataset.topic === topic;
+                  button.classList.toggle("is-on", on);
+                  button.setAttribute("aria-selected", on ? "true" : "false");
+                });
+                document.querySelector("#contact-heading").textContent = copy.heading;
+                document.querySelector("#contact-lead").textContent = copy.lead;
+                document.querySelector("#name-caption").textContent = copy.name;
+                document.querySelector("#message-caption").textContent = copy.message;
+                document.querySelector("#submit-label").textContent = copy.button;
+              }
+              document.querySelectorAll(".topic-switch [data-topic]").forEach((button) => {
+                button.addEventListener("click", () => {
+                  const topic = button.dataset.topic;
+                  applyTopic(topic);
+                  history.replaceState(null, "", topic === "visit" ? "#contact" : "#" + topic);
+                });
+              });
+              applyTopic(topicFromHash());
+              window.addEventListener("hashchange", () => applyTopic(topicFromHash()));
               document.querySelector("#contact-form").addEventListener("submit", async (event) => {
                 event.preventDefault();
                 const form = event.currentTarget;
