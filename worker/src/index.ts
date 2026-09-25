@@ -789,7 +789,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
     a { color:var(--pink-dark); }
     button, input, textarea, select { font:inherit; }
     button { border:0; border-radius:10px; background:var(--pink); color:#fff; padding:10px 16px; font-weight:700; cursor:pointer; }
-    button:hover { background:var(--pink-dark); }
+    button:hover { background:#ee8eb9; }
     button:disabled { opacity:.45; cursor:default; }
     button.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
     button.ghost:hover { background:#fbf5f8; }
@@ -878,7 +878,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
     .wysiwyg-bar { display:flex; flex-wrap:wrap; gap:2px; align-items:center; padding:6px; background:#f4f6f8; border-bottom:1px solid #e1e5ea; }
     .wysiwyg-bar button, .wysiwyg-bar select { width:34px; height:34px; margin:0; padding:0; border:0; border-radius:6px; background:transparent; color:#52606d; }
     .wysiwyg-bar select { width:auto; height:34px; padding:0 8px; font-size:.92rem; }
-    .wysiwyg-bar button:hover, .wysiwyg-bar select:hover, .wysiwyg-bar button.is-on { background:#e6ebf0; color:#1f2933; }
+    .wysiwyg-bar button:hover, .wysiwyg-bar select:hover, .wysiwyg-bar button.is-on { background:#f8eef3; color:#7a6570; }
     .wysiwyg-bar svg { width:18px; height:18px; display:block; margin:auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
     .wysiwyg-bar .sep { width:1px; height:22px; margin:0 4px; background:#d5dbe3; }
     .wysiwyg-bar input[type="color"] { width:28px; height:28px; padding:0; border:0; background:transparent; }
