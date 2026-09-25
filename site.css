@@ -5531,3 +5531,38 @@ body.contact-pop-open {
   .hisaho img[src*="soldier-left"]:hover { translate: 0 -6px; rotate: -4deg; }
   .hisaho img[src*="soldier-right"]:hover { translate: 0 -6px; rotate: 4deg; }
 }
+
+/* モバイル: 動物は触っていなくても少し揺れ、タップすると跳ねる */
+@keyframes hp-idle {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  50% { translate: 0 -5px; rotate: 2deg; }
+}
+
+@media (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .hisaho img[src*="assets/mascots/chara-"],
+  .hisaho .nav-item img {
+    pointer-events: auto;
+    transform-origin: 50% 100%;
+    animation: hp-idle 3.6s ease-in-out infinite;
+  }
+
+  .hisaho img[src*="chara-rabbit"],
+  .hisaho .nav-item:nth-child(2) img { animation-delay: .45s; }
+  .hisaho img[src*="chara-giraffe"],
+  .hisaho .nav-item:nth-child(3) img { animation-delay: .9s; }
+  .hisaho img[src*="chara-panda"],
+  .hisaho .nav-item:nth-child(4) img { animation-delay: 1.3s; }
+  .hisaho img[src*="chara-chick"],
+  .hisaho .nav-item:nth-child(5) img { animation-delay: 1.7s; }
+  .hisaho img[src*="chara-squirrel"] { animation-delay: 2s; }
+
+  .hisaho img.is-animal-tap {
+    animation: hp-hop .8s cubic-bezier(.3, .7, .4, 1) both;
+    animation-delay: 0s;
+  }
+
+  .hisaho img.is-animal-tap.is-squish {
+    animation-name: hp-squish;
+    animation-duration: .7s;
+  }
+}

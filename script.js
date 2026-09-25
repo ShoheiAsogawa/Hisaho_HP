@@ -295,6 +295,37 @@ if (heroCarousel) {
   startAutoplay();
 })();
 
+// モバイルの動物: タップで跳ねる。待機の揺れは CSS 側。
+(() => {
+  const mobile = window.matchMedia("(max-width: 900px)");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  if (!mobile.matches || reduce.matches) return;
+  const squish = /chara-(friends-all|lion-giraffe-play|rabbit-squirrel-lunch|panda-chick-nap)/;
+  const cards = ".class-card, .feature-item, .lesson-list li, .age-card, .lesson-card, .visit-flow article, .season-card";
+
+  const play = (img) => {
+    img.classList.remove("is-animal-tap");
+    void img.offsetWidth;
+    img.classList.toggle("is-squish", squish.test(img.getAttribute("src") || ""));
+    img.classList.add("is-animal-tap");
+  };
+
+  document.addEventListener("pointerup", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target) return;
+    const nav = target.closest(".nav-item");
+    const card = target.closest(cards);
+    const direct = target.closest('img[src*="assets/mascots/chara-"]');
+    const img = nav?.querySelector("img") || card?.querySelector('img[src*="assets/mascots/chara-"]') || direct;
+    if (img instanceof HTMLImageElement) play(img);
+  });
+
+  document.addEventListener("animationend", (event) => {
+    if (event.animationName !== "hp-hop" && event.animationName !== "hp-squish") return;
+    if (event.target instanceof HTMLImageElement) event.target.classList.remove("is-animal-tap");
+  });
+})();
+
 // フッターの「TOPへ」ボタン：ページのいちばん上までふわっと戻る。
 (() => {
   const button = document.querySelector(".to-top");
