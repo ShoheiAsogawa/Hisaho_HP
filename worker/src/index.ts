@@ -304,7 +304,9 @@ async function submitContact(request: Request, env: Env): Promise<Response> {
   const phone = clip(body.phone, 40);
   const message = String(body.message ?? "").replace(/\r\n/g, "\n").trim().slice(0, 4000);
   const known = topic === "visit" || topic === "recruit" || topic === "other";
-  if (!known || !parentName || !message || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  const emailOk = !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const phoneDigits = phone.replace(/\D/g, "");
+  if (!known || !parentName || !message || !emailOk || phoneDigits.length < 10) {
     return json({ error: "入力内容を確認してください" }, 400);
   }
   if (topic !== "other" && !childAge) return json({ error: "入力内容を確認してください" }, 400);
@@ -312,8 +314,8 @@ async function submitContact(request: Request, env: Env): Promise<Response> {
   const stored = await storeResume(env, resume);
   if (!stored.ok) return json({ error: stored.error }, 400);
   const recent = await env.DB.prepare(
-    "SELECT COUNT(*) AS n FROM inquiries WHERE email = ? AND created_at >= datetime('now', '-1 hour')",
-  ).bind(email).first<{ n: number }>();
+    "SELECT COUNT(*) AS n FROM inquiries WHERE phone = ? AND created_at >= datetime('now', '-1 hour')",
+  ).bind(phone).first<{ n: number }>();
   if ((recent?.n ?? 0) >= 5) return json({ error: "しばらく時間をおいて再度お試しください" }, 429);
   await env.DB.prepare(
     "INSERT INTO inquiries (parent_name, child_age, email, phone, message, topic, detail, resume_name, resume_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -363,8 +365,8 @@ async function forwardContact(input: { topic: string; parentName: string; childA
     `種類: ${label}`,
     `お名前: ${input.parentName}`,
     about,
-    `メール: ${input.email}`,
-    `電話: ${input.phone || "未記入"}`,
+    `電話: ${input.phone}`,
+    `メール: ${input.email || "未記入"}`,
     input.resumeName ? `履歴書: ${input.resumeName}` : "",
     "",
     input.message,
@@ -375,8 +377,7 @@ async function forwardContact(input: { topic: string; parentName: string; childA
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({
         name: input.parentName,
-        email: input.email,
-        _replyto: input.email,
+        ...(input.email ? { email: input.email, _replyto: input.email } : {}),
         _subject: `【ひさほ保育園】${label} ${input.parentName}`,
         _template: "table",
         _captcha: "false",
@@ -1033,7 +1034,8 @@ const ADMIN_HTML = `<!DOCTYPE html>
         const topic = topicNames[item.topic] || "園見学";
         const extra = item.topic === "other" ? "" : " / " + escapeText(item.child_age || "") + (item.detail ? " / " + escapeText(item.detail) : "");
         const resume = item.resume_name ? '<p><a href="/api/inquiries/' + item.id + '/resume">' + escapeText(item.resume_name) + '</a></p>' : '';
-        return '<article class="card" style="margin-top:12px;padding:16px"><p class="meta">' + escapeText(item.created_at) + " ・ " + topic + '</p><h3>' + escapeText(item.parent_name) + extra + '</h3><p>' + escapeText(item.email) + (item.phone ? ' / ' + escapeText(item.phone) : '') + '</p>' + resume + '<p style="white-space:pre-wrap">' + escapeText(item.message) + '</p></article>';
+        const contact = escapeText(item.phone || "") + (item.email ? " / " + escapeText(item.email) : "");
+        return '<article class="card" style="margin-top:12px;padding:16px"><p class="meta">' + escapeText(item.created_at) + " ・ " + topic + '</p><h3>' + escapeText(item.parent_name) + extra + '</h3><p>' + contact + '</p>' + resume + '<p style="white-space:pre-wrap">' + escapeText(item.message) + '</p></article>';
       }).join('') : '<p class="empty">まだ問い合わせはありません。</p>';
       editor.classList.add("hidden");
       document.querySelector("#inbox").classList.remove("hidden");
