@@ -68,7 +68,7 @@ body.hisaho {
   top: 0;
   z-index: 60;
   overflow: visible;
-  background: rgba(255, 237, 218, 0.96);
+  background: var(--hp-base);
   border-bottom: 1px solid rgba(196, 45, 134, 0.09);
   box-shadow: 0 4px 24px rgba(107, 42, 78, 0.04);
   backdrop-filter: blur(16px);
@@ -4621,33 +4621,21 @@ body.contact-pop-open {
 }
 
 /* =========================================================================
-   TOP（PC）: ヘッダーの白い帯をなくして、ヒーロー写真を上まで見せる
-   ・ヘッダーは写真の上に重ねる（透明）
-   ・スクロールしたら白いヘッダーに戻る（.is-solid は script.js が付ける）
+   TOP（PC）: 虹の下地とヘッダーを同じベース色でつなぐ
+   ・スクロールしてもヘッダーはベース色のまま（.is-solid は script.js が付ける）
    ========================================================================= */
 @media (min-width: 901px) {
   .hisaho.home-page .site-header {
-    background: transparent;
+    background: var(--hp-base);
     border-bottom: 0;
     box-shadow: none;
     backdrop-filter: none;
     transition: background-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
   }
 
-  /* ごく淡いベールだけ。白い帯には見えない濃さにとどめる */
+  /* 白いベールは虹の下地と色がずれるので置かない */
   .hisaho.home-page .site-header::before {
-    content: "";
-    position: absolute;
-    inset: -1px 0 0;
-    z-index: -1;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.34) 0%,
-      rgba(255, 255, 255, 0.14) 52%,
-      rgba(255, 255, 255, 0) 100%
-    );
-    pointer-events: none;
-    transition: opacity 0.35s ease;
+    content: none;
   }
 
   /* 白背景に頼らず、文字とアイコンに光をまとわせて写真の上でも読めるようにする */
@@ -4666,7 +4654,7 @@ body.contact-pop-open {
 
   /* 虹色ブロブの下の白い余白もなくして、写真を画面の一番上まで届かせる */
   .hisaho.home-page .page-frame-top {
-    background: transparent;
+    background: var(--hp-base);
   }
 
   /* 写真に重なっている間は点線の区切りを消す */
@@ -4684,7 +4672,7 @@ body.contact-pop-open {
 
   /* スクロールしたらベース色のヘッダーへ */
   .hisaho.home-page .site-header.is-solid {
-    background: rgba(255, 237, 218, 0.96);
+    background: var(--hp-base);
     box-shadow: 0 4px 24px rgba(107, 42, 78, 0.08);
     backdrop-filter: blur(16px);
   }
