@@ -35,6 +35,10 @@
           "binding": "FILES",
           "bucket_name": "hisaho-hp-files"
         }
+      ],
+      "routes": [
+        { "pattern": "hisaho-hoikuen.com", "custom_domain": true },
+        { "pattern": "www.hisaho-hoikuen.com", "custom_domain": true }
       ]
     }
   }

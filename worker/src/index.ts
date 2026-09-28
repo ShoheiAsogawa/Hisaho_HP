@@ -30,6 +30,10 @@ const HOME_NEWS_LIMIT = 3;
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    if (url.hostname === "www.hisaho-hoikuen.com") {
+      url.hostname = "hisaho-hoikuen.com";
+      return Response.redirect(url.toString(), 301);
+    }
     if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) {
       return adminResponse();
     }
