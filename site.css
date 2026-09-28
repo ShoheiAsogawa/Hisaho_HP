@@ -5354,10 +5354,16 @@ body.contact-pop-open {
   }
 }
 
-/* Deco Studio でヘッダー左右に置いたキャラ（TOPのみ。900px 以下は非表示）。
-   固定の px 位置ではなく、ヘッダーの下端に立たせる（パンダはヒーローのふちから顔を出す形）。
+/* ヘッダー左右のひよことパンダ（全ページ。900px 以下は非表示）。
+   固定の px 位置ではなく、ヘッダーの下端に立たせる（パンダは下のふちから顔を出す形）。
    高さはメニュー（1000px幅で約75px〜1600px幅で約90px）に合わせて伸縮させる */
 @media (min-width: 901px) {
+  .site-header .hp-deco-item:has(img[src*="chara-chick-run"]),
+  .site-header .hp-deco-item:has(img[src*="chara-panda-peek"]) {
+    position: absolute;
+    display: block;
+  }
+
   .site-header .hp-deco-item:has(img[src*="chara-chick-run"]) {
     top: auto !important;
     bottom: 0;

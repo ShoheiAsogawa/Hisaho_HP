@@ -326,6 +326,30 @@ if (heroCarousel) {
   });
 })();
 
+// ヘッダー左右のひよことパンダ。TOP以外のページにも同じ位置で出す。
+(() => {
+  const host = document.querySelector("header.site-header > .header-inner");
+  if (!host || host.querySelector(".hp-deco-item")) return;
+  host.classList.add("hp-deco-host");
+  const mascots = [
+    { id: "d19", src: "assets/mascots/chara-chick-run.webp", style: "left:6px;top:27px;width:72px;z-index:0" },
+    { id: "d22", src: "assets/mascots/chara-panda-peek.webp", style: "left:1095px;top:60px;width:79px;z-index:0" },
+  ];
+  mascots.forEach((item) => {
+    const wrap = document.createElement("span");
+    wrap.className = "hp-deco-item";
+    wrap.dataset.deco = item.id;
+    wrap.setAttribute("aria-hidden", "true");
+    wrap.style.cssText = item.style;
+    const img = document.createElement("img");
+    img.src = item.src;
+    img.alt = "";
+    img.loading = "lazy";
+    wrap.appendChild(img);
+    host.appendChild(wrap);
+  });
+})();
+
 // フッターの「TOPへ」ボタン：ページのいちばん上までふわっと戻る。
 (() => {
   const button = document.querySelector(".to-top");
