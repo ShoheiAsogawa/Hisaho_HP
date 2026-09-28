@@ -25,15 +25,61 @@ const CATEGORIES = ["行事", "国際交流", "新しい取り組み", "園見�
 const TAGS = new Set(["", "tag-pink", "tag-out"]);
 // 本文に写真がない記事は、動物みんなのイラストをTOP画像にする。
 const FALLBACK_COVER = "/assets/mascots/chara-friends-all.webp";
+const SITE = "https://hisaho-hoikuen.com";
+const SHARE_IMAGE = `${SITE}/assets/photos/hero-06-group-photo.jpg`;
+const PUBLIC_PAGES = ["/", "/about.html", "/food.html", "/visit.html", "/recruit.html", "/news"];
+
+function absoluteUrl(src: string): string {
+  if (src.startsWith("https://") || src.startsWith("http://")) return src;
+  return `${SITE}${src.startsWith("/") ? src : `/${src}`}`;
+}
+
+function articleJson(title: string, description: string, canonical: string, image: string, published: string): string {
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: title,
+    description,
+    datePublished: published,
+    image,
+    mainEntityOfPage: canonical,
+    publisher: { "@type": "Organization", name: "認定こども園 ひさほ保育園" },
+  }).replaceAll("<", "\\u003c");
+}
+
+function renderRobots(): Response {
+  return new Response(
+    `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: ${SITE}/sitemap.xml\n`,
+    { headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=3600" } },
+  );
+}
+
+async function renderSitemap(env: Env): Promise<Response> {
+  let ids: number[] = [];
+  try {
+    const result = await env.DB.prepare("SELECT id FROM news WHERE published = 1 ORDER BY sort_order ASC, id DESC").all<{ id: number }>();
+    ids = (result.results ?? []).map((row) => row.id);
+  } catch {
+    ids = [];
+  }
+  const locs = [...PUBLIC_PAGES.map((path) => `${SITE}${path}`), ...ids.map((id) => `${SITE}/news/${id}`)];
+  const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${locs.map((loc) => `  <url><loc>${loc}</loc></url>`).join("\n")}\n</urlset>\n`;
+  return new Response(body, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=300" } });
+}
 const HOME_NEWS_LIMIT = 3;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    if (url.hostname === "www.hisaho-hoikuen.com") {
+    if (url.hostname === "www.hisaho-hoikuen.com" || url.hostname === "hisaho-hp.uken-shohei.workers.dev") {
       url.hostname = "hisaho-hoikuen.com";
+      url.protocol = "https:";
       return Response.redirect(url.toString(), 301);
     }
+    if (url.pathname === "/robots.txt") return renderRobots();
+    if (url.pathname === "/sitemap.xml") return renderSitemap(env);
+    if (url.pathname === "/index.html") return Response.redirect(`${SITE}/`, 301);
+    if (url.pathname === "/news.html") return Response.redirect(`${SITE}/news`, 301);
     if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) {
       return adminResponse();
     }
@@ -164,6 +210,9 @@ async function renderNewsDetail(request: Request, env: Env, id: number): Promise
   const older = index >= 0 && index < rows.length - 1 ? rows[index + 1] : null;
   const plainTitle = row ? row.title.replace(/<[^>]+>/g, "") : "記事が見つかりません";
   const description = row ? excerpt(row.body) : "お探しのお知らせは、公開を終了したか、アドレスが変わった可能性があります。";
+  const canonical = `${SITE}/news/${id}`;
+  const image = absoluteUrl(row ? coverFor(row).src : SHARE_IMAGE);
+  const pageTitle = `${plainTitle} | お知らせ | 認定こども園 ひさほ保育園`;
   const article = row ? renderDetailArticle(row, newer, older) : renderMissingArticle();
   const heroLead = row
     ? `${renderTag(row)}<time datetime="${escapeAttr(row.published_at)}">${escapeHtml(formatMonth(row.published_at))}</time>`
@@ -179,8 +228,20 @@ async function renderNewsDetail(request: Request, env: Env, id: number): Promise
         }
       },
     })
-    .on("title", { element(element) { element.setInnerContent(`${plainTitle} | お知らせ | 認定こども園 ひさほ保育園`); } })
+    .on("title", { element(element) { element.setInnerContent(pageTitle); } })
     .on('meta[name="description"]', { element(element) { element.setAttribute("content", description); } })
+    .on('link[rel="canonical"]', { element(element) { element.setAttribute("href", canonical); } })
+    .on('meta[property="og:type"]', { element(element) { element.setAttribute("content", row ? "article" : "website"); } })
+    .on('meta[property="og:title"]', { element(element) { element.setAttribute("content", pageTitle); } })
+    .on('meta[property="og:description"]', { element(element) { element.setAttribute("content", description); } })
+    .on('meta[property="og:url"]', { element(element) { element.setAttribute("content", canonical); } })
+    .on('meta[property="og:image"]', { element(element) { element.setAttribute("content", image); } })
+    .on("head", {
+      element(element) {
+        if (!row) element.append('<meta name="robots" content="noindex" />', { html: true });
+        else element.append(`<script type="application/ld+json">${articleJson(plainTitle, description, canonical, image, row.published_at)}</script>`, { html: true });
+      },
+    })
     .on(".page-hero-inner .eyebrow", { element(element) { element.setInnerContent("News"); } })
     .on(".page-hero-inner h1", { element(element) { element.setInnerContent(row ? allowWbr(row.title) : "記事が見つかりません", { html: true }); } })
     .on("body", { element(element) { element.setAttribute("class", `${element.getAttribute("class") ?? ""} news-detail-page`.trim()); } })
