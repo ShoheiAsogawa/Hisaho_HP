@@ -47,7 +47,7 @@
   overflow: hidden;
   margin: 0;
   padding: clamp(48px, 5vw, 76px) 0 100px;
-  background: #fff;
+  background: #ffedda;
   color: var(--dream-ink);
 }
 #main.nursery-main .dream-layout {
@@ -208,7 +208,7 @@
   max-width: 100%;
   margin: -22px auto 18px;
   padding: 8px 24px 9px;
-  border: 3px solid #fffdf6;
+  border: 3px solid #ffedda;
   border-radius: 999px;
   background: var(--pill);
   color: var(--pill-ink);
@@ -413,7 +413,7 @@
   --section-ink: #51422d;
   --section-muted: #6a5c49;
   --section-accent: #79541f;
-  background: #fffdf6;
+  background: #ffedda;
 }
 #main.nursery-main #concept { --section-accent: #65441b; --section-hover: #4e3211; --section-muted: #57462c; }
 #main.nursery-main .concept-statement h2,
@@ -474,7 +474,7 @@
   --section-hover: #593b12;
   --section-soft: #fff3d4;
   --section-line: #e9d6b0;
-  background: #fffdf7;
+  background: #ffedda;
 }
 #main.nursery-main .admission-copy h2 { color: var(--section-accent); }
 #main.nursery-main .admission-copy > p { color: var(--section-muted); }
@@ -482,7 +482,7 @@
 #main.nursery-main .visit-invite :is(h3, p) { color: #57412a; }
 
 /* 施設情報: 青みのグレーで、表と地図を一つの情報ブロックに。 */
-#main.nursery-main #overview { background: #fff; }
+#main.nursery-main #overview { background: #ffedda; }
 #main.nursery-main .overview-table a { text-decoration-color: var(--section-line); }
 #main.nursery-main .map-card { background: #f2f5fc; }
 #main.nursery-main .map-road { stroke: #d5def0; }

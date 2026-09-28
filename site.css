@@ -1,6 +1,6 @@
 /*
   Home page visual system
-  Brand direction: true white + Hisaho pink, with small yellow/mint/sky accents.
+  Brand direction: peach base (#ffedda) + Hisaho pink, with small yellow/mint/sky accents.
 */
 
 body.hisaho {
@@ -19,6 +19,7 @@ body.hisaho {
   --hp-sky: #55bdea;
   --hp-sky-soft: #e4f5fd;
   --hp-white: #fff;
+  --hp-base: #ffedda;
   --hp-container: min(1180px, calc(100% - 48px));
   --hp-section-y: clamp(76px, 8vw, 116px);
   --hp-shadow: 0 18px 48px rgba(107, 42, 78, 0.12);
@@ -34,7 +35,7 @@ body.hisaho {
   --cream-2: var(--hp-white);
   --container: var(--hp-container);
   color: var(--hp-ink);
-  background: var(--hp-white);
+  background: var(--hp-base);
   font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
   font-weight: 500;
   line-height: 1.85;
@@ -67,7 +68,7 @@ body.hisaho {
   top: 0;
   z-index: 60;
   overflow: visible;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 237, 218, 0.96);
   border-bottom: 1px solid rgba(196, 45, 134, 0.09);
   box-shadow: 0 4px 24px rgba(107, 42, 78, 0.04);
   backdrop-filter: blur(16px);
@@ -249,7 +250,7 @@ body.hisaho {
 .hisaho .hero {
   position: relative;
   padding: clamp(52px, 6vw, 86px) 0 clamp(76px, 8vw, 112px);
-  background: var(--hp-white);
+  background: var(--hp-base);
 }
 
 .hisaho .hero-inner {
@@ -1095,7 +1096,7 @@ body.hisaho {
 .hisaho .admission-section {
   padding: var(--hp-section-y) 0;
   border-top: 1px solid var(--hp-line);
-  background: var(--hp-white);
+  background: var(--hp-base);
 }
 
 .hisaho .admission-inner {
@@ -2106,7 +2107,7 @@ body.hisaho {
   overflow: hidden;
   line-height: 0;
   pointer-events: none;
-  background: var(--hp-white);
+  background: var(--hp-base);
 }
 
 .hisaho .page-frame img {
@@ -4476,7 +4477,7 @@ body.contact-pop-open {
     padding: 0 0 72px;
     display: block;
     overflow: visible;
-    background: var(--hp-white);
+    background: var(--hp-base);
   }
 
   .hisaho .hero-carousel-media {
@@ -4494,7 +4495,7 @@ body.contact-pop-open {
     padding: 0;
     border: 0;
     border-radius: 0;
-    background: var(--hp-white);
+    background: transparent;
     box-shadow: none;
     backdrop-filter: none;
   }
@@ -4681,9 +4682,9 @@ body.contact-pop-open {
     padding-top: var(--home-top-h);
   }
 
-  /* スクロールしたら通常の白ヘッダーへ */
+  /* スクロールしたらベース色のヘッダーへ */
   .hisaho.home-page .site-header.is-solid {
-    background: rgba(255, 255, 255, 0.96);
+    background: rgba(255, 237, 218, 0.96);
     box-shadow: 0 4px 24px rgba(107, 42, 78, 0.08);
     backdrop-filter: blur(16px);
   }
