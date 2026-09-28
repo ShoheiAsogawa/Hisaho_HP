@@ -26,7 +26,7 @@ const TAGS = new Set(["", "tag-pink", "tag-out"]);
 // 本文に写真がない記事は、動物みんなのイラストをTOP画像にする。
 const FALLBACK_COVER = "/assets/mascots/chara-friends-all.webp";
 const SITE = "https://hisaho-hoikuen.com";
-const SHARE_IMAGE = `${SITE}/assets/photos/hero-06-group-photo.jpg`;
+const SHARE_IMAGE = `${SITE}/assets/brand/og-share.png`;
 const PUBLIC_PAGES = ["/", "/about.html", "/food.html", "/visit.html", "/recruit.html", "/news"];
 
 function absoluteUrl(src: string): string {
