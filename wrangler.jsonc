@@ -39,6 +39,13 @@
       "routes": [
         { "pattern": "hisaho-hoikuen.com", "custom_domain": true },
         { "pattern": "www.hisaho-hoikuen.com", "custom_domain": true }
+      ],
+      "send_email": [
+        {
+          "name": "EMAIL",
+          "allowed_sender_addresses": ["noreply@hisaho-hoikuen.com"],
+          "destination_address": "hisahohoikuen@gmail.com"
+        }
       ]
     }
   }

@@ -1,7 +1,18 @@
+interface ContactMail {
+  send(message: {
+    to: string;
+    from: { email: string; name: string };
+    subject: string;
+    text: string;
+    replyTo?: string;
+  }): Promise<{ messageId?: string }>;
+}
+
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
   FILES?: R2Bucket;
+  EMAIL?: ContactMail;
   CMS_PASSWORD?: string;
   CMS_SESSION_SECRET?: string;
 }
@@ -338,6 +349,7 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
 }
 
 const CONTACT_TO = "hisahohoikuen@gmail.com";
+const CONTACT_FROM = { email: "noreply@hisaho-hoikuen.com", name: "認定こども園 ひさほ保育園" };
 
 async function readContactBody(request: Request): Promise<{ body: Record<string, unknown>; resume: File | null } | null> {
   const type = request.headers.get("content-type") ?? "";
@@ -389,7 +401,7 @@ async function submitContact(request: Request, env: Env): Promise<Response> {
   await env.DB.prepare(
     "INSERT INTO inquiries (parent_name, child_name, child_age, email, phone, message, topic, detail, resume_name, resume_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
   ).bind(parentName, childName, childAge, email, phone, message, topic, detail, stored.name, stored.key).run();
-  const mailed = await forwardContact({ topic, parentName, childName, childAge, detail, email, phone, message, resumeName: stored.name });
+  const mailed = await forwardContact(env, { topic, parentName, childName, childAge, detail, email, phone, message, resumeName: stored.name });
   return json({ ok: true, mailed });
 }
 
@@ -423,7 +435,7 @@ function resumeExtension(file: File): string | null {
 
 const TOPIC_LABEL: Record<string, string> = { visit: "園見学", recruit: "採用", other: "その他" };
 
-async function forwardContact(input: { topic: string; parentName: string; childName: string; childAge: string; detail: string; email: string; phone: string; message: string; resumeName: string }): Promise<boolean> {
+async function forwardContact(env: Env, input: { topic: string; parentName: string; childName: string; childAge: string; detail: string; email: string; phone: string; message: string; resumeName: string }): Promise<boolean> {
   const label = TOPIC_LABEL[input.topic] ?? "お問い合わせ";
   const about = input.topic === "recruit"
     ? `希望職種: ${input.childAge}\nご経験: ${input.detail || "未記入"}`
@@ -440,6 +452,23 @@ async function forwardContact(input: { topic: string; parentName: string; childN
     "",
     input.message,
   ].filter((line) => line !== "").join("\n");
+  const subject = `【ひさほ保育園】${label} ${input.parentName}`;
+  if (env.EMAIL) {
+    try {
+      await env.EMAIL.send({
+        to: CONTACT_TO,
+        from: CONTACT_FROM,
+        subject,
+        text,
+        ...(input.email ? { replyTo: input.email } : {}),
+      });
+      return true;
+    } catch (error) {
+      const code = error && typeof error === "object" && "code" in error ? String(error.code) : "send_failed";
+      console.error("contact mail failed", code);
+      return false;
+    }
+  }
   try {
     const response = await fetch(`https://formsubmit.co/ajax/${CONTACT_TO}`, {
       method: "POST",
@@ -447,7 +476,7 @@ async function forwardContact(input: { topic: string; parentName: string; childN
       body: JSON.stringify({
         name: input.parentName,
         ...(input.email ? { email: input.email, _replyto: input.email } : {}),
-        _subject: `【ひさほ保育園】${label} ${input.parentName}`,
+        _subject: subject,
         _template: "table",
         _captcha: "false",
         message: text,
@@ -854,6 +883,9 @@ const ADMIN_HTML = `<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
   <title>お知らせ管理 | ひさほ保育園</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet" />
