@@ -5562,3 +5562,96 @@ body.contact-pop-open {
     animation-duration: .7s;
   }
 }
+
+/* 様式・PDFのダウンロード */
+.hisaho .doc-links {
+  margin-top: clamp(28px, 4vw, 44px);
+  text-align: center;
+}
+
+.hisaho .doc-links-title {
+  margin: 0 0 14px;
+  color: var(--hp-ink);
+  font-weight: 900;
+}
+
+.hisaho .doc-links-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.hisaho .cta-card .doc-links-list {
+  justify-content: flex-start;
+}
+
+.hisaho .doc-button {
+  min-height: 48px;
+  padding: 11px 22px;
+}
+
+.hisaho .doc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 22px);
+}
+
+.hisaho .doc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: clamp(20px, 2.4vw, 28px);
+  border: 2px solid transparent;
+  border-radius: 22px;
+  background: var(--hp-white);
+  box-shadow: var(--hp-shadow-soft);
+  color: var(--hp-ink);
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.hisaho .doc-card strong {
+  font-size: clamp(1rem, 1.4vw, 1.14rem);
+  font-weight: 900;
+  line-height: 1.5;
+}
+
+.hisaho .doc-card span {
+  color: var(--hp-muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.hisaho .doc-card em {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 6px;
+  color: var(--hp-pink-deep);
+  font-style: normal;
+  font-weight: 900;
+}
+
+.hisaho .doc-card svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hisaho .doc-card:hover,
+.hisaho .doc-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--hp-pink);
+}
+
+@media (max-width: 720px) {
+  .hisaho .doc-grid {
+    grid-template-columns: 1fr;
+  }
+}
