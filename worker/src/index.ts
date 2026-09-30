@@ -37,6 +37,8 @@ const TAGS = new Set(["", "tag-pink", "tag-out"]);
 // 本文に写真がない記事は、動物みんなのイラストをTOP画像にする。
 const FALLBACK_COVER = "/assets/mascots/chara-friends-all.webp";
 const SITE = "https://hisaho-hoikuen.com";
+// 公開に戻すときは true にする。
+const SITE_PUBLIC = false;
 const SHARE_IMAGE = `${SITE}/assets/brand/og-share.png`;
 const PUBLIC_PAGES = ["/", "/about.html", "/food.html", "/visit.html", "/recruit.html", "/news"];
 
@@ -59,10 +61,47 @@ function articleJson(title: string, description: string, canonical: string, imag
 }
 
 function renderRobots(): Response {
-  return new Response(
-    `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: ${SITE}/sitemap.xml\n`,
-    { headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=3600" } },
-  );
+  const body = SITE_PUBLIC
+    ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: ${SITE}/sitemap.xml\n`
+    : "User-agent: *\nDisallow: /\n";
+  return new Response(body, {
+    headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
+  });
+}
+
+function renderPrivate(): Response {
+  const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>認定こども園 ひさほ保育園</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #ffedda; color: #4b3742; font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif; }
+    main { width: min(28rem, calc(100% - 48px)); text-align: center; }
+    p { margin: 0; line-height: 1.8; }
+    h1 { margin: 12px 0 16px; font-size: 1.35rem; font-weight: 700; }
+    a { color: #9e1d69; }
+  </style>
+</head>
+<body>
+  <main>
+    <p>認定こども園 ひさほ保育園</p>
+    <h1>ただいま非公開にしています</h1>
+    <p>サイトの公開を一時的に止めています。</p>
+    <p>お問い合わせはお電話でお願いします。<br /><a href="tel:0724275688">072-427-5688</a></p>
+  </main>
+</body>
+</html>`;
+  return new Response(html, {
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store",
+      "cdn-cache-control": "no-store",
+      "x-robots-tag": "noindex, nofollow",
+    },
+  });
 }
 
 async function renderSitemap(env: Env): Promise<Response> {
@@ -88,6 +127,9 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
     if (url.pathname === "/robots.txt") return renderRobots();
+    if (!SITE_PUBLIC && url.pathname !== "/admin" && !url.pathname.startsWith("/admin/") && !url.pathname.startsWith("/api/")) {
+      return renderPrivate();
+    }
     if (url.pathname === "/sitemap.xml") return renderSitemap(env);
     if (url.pathname === "/index.html") return Response.redirect(`${SITE}/`, 301);
     if (url.pathname === "/news.html") return Response.redirect(`${SITE}/news`, 301);
