@@ -42,6 +42,20 @@ const PREVIEW_HOST = "hisaho-hp.uken-shohei.workers.dev";
 const SITE_PUBLIC = false;
 const SHARE_IMAGE = `${SITE}/assets/brand/og-share.png`;
 const PUBLIC_PAGES = ["/", "/about.html", "/food.html", "/visit.html", "/recruit.html", "/news"];
+const DOCS = [
+  { slug: "daily-program-0-1", label: "デイリープログラム（0・1歳児）", page: "園について" },
+  { slug: "daily-program-2-3", label: "デイリープログラム（2・3歳児）", page: "園について" },
+  { slug: "daily-program-4-5", label: "デイリープログラム（4・5歳児）", page: "園について" },
+  { slug: "disclosure", label: "公開情報（定款・役員名簿・役員等報酬規程）", page: "園について" },
+  { slug: "lunch-menu", label: "今月の献立表", page: "食育・給食" },
+  { slug: "allergy-management", label: "アレルギー疾患生活管理指導表", page: "食育・給食" },
+  { slug: "medicine-request", label: "お薬依頼書・アレルギー疾患生活管理指導表", page: "入園案内" },
+  { slug: "attendance-notice", label: "登園届", page: "入園案内" },
+  { slug: "saturday-care-certificate", label: "土曜日の保育が必要な証明書", page: "入園案内" },
+  { slug: "extended-care-employment", label: "延長保育に伴う在職証明書", page: "入園案内" },
+];
+const DOC_SLUGS = new Set(DOCS.map((doc) => doc.slug));
+const DOC_MAX_BYTES = 20 * 1024 * 1024;
 
 function absoluteUrl(src: string): string {
   if (src.startsWith("https://") || src.startsWith("http://")) return src;
@@ -152,6 +166,11 @@ export default {
     }
     if (url.pathname.startsWith("/media/")) {
       return serveMedia(env, url.pathname.slice("/media/".length));
+    }
+    const doc = url.pathname.match(/^\/assets\/docs\/([a-z0-9-]+)\.pdf$/);
+    if (doc && DOC_SLUGS.has(doc[1])) {
+      const replaced = await serveDoc(request, env, doc[1]);
+      if (replaced) return replaced;
     }
     return env.ASSETS.fetch(request);
   },
@@ -383,6 +402,13 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   if (resumeMatch && request.method === "GET") return downloadResume(env, Number(resumeMatch[1]));
   const inquiryMatch = url.pathname.match(/^\/api\/inquiries\/(\d+)$/);
   if (inquiryMatch && request.method === "DELETE") return deleteInquiry(env, Number(inquiryMatch[1]));
+  if (request.method === "GET" && url.pathname === "/api/docs") return listDocs(env);
+  const docMatch = url.pathname.match(/^\/api\/docs\/([a-z0-9-]+)$/);
+  if (docMatch && DOC_SLUGS.has(docMatch[1])) {
+    if (request.method === "GET") return openDoc(request, env, url, docMatch[1]);
+    if (request.method === "POST") return replaceDoc(request, env, docMatch[1]);
+    if (request.method === "DELETE") return restoreDoc(env, docMatch[1]);
+  }
   if (request.method === "GET" && url.pathname === "/api/news") return listNews(env, true);
   if (request.method === "POST" && url.pathname === "/api/media") return uploadMedia(request, env);
   if (request.method === "POST" && url.pathname === "/api/news") return createNews(request, env);
@@ -846,6 +872,67 @@ async function uploadMedia(request: Request, env: Env): Promise<Response> {
   return json({ url: `/media/${id}` });
 }
 
+function docKey(slug: string): string {
+  return `docs/${slug}.pdf`;
+}
+
+async function serveDoc(request: Request, env: Env, slug: string): Promise<Response | null> {
+  if (!env.FILES) return null;
+  const object = await env.FILES.get(docKey(slug), { onlyIf: request.headers });
+  if (!object) return null;
+  const headers = new Headers({
+    "content-type": "application/pdf",
+    "cache-control": "public, max-age=0, must-revalidate",
+    etag: object.httpEtag,
+  });
+  if (!("body" in object)) return new Response(null, { status: 304, headers });
+  return new Response(object.body, { headers });
+}
+
+async function openDoc(request: Request, env: Env, url: URL, slug: string): Promise<Response> {
+  const replaced = await serveDoc(new Request(request.url), env, slug);
+  if (replaced) return replaced;
+  return env.ASSETS.fetch(new Request(new URL(`/assets/docs/${slug}.pdf`, url.origin)));
+}
+
+async function listDocs(env: Env): Promise<Response> {
+  const docs = await Promise.all(
+    DOCS.map(async (doc) => {
+      const head = env.FILES ? await env.FILES.head(docKey(doc.slug)) : null;
+      return {
+        ...doc,
+        url: `/assets/docs/${doc.slug}.pdf`,
+        replaced: Boolean(head),
+        name: head?.customMetadata?.name ?? null,
+        uploaded_at: head ? head.uploaded.toISOString() : null,
+      };
+    }),
+  );
+  return json({ docs, storage: Boolean(env.FILES) });
+}
+
+async function replaceDoc(request: Request, env: Env, slug: string): Promise<Response> {
+  if (!env.FILES) return json({ error: "資料の保存先が設定されていません" }, 500);
+  const form = await request.formData().catch(() => null);
+  const file = form?.get("file");
+  if (!(file instanceof File) || !file.size) return json({ error: "PDFファイルを選んでください" }, 400);
+  if (file.size > DOC_MAX_BYTES) return json({ error: "PDFは20MB以下にしてください" }, 400);
+  const bytes = await file.arrayBuffer();
+  const magic = new TextDecoder().decode(new Uint8Array(bytes, 0, Math.min(5, bytes.byteLength)));
+  if (magic !== "%PDF-") return json({ error: "PDFファイルを選んでください" }, 400);
+  await env.FILES.put(docKey(slug), bytes, {
+    httpMetadata: { contentType: "application/pdf" },
+    customMetadata: { name: clip(file.name, 200) },
+  });
+  return json({ ok: true });
+}
+
+async function restoreDoc(env: Env, slug: string): Promise<Response> {
+  if (!env.FILES) return json({ error: "資料の保存先が設定されていません" }, 500);
+  await env.FILES.delete(docKey(slug));
+  return json({ ok: true });
+}
+
 function toBytes(bytes: unknown): Uint8Array {
   if (bytes instanceof Uint8Array) return bytes;
   if (bytes instanceof ArrayBuffer) return new Uint8Array(bytes);
@@ -927,7 +1014,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>お知らせ管理 | ひさほ保育園</title>
+  <title>サイト管理 | ひさほ保育園</title>
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/apple-touch-icon.png" />
@@ -973,7 +1060,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
     .sidebar-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
     .sidebar-head h2 { margin:0; font-size:1rem; }
     .mode-nav, .filters { display:flex; gap:2px; padding:3px; background:#f3e9ee; border-radius:10px; }
-    .mode-nav button, .filters button { flex:1; height:30px; padding:0 10px; border:0; border-radius:8px; background:transparent; color:var(--muted); font-size:.8rem; font-weight:500; }
+    .mode-nav button, .filters button { flex:1; height:30px; padding:0 10px; white-space:nowrap; border:0; border-radius:8px; background:transparent; color:var(--muted); font-size:.8rem; font-weight:500; }
     .mode-nav button:hover, .filters button:hover { background:rgba(255,255,255,.55); color:var(--ink); }
     .mode-nav button.is-on, .filters button.is-on { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(52,40,47,.08); }
     .mode-nav button.is-on:hover, .filters button.is-on:hover { background:#fff; }
@@ -1037,6 +1124,18 @@ const ADMIN_HTML = `<!DOCTYPE html>
       .inbox-workspace:not(.is-reading) .inquiry-detail { display:none; }
     }
     @media (min-width:821px) { #inquiry-back { display:none; } }
+    .docs-wrap { display:grid; gap:18px; max-width:880px; margin:0 auto; padding:20px 24px 48px; }
+    .docs-wrap > .meta { line-height:1.7; }
+    .doc-groups { display:grid; gap:18px; }
+    .doc-group { display:grid; gap:0; padding:0; overflow:hidden; }
+    .doc-group h2 { margin:0; padding:14px 20px; font-size:.95rem; border-bottom:1px solid var(--line); background:#fcf9fa; }
+    .doc-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:center; padding:14px 20px; border-bottom:1px solid var(--line); }
+    .doc-row:last-child { border-bottom:0; }
+    .doc-name { font-weight:700; line-height:1.45; }
+    .doc-state { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:4px; color:var(--muted); font-size:.78rem; }
+    .doc-actions { display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:flex-end; }
+    .doc-actions a.quiet { display:inline-flex; align-items:center; height:36px; padding:0 12px; border-radius:8px; text-decoration:none; }
+    @media (max-width:640px) { .doc-row { grid-template-columns:1fr; } .doc-actions { justify-content:flex-start; } .docs-wrap { padding:14px; } }
     @media (max-width:1080px) { .editor-area { grid-template-columns:1fr; } .side-col { position:static; } }
     @media (max-width:820px) { .workspace { grid-template-columns:1fr; padding:14px; } .sidebar { position:static; max-height:none; } .topbar { padding:10px 14px; flex-wrap:wrap; } .mode-nav { order:3; width:100%; } }
     .wysiwyg { border:1px solid #d5dbe3; border-radius:10px; background:#fff; overflow:hidden; }
@@ -1060,11 +1159,12 @@ const ADMIN_HTML = `<!DOCTYPE html>
   <header class="topbar">
     <div class="brand">
       <small>認定こども園 ひさほ保育園</small>
-      <strong>お知らせ管理</strong>
+      <strong>サイト管理</strong>
     </div>
     <nav id="mode-nav" class="mode-nav hidden" aria-label="管理メニュー">
       <button id="show-editor" class="is-on" type="button">記事</button>
       <button id="show-inquiries" type="button">問い合わせ<span id="inquiry-badge" class="badge hidden"></span></button>
+      <button id="show-docs" type="button">資料</button>
     </nav>
     <div class="row top-tools">
       <a class="text-link" href="/news.html" target="_blank" rel="noopener">サイトを見る</a>
@@ -1100,6 +1200,11 @@ const ADMIN_HTML = `<!DOCTYPE html>
         <div id="inquiry-list" class="post-list" role="listbox" aria-label="問い合わせ一覧"></div>
       </aside>
       <div id="inquiry-detail" class="card inquiry-detail"></div>
+    </section>
+    <section id="docs" class="docs-wrap hidden">
+      <p class="meta">HPに置いているPDFです。「差し替える」で新しいPDFを選ぶと、すぐにHPのボタンから開くファイルが入れ替わります。「最初のファイルに戻す」で元のPDFに戻せます。</p>
+      <div id="doc-list" class="doc-groups"></div>
+      <input id="doc-file" type="file" accept="application/pdf,.pdf" hidden />
     </section>
     <section id="editor" class="workspace hidden">
       <aside class="sidebar">
@@ -1239,11 +1344,13 @@ const ADMIN_HTML = `<!DOCTYPE html>
       logout.classList.toggle("hidden", !on);
       document.querySelector("#mode-nav").classList.toggle("hidden", !on);
       document.querySelector("#inbox").classList.add("hidden");
+      document.querySelector("#docs").classList.add("hidden");
       setMode("editor");
     }
     function setMode(mode) {
       document.querySelector("#show-editor").classList.toggle("is-on", mode === "editor");
       document.querySelector("#show-inquiries").classList.toggle("is-on", mode === "inbox");
+      document.querySelector("#show-docs").classList.toggle("is-on", mode === "docs");
     }
 
     let inquiries = [];
@@ -1514,6 +1621,7 @@ const ADMIN_HTML = `<!DOCTYPE html>
     }
     async function openInbox() {
       editor.classList.add("hidden");
+      document.querySelector("#docs").classList.add("hidden");
       const inbox = document.querySelector("#inbox");
       inbox.classList.remove("hidden");
       inbox.classList.remove("is-reading");
@@ -1540,8 +1648,111 @@ const ADMIN_HTML = `<!DOCTYPE html>
       if (!confirmDiscard()) return;
       document.querySelector("#inbox").classList.add("hidden");
       document.querySelector("#inbox").classList.remove("is-reading");
+      document.querySelector("#docs").classList.add("hidden");
       editor.classList.remove("hidden");
       setMode("editor");
+    });
+
+    let docTarget = null;
+    async function openDocs() {
+      editor.classList.add("hidden");
+      document.querySelector("#inbox").classList.add("hidden");
+      document.querySelector("#docs").classList.remove("hidden");
+      setMode("docs");
+      const box = document.querySelector("#doc-list");
+      box.innerHTML = '<p class="empty">読み込んでいます…</p>';
+      try {
+        const data = await api("/api/docs");
+        renderDocs(data.docs || []);
+      } catch (error) {
+        box.innerHTML = '<p class="empty">読み込めませんでした。もう一度お試しください。</p>';
+      }
+    }
+    function renderDocs(docs) {
+      const box = document.querySelector("#doc-list");
+      box.innerHTML = "";
+      const pages = [];
+      docs.forEach((doc) => { if (!pages.includes(doc.page)) pages.push(doc.page); });
+      pages.forEach((page) => {
+        const group = document.createElement("section");
+        group.className = "card doc-group";
+        const heading = document.createElement("h2");
+        heading.textContent = page + "ページ";
+        group.append(heading);
+        docs.filter((doc) => doc.page === page).forEach((doc) => {
+          const row = document.createElement("div");
+          row.className = "doc-row";
+          const info = document.createElement("div");
+          const name = document.createElement("div");
+          name.className = "doc-name";
+          name.textContent = doc.label;
+          const state = document.createElement("div");
+          state.className = "doc-state";
+          const badge = document.createElement("span");
+          badge.className = "badge " + (doc.replaced ? "live" : "draft");
+          badge.textContent = doc.replaced ? "差し替え済み" : "最初のファイル";
+          state.append(badge);
+          if (doc.replaced) {
+            const when = document.createElement("span");
+            when.textContent = formatWhen(doc.uploaded_at) + (doc.name ? " ・ " + doc.name : "");
+            state.append(when);
+          }
+          info.append(name, state);
+          const actions = document.createElement("div");
+          actions.className = "doc-actions";
+          const open = document.createElement("a");
+          open.className = "quiet";
+          open.href = "/api/docs/" + doc.slug + "?t=" + Date.now();
+          open.target = "_blank";
+          open.rel = "noopener";
+          open.textContent = "開く";
+          const replace = button("差し替える", () => {
+            docTarget = doc;
+            document.querySelector("#doc-file").click();
+          });
+          actions.append(open, replace);
+          if (doc.replaced) {
+            actions.append(button("最初のファイルに戻す", async () => {
+              if (!confirm("「" + doc.label + "」を最初のファイルに戻します。よろしいですか？")) return;
+              try {
+                await api("/api/docs/" + doc.slug, { method: "DELETE" });
+                toast("最初のファイルに戻しました");
+                await openDocs();
+              } catch (error) {
+                toast(error.message);
+              }
+            }, "text-btn danger"));
+          }
+          row.append(info, actions);
+          group.append(row);
+        });
+        box.append(group);
+      });
+    }
+    document.querySelector("#show-docs").addEventListener("click", () => {
+      if (!confirmDiscard()) return;
+      openDocs();
+    });
+    document.querySelector("#doc-file").addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      const doc = docTarget;
+      docTarget = null;
+      if (!file || !doc) return;
+      if (!/\\.pdf$/i.test(file.name) && file.type !== "application/pdf") { toast("PDFファイルを選んでください"); return; }
+      if (file.size > 20 * 1024 * 1024) { toast("PDFは20MB以下にしてください"); return; }
+      toast("「" + doc.label + "」をアップロードしています…");
+      try {
+        const formData = new FormData();
+        formData.append("file", file, file.name);
+        const response = await fetch("/api/docs/" + doc.slug, { method: "POST", body: formData, credentials: "same-origin" });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "差し替えできませんでした");
+        toast("「" + doc.label + "」を差し替えました");
+        await openDocs();
+      } catch (error) {
+        toast(error.message);
+      }
     });
     document.querySelector("#reload-inquiries").addEventListener("click", () => { openInbox(); });
     document.querySelector("#inquiry-search").addEventListener("input", () => { renderInbox(); });
