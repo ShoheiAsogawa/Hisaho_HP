@@ -37,7 +37,8 @@ const TAGS = new Set(["", "tag-pink", "tag-out"]);
 // 本文に写真がない記事は、動物みんなのイラストをTOP画像にする。
 const FALLBACK_COVER = "/assets/mascots/chara-friends-all.webp";
 const SITE = "https://hisaho-hoikuen.com";
-// 公開に戻すときは true にする。
+const PREVIEW_HOST = "hisaho-hp.uken-shohei.workers.dev";
+// 公開に戻すときは true にする。プレビュー用の workers.dev は、false のあいだもサイトを表示する。
 const SITE_PUBLIC = false;
 const SHARE_IMAGE = `${SITE}/assets/brand/og-share.png`;
 const PUBLIC_PAGES = ["/", "/about.html", "/food.html", "/visit.html", "/recruit.html", "/news"];
@@ -121,18 +122,20 @@ const HOME_NEWS_LIMIT = 3;
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    if (url.hostname === "www.hisaho-hoikuen.com" || url.hostname === "hisaho-hp.uken-shohei.workers.dev") {
+    const preview = url.hostname === PREVIEW_HOST;
+    if (url.hostname === "www.hisaho-hoikuen.com") {
       url.hostname = "hisaho-hoikuen.com";
       url.protocol = "https:";
       return Response.redirect(url.toString(), 301);
     }
     if (url.pathname === "/robots.txt") return renderRobots();
-    if (!SITE_PUBLIC && url.pathname !== "/admin" && !url.pathname.startsWith("/admin/") && !url.pathname.startsWith("/api/")) {
+    if (!SITE_PUBLIC && !preview && url.pathname !== "/admin" && !url.pathname.startsWith("/admin/") && !url.pathname.startsWith("/api/")) {
       return renderPrivate();
     }
     if (url.pathname === "/sitemap.xml") return renderSitemap(env);
-    if (url.pathname === "/index.html") return Response.redirect(`${SITE}/`, 301);
-    if (url.pathname === "/news.html") return Response.redirect(`${SITE}/news`, 301);
+    const origin = preview ? url.origin : SITE;
+    if (url.pathname === "/index.html") return Response.redirect(`${origin}/`, 301);
+    if (url.pathname === "/news.html") return Response.redirect(`${origin}/news`, 301);
     if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) {
       return adminResponse();
     }
