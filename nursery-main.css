@@ -251,7 +251,6 @@
 #main.nursery-main .experiences-section {
   margin-block: 0;
   padding-block: var(--nursery-space);
-  overflow: visible;
   background: #e4f6ef;
   border-radius: 0;
 }
