@@ -2678,6 +2678,23 @@ body.hisaho {
 }
 
 /* 施設のご案内 */
+.hisaho .facility-plans {
+  display: grid;
+  gap: clamp(28px, 4vw, 48px);
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.hisaho .facility-plan {
+  margin: 0;
+}
+
+.hisaho .facility-plan img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .hisaho .facility-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
