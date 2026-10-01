@@ -326,7 +326,7 @@ async function renderNewsDetail(request: Request, env: Env, id: number): Promise
         element.setInnerContent(heroLead, { html: true });
       },
     })
-    .on("#news", { element(element) { element.setInnerContent(article, { html: true }); } })
+    .on("#news-slot", { element(element) { element.setInnerContent(article, { html: true }); } })
     .transform(asset);
   if (row) return rewritten;
   return new Response(rewritten.body, { status: 404, headers: rewritten.headers });
