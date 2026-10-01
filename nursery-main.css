@@ -46,7 +46,7 @@
   isolation: isolate;
   overflow: hidden;
   margin: 0;
-  padding: clamp(48px, 5vw, 76px) 0 100px;
+  padding: clamp(48px, 5vw, 76px) 0 clamp(40px, 5vw, 68px);
   background: #ffedda;
   color: var(--dream-ink);
 }
@@ -223,10 +223,10 @@
 /* 大きくゆるやかな曲線。小さな連続スカラップは使わない。 */
 #main.nursery-main .concept-band {
   padding: 105px 0;
-  margin-block: 28px;
+  margin-block: 0;
   color: var(--nursery-ink);
   background: var(--nursery-yellow);
-  border-radius: 48% 52% 45% 55% / 8% 10% 9% 8%;
+  border-radius: 0;
   isolation: isolate;
 }
 #main.nursery-main .concept-statement { display: block; max-width: 850px; position: relative; z-index: 1; }
@@ -249,10 +249,11 @@
 #main.nursery-main .class-card :is(strong, span) { color: #352e43; }
 
 #main.nursery-main .experiences-section {
-  margin-block: 28px;
+  margin-block: 0;
   padding-block: var(--nursery-space);
+  overflow: visible;
   background: #e4f6ef;
-  border-radius: 6% 9% 8% 5% / 5% 7% 6% 8%;
+  border-radius: 0;
 }
 #main.nursery-main .experiences-inner { gap: 28px 65px; }
 #main.nursery-main .experience-copy h2 { font-size: clamp(1.85rem, 3vw, 2.7rem); line-height: 1.6; }
@@ -284,7 +285,7 @@
 #main.nursery-main .food-card h3 { color: #176957; font-size: 1.15rem; }
 #main.nursery-main .food-care-note { max-width: 800px; margin: 38px auto 0; text-align: center; color: var(--hp-muted); font-size: .88rem; }
 
-#main.nursery-main .events-section { background: #eef2ff; padding-block: var(--nursery-space); border-radius: 45% 55% 0 0 / 3% 4% 0 0; }
+#main.nursery-main .events-section { background: #eef2ff; padding-block: var(--nursery-space); border-radius: 0; }
 #main.nursery-main .season-card h3 span { color: #352e43; }
 #main.nursery-main .season-card.spring h3 span { background: var(--nursery-pink); }
 #main.nursery-main .season-card.summer h3 span { background: var(--nursery-mint); }
@@ -295,7 +296,7 @@
 #main.nursery-main .season-card.autumn > img { object-fit: contain; background: #fff2e6; }
 #main.nursery-main .season-card.winter > img { object-fit: contain; background: #f1f7fc; }
 
-#main.nursery-main #instagram { position: relative; z-index: 1; padding-block: 80px; background: #ffe4ee; border-radius: 0; }
+#main.nursery-main #instagram { position: relative; z-index: 1; padding-block: 80px; background: #ffe4ee; border-radius: 0; overflow: visible; }
 #main.nursery-main .section-wave { position: absolute; left: 0; width: 100%; height: 65px; fill: var(--rose-surface); pointer-events: none; }
 #main.nursery-main .section-wave-top { top: -64px; }
 #main.nursery-main .section-wave-bottom { bottom: -64px; transform: scaleY(-1); }
@@ -304,7 +305,7 @@
 #main.nursery-main #instagram .section-heading h2 { color: var(--nursery-accent); }
 #main.nursery-main #instagram .section-heading { margin-bottom: 36px; }
 
-#main.nursery-main .admission-section { background: #fff; padding-block: calc(var(--nursery-space) + 36px) var(--nursery-space); }
+#main.nursery-main .admission-section { background: #fff; border-top: 0; padding-block: calc(var(--nursery-space) + 36px) var(--nursery-space); }
 #main.nursery-main .admission-inner { align-items: stretch; gap: clamp(28px, 4vw, 64px); }
 #main.nursery-main .admission-copy { display: flex; flex-direction: column; justify-content: center; }
 #main.nursery-main .admission-copy h2 { font-size: clamp(1.6rem, 2.7vw, 2.5rem); }
@@ -376,12 +377,12 @@
   #main.nursery-main .admission-section { padding-top: calc(var(--nursery-space) + 12px); }
 }
 /* TOP お知らせ：最新3件をサムネイル付きの小さなカードで。 */
-#main.nursery-main #home-news { position: relative; z-index: 1; background: var(--rose-surface); padding-block: clamp(28px, 3.4vw, 44px) clamp(72px, 7vw, 96px); }
+#main.nursery-main #home-news { position: relative; z-index: 1; background: var(--rose-surface); padding-top: calc(clamp(48px, 6vw, 76px) + clamp(24px, 3vw, 40px)); padding-bottom: clamp(40px, 5vw, 64px); }
 #main.nursery-main .home-news-wave { position: absolute; left: 0; bottom: -64px; width: 100%; height: 65px; fill: var(--rose-surface); pointer-events: none; transform: scaleY(-1); }
-#main.nursery-main #features { position: relative; z-index: 0; padding-top: calc(var(--nursery-space) + 36px); }
+#main.nursery-main #features { position: relative; z-index: 0; padding-top: calc(clamp(48px, 6vw, 76px) + clamp(40px, 4.5vw, 72px)); }
 @media (max-width: 900px) {
   #main.nursery-main .home-news-wave { height: 38px; bottom: -37px; }
-  #main.nursery-main #features { padding-top: calc(var(--nursery-space) + 16px); }
+  #main.nursery-main #features { padding-top: calc(clamp(48px, 6vw, 76px) + clamp(28px, 4vw, 48px)); }
 }
 #main.nursery-main .home-news-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; max-width: 1040px; margin: 0 auto 18px; }
 #main.nursery-main .home-news-head h2 { display: flex; align-items: baseline; gap: 12px; margin: 0; color: var(--section-ink); font-size: clamp(1.35rem, 2.2vw, 1.7rem); line-height: 1.3; }
@@ -521,7 +522,7 @@
   #main.nursery-main .feature-art img { width: 186px; height: 142px; }
   #main.nursery-main .feature-item h3 { align-self: auto; margin: -18px auto 14px; font-size: .98rem; }
   #main.nursery-main .feature-item p { max-width: 300px; margin-inline: auto; font-size: .9rem; }
-  #main.nursery-main .concept-band { padding-block: 72px; border-radius: 40% 60% 40% 60% / 4% 5% 4% 5%; }
+  #main.nursery-main .concept-band { padding-block: 72px; }
   #main.nursery-main .concept-statement h2 { font-size: 1.45rem; line-height: 1.8; }
   #main.nursery-main .concept-statement p { font-size: .86rem; }
   #main.nursery-main .concept-cloud { top: 26px; right: 8%; width: 60px; }
@@ -542,7 +543,7 @@
   #main.nursery-main .season-card h3 { flex-direction: column; align-items: flex-start; gap: 8px; font-size: .9rem; }
   #main.nursery-main .season-card h3 span { width: 36px; height: 36px; font-size: 1.05rem; }
   #main.nursery-main .season-card li { font-size: .75rem; }
-  #main.nursery-main #instagram { padding-block: 55px; }
+  #main.nursery-main #instagram { padding-bottom: 55px; }
   #main.nursery-main .visit-invite { padding: 22px 16px; gap: 8px 12px; grid-template-columns: 72px minmax(0, 1fr); }
   #main.nursery-main .visit-invite .visit-guide { width: 72px; max-height: 120px; height: auto; }
   #main.nursery-main .support-list span { white-space: normal; }
@@ -711,6 +712,32 @@
 @media (prefers-reduced-motion: reduce) {
   #main.nursery-main :is(.dream-chara, .visit-invite .visit-guide, .concept-cloud, .gate-soldier) { animation: none; }
 }
+
+/* セクションの境目。上のセクションの色が、ゆるい波で次のセクションに入る。 */
+#main.nursery-main .section-edge,
+body.hisaho .footer-edge {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: clamp(48px, 6vw, 76px);
+  fill: #ffedda;
+  pointer-events: none;
+}
+#main.nursery-main #features > .section-edge { fill: #fff0f5; }
+#main.nursery-main #classes > .section-edge { fill: #f2cb4b; }
+#main.nursery-main #childcare > .section-edge { fill: #f7f8ff; }
+#main.nursery-main #food > .section-edge { fill: #f4effb; }
+#main.nursery-main #events > .section-edge { fill: #f5fbf7; }
+#main.nursery-main #instagram > .section-edge { fill: #eef3fc; }
+#main.nursery-main #admission > .section-edge { fill: #fff0f5; }
+#main.nursery-main :is(#concept, #childcare, #events, #admission) > .section-edge,
+body.hisaho .footer-edge { transform: scaleX(-1); }
+#main.nursery-main :is(#features, #concept, #classes, #childcare, #food, #events, #instagram, #admission) {
+  padding-top: calc(clamp(48px, 6vw, 76px) + clamp(40px, 4.5vw, 72px));
+}
+body.hisaho .site-footer { position: relative; padding-top: calc(clamp(48px, 6vw, 76px) + clamp(36px, 4vw, 56px)); }
 
 /* ホバーアニメーション（本体は site.css 末尾）。TOP では ID 付きのルールが
    pointer-events と待機アニメーションを決めているので、ここで上書きする。
