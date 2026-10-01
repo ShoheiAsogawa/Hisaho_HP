@@ -2678,11 +2678,34 @@ body.hisaho {
 }
 
 /* 施設のご案内 */
+.hisaho .facility-band {
+  position: relative;
+  background: var(--hp-white);
+  padding: clamp(108px, 13vw, 156px) 0 clamp(100px, 12vw, 148px);
+}
+
+.hisaho .facility-wave {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: clamp(52px, 6.5vw, 80px);
+  fill: var(--hp-base);
+  pointer-events: none;
+}
+
+.hisaho .facility-wave-top { top: -1px; }
+.hisaho .facility-wave-bottom { bottom: -1px; }
+
+.hisaho .facility-inner {
+  width: var(--hp-container);
+  margin: 0 auto;
+}
+
 .hisaho .facility-plans {
   display: grid;
-  gap: clamp(28px, 4vw, 48px);
-  max-width: 920px;
-  margin: 0 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(16px, 2.4vw, 36px);
+  align-items: start;
 }
 
 .hisaho .facility-plan {
@@ -2693,6 +2716,14 @@ body.hisaho {
   display: block;
   width: 100%;
   height: auto;
+}
+
+@media (max-width: 760px) {
+  .hisaho .facility-plans {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+    margin: 0 auto;
+  }
 }
 
 .hisaho .facility-grid {
